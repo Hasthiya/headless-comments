@@ -1,13 +1,16 @@
-'use client';
-
 /**
- * Default preset — pre-styled comment section components
+ * Default preset — re-exports shadcn preset for backward compatibility
  * @module @comment-section/presets/default
  */
 
-export { CommentSection } from './CommentSection';
-export { CommentItem } from './CommentItem';
-export { ActionBar } from './ActionBar';
-export { ReplyForm } from './ReplyForm';
-export { ReactionButton } from './ReactionButton';
-export { Avatar } from './Avatar';
+export {
+    ShadcnCommentSection as CommentSection,
+    ShadcnCommentItem as CommentItem,
+    ShadcnActionBar as ActionBar,
+    ShadcnReplyForm as ReplyForm,
+    ShadcnReactionButton as ReactionButton,
+    ShadcnAvatar as Avatar,
+} from '../shadcn';
+
+// Default export
+export { ShadcnCommentSection as default } from '../shadcn';

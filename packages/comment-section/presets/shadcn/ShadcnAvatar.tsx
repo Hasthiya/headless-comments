@@ -9,11 +9,12 @@ import React, { useMemo } from 'react';
 import type { AvatarProps } from '../../headless/types';
 import { getDefaultAvatar } from '../../core/utils';
 import { useCommentSection } from '../../headless/useComments';
+import { cn } from '../../core/utils';
 
 /**
- * Avatar component displays a user's profile picture or initials
+ * ShadcnAvatar component displays a user's profile picture or initials
  */
-export const Avatar: React.FC<AvatarProps> = ({
+export const ShadcnAvatar: React.FC<AvatarProps> = ({
     user,
     size = 'md',
     className = '',
@@ -37,52 +38,38 @@ export const Avatar: React.FC<AvatarProps> = ({
         return <>{render(user)}</>;
     }
 
-    // Size mapping
-    const sizeMap = {
-        sm: '28px',
-        md: '36px',
-        lg: '48px',
+    // Size mapping for Tailwind classes
+    const sizeClasses = {
+        sm: "h-7 w-7 text-[10px]",
+        md: "h-9 w-9 text-xs",
+        lg: "h-12 w-12 text-base",
     };
-
-    const avatarSize = sizeMap[size];
-    const fontSize = size === 'sm' ? '10px' : size === 'md' ? '13px' : '16px';
 
     // Get avatar URL or generate default
     const avatarUrl = user.avatarUrl || getDefaultAvatar(user.name);
 
-    const containerStyle: React.CSSProperties = {
-        width: avatarSize,
-        height: avatarSize,
-        borderRadius: '50%',
-        overflow: 'hidden',
-        flexShrink: 0,
-        backgroundColor: theme.secondaryColor,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize,
-        fontWeight: 600,
-        color: '#ffffff',
-        ...style,
-    };
-
     return (
-        <div className={`cs-avatar ${className}`} style={containerStyle}>
+        <div
+            className={cn(
+                "relative flex shrink-0 overflow-hidden rounded-full bg-muted items-center justify-center font-semibold text-primary-foreground",
+                sizeClasses[size],
+                className
+            )}
+            style={{ backgroundColor: theme.secondaryColor, ...style }}
+        >
             {avatarUrl ? (
                 <img
                     src={avatarUrl}
                     alt={`${user.name}'s avatar`}
-                    style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                    }}
+                    className="aspect-square h-full w-full object-cover"
                     onError={(e) => {
                         // Fallback to initials on image load error
                         e.currentTarget.style.display = 'none';
                         const parent = e.currentTarget.parentElement;
                         if (parent) {
-                            parent.innerText = initials;
+                            const span = document.createElement('span');
+                            span.innerText = initials;
+                            parent.appendChild(span);
                         }
                     }}
                 />
@@ -93,6 +80,6 @@ export const Avatar: React.FC<AvatarProps> = ({
     );
 };
 
-Avatar.displayName = 'Avatar';
+ShadcnAvatar.displayName = 'ShadcnAvatar';
 
-export default Avatar;
+export default ShadcnAvatar;

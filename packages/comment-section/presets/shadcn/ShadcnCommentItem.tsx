@@ -12,15 +12,15 @@ import { useCommentSection } from '../../headless/useComments';
 import { useReplyForm } from '../../headless/useReplyForm';
 import { useEditMode } from '../../headless/useEditMode';
 import { useReactions } from '../../headless/useReactions';
-import { formatRelativeTime } from '../../core/utils';
-import { Avatar } from './Avatar';
-import { ActionBar } from './ActionBar';
-import { ReplyForm } from './ReplyForm';
+import { formatRelativeTime, cn } from '../../core/utils';
+import { ShadcnAvatar } from './ShadcnAvatar';
+import { ShadcnActionBar } from './ShadcnActionBar';
+import { ShadcnReplyForm } from './ShadcnReplyForm';
 
 /**
- * CommentItem component displays a single comment with all features
+ * ShadcnCommentItem component displays a single comment with all features
  */
-export const CommentItem: React.FC<CommentItemProps> = ({
+export const ShadcnCommentItem: React.FC<CommentItemProps> = ({
   comment,
   currentUser,
   onReply,
@@ -125,169 +125,43 @@ export const CommentItem: React.FC<CommentItemProps> = ({
     return formatRelativeTime(comment.createdAt, localeValue, texts);
   }, [comment.createdAt, renderTimestamp, localeValue, texts]);
 
-  // Container styles
-  const containerStyle: React.CSSProperties = {
-    position: 'relative',
-    padding: `${theme.commentSpacing} 0`,
-    fontFamily: theme.fontFamily,
-    fontSize: theme.fontSize,
-    color: theme.textColor,
-    opacity: comment.isPending ? 0.7 : 1,
-    ...style,
-  };
-
-  // Reply indicator line style
-  const replyLineStyle: React.CSSProperties = {
-    position: 'absolute',
-    left: '18px',
-    top: '60px',
-    bottom: '0',
-    width: '2px',
-    backgroundColor: theme.borderColor,
-    borderRadius: '1px',
-    display: depth < maxDepthValue && comment.replies && comment.replies.length > 0 && showReplies ? 'block' : 'none',
-  };
-
-  // Comment content wrapper
-  const commentWrapperStyle: React.CSSProperties = {
-    display: 'flex',
-    gap: '12px',
-  };
-
-  // Content area styles
-  const contentAreaStyle: React.CSSProperties = {
-    flex: 1,
-    minWidth: 0,
-  };
-
-  // Header styles
-  const headerStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    marginBottom: '4px',
-  };
-
-  // Username styles
-  const usernameStyle: React.CSSProperties = {
-    fontWeight: 600,
-    color: theme.textColor,
-    fontSize: '14px',
-  };
-
-  // Verified badge styles
-  const verifiedBadgeStyle: React.CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '16px',
-    height: '16px',
-    borderRadius: '50%',
-    backgroundColor: '#3b82f6',
-    color: '#ffffff',
-    fontSize: '10px',
-  };
-
-  // Timestamp styles
-  const timestampStyle: React.CSSProperties = {
-    fontSize: '12px',
-    color: theme.secondaryTextColor,
-  };
-
-  // Comment text styles
-  const commentTextStyle: React.CSSProperties = {
-    lineHeight: '1.5',
-    wordBreak: 'break-word',
-    whiteSpace: 'pre-wrap',
-    color: theme.textColor,
-  };
-
-  // Edited indicator styles
-  const editedStyle: React.CSSProperties = {
-    fontSize: '12px',
-    color: theme.secondaryTextColor,
-    fontStyle: 'italic',
-    marginLeft: '4px',
-  };
-
-  // Replies container styles
-  const repliesContainerStyle: React.CSSProperties = {
-    marginLeft: '40px',
-    marginTop: '8px',
-    borderLeft: `2px solid ${theme.borderColor}`,
-    paddingLeft: '16px',
-  };
-
-  // Toggle replies button styles
-  const toggleRepliesStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '4px',
-    padding: '6px 10px',
-    marginTop: '8px',
-    border: 'none',
-    background: 'transparent',
-    color: theme.primaryColor,
-    fontSize: '13px',
-    fontWeight: 500,
-    cursor: 'pointer',
-    fontFamily: 'inherit',
-    borderRadius: theme.borderRadius,
-    transition: `background-color ${theme.animationDuration} ease`,
-  };
-
-  // Edit textarea styles
-  const editTextareaStyle: React.CSSProperties = {
-    width: '100%',
-    minHeight: '80px',
-    padding: '12px',
-    fontSize: '14px',
-    fontFamily: 'inherit',
-    lineHeight: '1.5',
-    borderRadius: theme.borderRadius,
-    border: `1px solid ${theme.borderColor}`,
-    backgroundColor: theme.backgroundColor,
-    color: theme.textColor,
-    resize: 'vertical',
-    outline: 'none',
-    marginBottom: '8px',
-  };
-
-  // Error message styles
-  const errorStyle: React.CSSProperties = {
-    padding: '8px 12px',
-    backgroundColor: '#fef2f2',
-    border: `1px solid #fecaca`,
-    borderRadius: theme.borderRadius,
-    color: '#ef4444',
-    fontSize: '13px',
-    marginTop: '8px',
-  };
 
   return (
     <div
-      className={`cs-comment-item ${comment.isPending ? 'cs-comment-pending' : ''} ${comment.hasError ? 'cs-comment-error' : ''} ${className}`}
-      style={containerStyle}
+      className={cn(
+        "relative py-4 transition-opacity",
+        comment.isPending && "opacity-70",
+        comment.hasError && "border-2 border-destructive/50 rounded-lg p-2",
+        className
+      )}
+      style={style} // Keep style for custom overrides if needed
       data-comment-id={comment.id}
     >
       {/* Reply line indicator */}
-      {depth > 0 && <div style={replyLineStyle} />}
+      {depth > 0 && (
+        <div className={cn(
+          "absolute left-[18px] top-[60px] bottom-0 w-[2px] bg-border rounded-full",
+          !(depth < maxDepthValue && comment.replies && comment.replies.length > 0 && showReplies) && "hidden"
+        )} />
+      )}
 
-      <div style={commentWrapperStyle}>
+      <div className="flex gap-3">
         {/* Avatar */}
-        {renderAvatar ? (
-          renderAvatar(comment.author)
-        ) : (
-          <Avatar user={comment.author} size="md" />
-        )}
+        <div className="flex-shrink-0">
+          {renderAvatar ? (
+            renderAvatar(comment.author)
+          ) : (
+            <ShadcnAvatar user={comment.author} size="md" />
+          )}
+        </div>
 
         {/* Content Area */}
-        <div style={contentAreaStyle}>
+        <div className="flex-1 min-w-0">
           {/* Header */}
-          <div style={headerStyle}>
-            <span style={usernameStyle}>{comment.author.name}</span>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="font-semibold text-sm">{comment.author.name}</span>
             {showVerifiedBadge && comment.author.isVerified && (
-              <span style={verifiedBadgeStyle} title={texts.verified}>
+              <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-500 text-white text-[10px]" title={texts.verified}>
                 <svg
                   width="10"
                   height="10"
@@ -298,77 +172,50 @@ export const CommentItem: React.FC<CommentItemProps> = ({
                 </svg>
               </span>
             )}
-            <span style={timestampStyle}>{formattedTime}</span>
-            {comment.isEdited && <span style={editedStyle}>{texts.edited}</span>}
+            <span className="text-xs text-muted-foreground">{formattedTime}</span>
+            {comment.isEdited && <span className="text-xs text-muted-foreground italic">{texts.edited}</span>}
           </div>
 
           {/* Comment Content or Edit Form */}
           {editMode.isEditing && editMode.editingCommentId === comment.id ? (
-            <div>
+            <div className="space-y-2">
               <textarea
                 value={editMode.editValue}
                 onChange={(e) => editMode.setEditValue(e.target.value)}
-                style={editTextareaStyle}
+                className="w-full min-h-[80px] p-3 text-sm rounded-md border border-input bg-background text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-y"
                 autoFocus
               />
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={() => handleEditSubmit(editMode.editValue)}
-                  style={{
-                    padding: '6px 14px',
-                    fontSize: '13px',
-                    fontWeight: 500,
-                    backgroundColor: theme.primaryColor,
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: theme.borderRadius,
-                    cursor: 'pointer',
-                  }}
+                  className="px-3 py-1.5 text-xs font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
                 >
                   {texts.submit}
                 </button>
                 <button
                   type="button"
                   onClick={editMode.cancelEdit}
-                  style={{
-                    padding: '6px 14px',
-                    fontSize: '13px',
-                    fontWeight: 500,
-                    backgroundColor: 'transparent',
-                    color: theme.secondaryTextColor,
-                    border: `1px solid ${theme.borderColor}`,
-                    borderRadius: theme.borderRadius,
-                    cursor: 'pointer',
-                  }}
+                  className="px-3 py-1.5 text-xs font-medium rounded-md border border-input bg-transparent hover:bg-accent hover:text-accent-foreground transition-colors"
                 >
                   {texts.cancel}
                 </button>
               </div>
             </div>
           ) : (
-            <div style={commentTextStyle}>
+            <div className="text-sm leading-relaxed whitespace-pre-wrap break-words text-foreground">
               {renderContent ? renderContent(comment) : comment.content}
             </div>
           )}
 
           {/* Error Message */}
           {comment.hasError && comment.errorMessage && (
-            <div style={errorStyle}>
+            <div className="mt-2 text-xs text-destructive bg-destructive/10 p-2 rounded-md border border-destructive/20">
               <strong>Error:</strong> {comment.errorMessage}
               <button
                 type="button"
                 onClick={() => handleReplySubmit(comment.content)}
-                style={{
-                  marginLeft: '8px',
-                  padding: '2px 8px',
-                  fontSize: '12px',
-                  backgroundColor: theme.primaryColor,
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                }}
+                className="ml-2 px-2 py-0.5 text-xs bg-destructive text-destructive-foreground rounded hover:bg-destructive/90 transition-colors"
               >
                 Retry
               </button>
@@ -380,7 +227,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
             renderReactions(comment)
           ) : (
             !readOnlyValue && (
-              <ActionBar
+              <ShadcnActionBar
                 comment={comment}
                 currentUser={currentUser}
                 onReply={depth < maxDepthValue ? handleReplyClick : undefined}
@@ -402,30 +249,29 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 
           {/* Reply Form */}
           {replyForm.isOpen && replyForm.activeCommentId === comment.id && (
-            <ReplyForm
-              parentComment={comment}
-              currentUser={currentUser}
-              onSubmit={handleReplySubmit}
-              onCancel={replyForm.closeReply}
-              maxCharLimit={500}
-              showCharCount
-              autoFocus
-              theme={theme}
-            />
+            <div className="mt-4">
+              <ShadcnReplyForm
+                parentComment={comment}
+                currentUser={currentUser}
+                onSubmit={handleReplySubmit}
+                onCancel={replyForm.closeReply}
+                maxCharLimit={500}
+                showCharCount
+                autoFocus
+                theme={theme}
+              />
+            </div>
           )}
 
           {/* Toggle Replies Button */}
           {comment.replies && comment.replies.length > 0 && depth < maxDepthValue && (
             <button
               type="button"
-              style={toggleRepliesStyle}
+              className={cn(
+                "flex items-center gap-1 mt-2 px-2 py-1.5 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors",
+                showReplies && "bg-transparent text-muted-foreground"
+              )}
               onClick={() => setShowReplies(!showReplies)}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = theme.hoverBackgroundColor ?? '#f9fafb';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-              }}
             >
               <svg
                 width="14"
@@ -434,10 +280,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
-                style={{
-                  transform: showReplies ? 'rotate(90deg)' : 'rotate(0deg)',
-                  transition: `transform ${theme.animationDuration} ease`,
-                }}
+                className={cn("transition-transform", showReplies && "rotate-90")}
               >
                 <polyline points="9 18 15 12 9 6" />
               </svg>
@@ -452,9 +295,9 @@ export const CommentItem: React.FC<CommentItemProps> = ({
             comment.replies &&
             comment.replies.length > 0 &&
             depth < maxDepthValue && (
-              <div style={repliesContainerStyle}>
+              <div className="ml-2 mt-2 pl-4 border-l-2 border-border space-y-2">
                 {comment.replies.map((reply) => (
-                  <CommentItem
+                  <ShadcnCommentItem
                     key={reply.id}
                     comment={reply}
                     currentUser={currentUser}
@@ -486,6 +329,6 @@ export const CommentItem: React.FC<CommentItemProps> = ({
   );
 };
 
-CommentItem.displayName = 'CommentItem';
+ShadcnCommentItem.displayName = 'ShadcnCommentItem';
 
-export default CommentItem;
+export default ShadcnCommentItem;

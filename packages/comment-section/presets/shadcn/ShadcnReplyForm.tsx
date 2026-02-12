@@ -9,12 +9,13 @@ import React, { useState, useCallback, useEffect } from 'react';
 import type { ReplyFormProps } from '../../headless/types';
 import { useCommentSection } from '../../headless/useComments';
 import { useAutoResize, useCharacterCount, useKeyboardShortcut } from '../../headless/hooks';
-import { Avatar } from './Avatar';
+import { cn } from '../../core/utils';
+import { ShadcnAvatar } from './ShadcnAvatar';
 
 /**
- * ReplyForm component displays a form for writing replies or new comments
+ * ShadcnReplyForm component displays a form for writing replies or new comments
  */
-export const ReplyForm: React.FC<ReplyFormProps> = ({
+export const ShadcnReplyForm: React.FC<ReplyFormProps> = ({
     parentComment,
     currentUser,
     onSubmit,
@@ -24,12 +25,11 @@ export const ReplyForm: React.FC<ReplyFormProps> = ({
     showCharCount = false,
     autoFocus = false,
     className = '',
-    theme: customTheme,
+    theme: _customTheme,
     disabled = false,
 }) => {
     const context = useCommentSection();
     const texts = context.texts;
-    const theme = customTheme || context.theme;
 
     const [content, setContent] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -81,85 +81,6 @@ export const ReplyForm: React.FC<ReplyFormProps> = ({
         onCancel?.();
     }, [onCancel]);
 
-    const containerStyle: React.CSSProperties = {
-        display: 'flex',
-        gap: '12px',
-        padding: '12px 0',
-        fontFamily: theme.fontFamily,
-        fontSize: theme.fontSize,
-    };
-
-    const textareaContainerStyle: React.CSSProperties = {
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '8px',
-    };
-
-    const textareaStyle: React.CSSProperties = {
-        width: '100%',
-        minHeight: '80px',
-        maxHeight: '200px',
-        padding: '12px 14px',
-        fontSize: '14px',
-        fontFamily: 'inherit',
-        lineHeight: '1.5',
-        borderRadius: theme.borderRadius,
-        border: `1px solid ${error ? '#ef4444' : theme.borderColor}`,
-        backgroundColor: theme.backgroundColor,
-        color: theme.textColor,
-        resize: 'none',
-        outline: 'none',
-        transition: `border-color ${theme.animationDuration} ease`,
-        boxSizing: 'border-box',
-    };
-
-    const footerStyle: React.CSSProperties = {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '12px',
-    };
-
-    const buttonBaseStyle: React.CSSProperties = {
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '6px',
-        padding: '8px 16px',
-        fontSize: '14px',
-        fontWeight: 500,
-        fontFamily: 'inherit',
-        borderRadius: theme.borderRadius,
-        border: '1px solid transparent',
-        cursor: disabled || isSubmitting ? 'not-allowed' : 'pointer',
-        opacity: disabled || isSubmitting ? 0.6 : 1,
-        transition: `all ${theme.animationDuration} ease`,
-    };
-
-    const submitButtonStyle: React.CSSProperties = {
-        ...buttonBaseStyle,
-        backgroundColor: theme.primaryColor,
-        color: '#ffffff',
-    };
-
-    const cancelButtonStyle: React.CSSProperties = {
-        ...buttonBaseStyle,
-        backgroundColor: 'transparent',
-        color: theme.secondaryTextColor,
-        borderColor: theme.borderColor,
-    };
-
-    const charCountStyle: React.CSSProperties = {
-        fontSize: '12px',
-        color: isOverLimit ? '#ef4444' : theme.secondaryTextColor,
-    };
-
-    const errorStyle: React.CSSProperties = {
-        fontSize: '12px',
-        color: '#ef4444',
-        marginTop: '4px',
-    };
 
     const inputPlaceholder =
         placeholder ||
@@ -168,27 +89,21 @@ export const ReplyForm: React.FC<ReplyFormProps> = ({
             : 'Write a comment...');
 
     return (
-        <div className={`cs-reply-form ${className}`} style={containerStyle}>
+        <div className={cn("flex gap-3 py-3", className)}>
             {/* User Avatar */}
             {currentUser && (
-                <Avatar user={currentUser} size="md" />
+                <div className="flex-shrink-0">
+                    <ShadcnAvatar user={currentUser} size="md" />
+                </div>
             )}
 
             {/* Form Content */}
-            <div style={textareaContainerStyle}>
+            <div className="flex-1 flex flex-col gap-2">
                 {/* Reply to indicator */}
                 {parentComment && (
-                    <div
-                        style={{
-                            fontSize: '12px',
-                            color: theme.secondaryTextColor,
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                        }}
-                    >
+                    <div className="text-xs text-muted-foreground flex items-center gap-1">
                         <span>Replying to</span>
-                        <span style={{ color: theme.primaryColor, fontWeight: 500 }}>
+                        <span className="text-primary font-medium">
                             @{parentComment.author.name}
                         </span>
                     </div>
@@ -201,30 +116,37 @@ export const ReplyForm: React.FC<ReplyFormProps> = ({
                     onChange={(e) => setContent(e.target.value)}
                     placeholder={inputPlaceholder}
                     disabled={disabled || isSubmitting}
-                    style={textareaStyle}
+                    className={cn(
+                        "w-full min-h-[80px] p-3 text-sm rounded-md border border-input bg-background text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-y",
+                        error && "border-destructive focus-visible:ring-destructive",
+                        isOverLimit && "border-destructive focus-visible:ring-destructive"
+                    )}
                     rows={3}
                     maxLength={maxCharLimit}
                     aria-label={inputPlaceholder}
                 />
 
                 {/* Error message */}
-                {error && <div style={errorStyle}>{error}</div>}
+                {error && <div className="text-xs text-destructive">{error}</div>}
 
                 {/* Footer */}
-                <div style={footerStyle}>
+                <div className="flex items-center justify-between gap-3">
                     {/* Character count */}
                     {showCharCount && maxCharLimit && (
-                        <span style={charCountStyle}>
+                        <span className={cn(
+                            "text-xs text-muted-foreground",
+                            isOverLimit && "text-destructive"
+                        )}>
                             {remaining !== undefined ? remaining : count}/{maxCharLimit}
                         </span>
                     )}
 
                     {/* Buttons */}
-                    <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
+                    <div className="flex items-center gap-2 ml-auto">
                         {onCancel && (
                             <button
                                 type="button"
-                                style={cancelButtonStyle}
+                                className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-transparent hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
                                 onClick={handleCancel}
                                 disabled={disabled || isSubmitting}
                             >
@@ -233,7 +155,7 @@ export const ReplyForm: React.FC<ReplyFormProps> = ({
                         )}
                         <button
                             type="button"
-                            style={submitButtonStyle}
+                            className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2"
                             onClick={handleSubmit}
                             disabled={
                                 disabled ||
@@ -243,7 +165,7 @@ export const ReplyForm: React.FC<ReplyFormProps> = ({
                             }
                         >
                             {isSubmitting ? (
-                                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span className="flex items-center gap-2">
                                     <svg
                                         width="14"
                                         height="14"
@@ -251,7 +173,7 @@ export const ReplyForm: React.FC<ReplyFormProps> = ({
                                         fill="none"
                                         stroke="currentColor"
                                         strokeWidth="2"
-                                        style={{ animation: 'spin 1s linear infinite' }}
+                                        className="animate-spin"
                                     >
                                         <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity="0.25" />
                                         <path d="M21 12a9 9 0 01-9 9" />
@@ -269,6 +191,6 @@ export const ReplyForm: React.FC<ReplyFormProps> = ({
     );
 };
 
-ReplyForm.displayName = 'ReplyForm';
+ShadcnReplyForm.displayName = 'ShadcnReplyForm';
 
-export default ReplyForm;
+export default ShadcnReplyForm;

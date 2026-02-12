@@ -13,10 +13,13 @@ import { CommentSectionContext } from './CommentProvider';
  * Hook to access the Comment Section context.
  * Must be used within a CommentSectionProvider.
  */
-export const useCommentSection = (): CommentSectionContextValue => {
+export const useComments = (): CommentSectionContextValue => {
     const context = useContext(CommentSectionContext);
     if (!context) {
-        throw new Error('useCommentSection must be used within a CommentSectionProvider');
+        throw new Error('useComments must be used within a CommentSectionProvider');
     }
     return context;
 };
+
+// Re-export for standard naming
+export const useCommentSection = useComments;

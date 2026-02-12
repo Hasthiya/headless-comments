@@ -296,7 +296,32 @@ export interface CommentSectionContextValue {
     readOnly: boolean;
     /** Generate unique ID */
     generateId: () => string;
-    /** Callbacks */
+    /** List of comments (sorted) */
+    comments: Comment[];
+    /** Error state */
+    error: Error | null;
+    /** Set error state */
+    setError: (error: Error | null) => void;
+    /** Submit a new comment */
+    submitComment: (content: string) => Promise<Comment>;
+    /** Reply to a comment */
+    replyToComment: (commentId: string, content: string) => Promise<Comment>;
+    /** Toggle a reaction */
+    toggleReaction: (commentId: string, reactionId: string) => Promise<void>;
+    /** Edit a comment */
+    editComment: (commentId: string, content: string) => Promise<Comment>;
+    /** Delete a comment */
+    deleteComment: (commentId: string) => Promise<void>;
+
+    // Pagination
+    onLoadMore?: () => Promise<Comment[]> | Comment[];
+    hasMore: boolean;
+    isLoading: boolean;
+    isLoadingMore: boolean;
+    loadMore: () => Promise<void>;
+
+    // Keep legacy signatures for backward compatibility if needed, 
+    // but the Provider will likely map them.
     onReply?: (commentId: string, content: string) => Promise<Comment> | Comment;
     onReaction?: (commentId: string, reactionId: string) => Promise<void> | void;
     onEdit?: (commentId: string, content: string) => Promise<Comment> | Comment;

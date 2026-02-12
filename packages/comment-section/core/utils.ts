@@ -4,6 +4,8 @@
  */
 
 import type { CommentTexts, CommentTheme, ReactionConfig } from './types';
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 /**
  * Default text translations (English)
@@ -301,3 +303,10 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
         return false;
     }
 };
+
+/**
+ * Optimize class names (shadcn/ui standard)
+ */
+export function cn(...inputs: ClassValue[]) {
+    return twMerge(clsx(inputs));
+}

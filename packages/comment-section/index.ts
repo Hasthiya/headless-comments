@@ -82,6 +82,11 @@ export {
   useAnimationState,
 } from './headless/hooks';
 
+export { HeadlessCommentItem } from './headless/CommentItem';
+export type { HeadlessCommentItemProps, HeadlessCommentItemChildrenProps } from './headless/CommentItem';
+export { HeadlessReplyForm } from './headless/ReplyForm';
+export type { HeadlessReplyFormProps, HeadlessReplyFormChildrenProps } from './headless/ReplyForm';
+
 // ─── Default Preset (styled components) ────────────────────────────────────
 export {
   CommentSection,
@@ -91,6 +96,16 @@ export {
   ReactionButton,
   Avatar,
 } from './presets/default';
+
+// ─── Shadcn Preset (new default implementation) ─────────────────────────────
+export {
+  ShadcnCommentSection,
+  ShadcnCommentItem,
+  ShadcnActionBar,
+  ShadcnReplyForm,
+  ShadcnReactionButton,
+  ShadcnAvatar,
+} from './presets/shadcn';
 
 // Default export for backwards compatibility
 export { CommentSection as default } from './presets/default';
