@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { CommentSectionShowcase } from '@/components/CommentSectionShowcase';
 import { Button } from '@/components/ui/button';
 
@@ -13,9 +14,14 @@ export default function Home() {
             Showcase for <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono">@comment-section/react</code>
           </p>
         </div>
-        <Button onClick={() => alert('Shadcn UI work!')}>
-          Shadcn Button
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button asChild variant="outline">
+            <Link href="/docs">Documentation</Link>
+          </Button>
+          <Button onClick={() => alert('Shadcn UI work!')}>
+            Shadcn Button
+          </Button>
+        </div>
       </div>
       <CommentSectionShowcase />
     </main>
