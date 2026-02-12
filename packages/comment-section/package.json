@@ -1,0 +1,85 @@
+{
+  "name": "@comment-section/react",
+  "version": "1.0.0",
+  "description": "A highly customizable React comment section component with reply, reaction support, and optimistic updates. TypeScript-ready and fully themeable.",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./core": {
+      "import": "./dist/core.mjs",
+      "require": "./dist/core.js",
+      "types": "./dist/core.d.ts"
+    },
+    "./headless": {
+      "import": "./dist/headless.mjs",
+      "require": "./dist/headless.js",
+      "types": "./dist/headless.d.ts"
+    },
+    "./presets/default": {
+      "import": "./dist/presets/default.mjs",
+      "require": "./dist/presets/default.js",
+      "types": "./dist/presets/default.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "eslint src --ext .ts,.tsx",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "react",
+    "comment",
+    "comment-section",
+    "comments",
+    "reply",
+    "reaction",
+    "optimistic-updates",
+    "typescript",
+    "component",
+    "ui",
+    "discussion",
+    "thread",
+    "nested-comments",
+    "themeable",
+    "customizable"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/comment-section.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/comment-section/issues"
+  },
+  "homepage": "https://github.com/yourusername/comment-section#readme",
+  "peerDependencies": {
+    "react": ">=19.0.0",
+    "react-dom": ">=19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

@@ -1,0 +1,116 @@
+﻿Γû▓ [WARNING] The condition "types" here will never be used as it comes after both "import" and "require" [package.json]
+
+    package.json:12:6:
+      12 Γöé       "types": "./dist/index.d.ts"
+         Γò╡       ~~~~~~~
+
+  The "import" condition comes earlier and will be used for all "import" statements:
+
+    package.json:10:6:
+      10 Γöé       "import": "./dist/index.mjs",
+         Γò╡       ~~~~~~~~
+
+  The "require" condition comes earlier and will be used for all "require" calls:
+
+    package.json:11:6:
+      11 Γöé       "require": "./dist/index.js",
+         Γò╡       ~~~~~~~~~
+
+Γû▓ [WARNING] The condition "types" here will never be used as it comes after both "import" and "require" [package.json]
+
+    package.json:17:6:
+      17 Γöé       "types": "./dist/core.d.ts"
+         Γò╡       ~~~~~~~
+
+  The "import" condition comes earlier and will be used for all "import" statements:
+
+    package.json:15:6:
+      15 Γöé       "import": "./dist/core.mjs",
+         Γò╡       ~~~~~~~~
+
+  The "require" condition comes earlier and will be used for all "require" calls:
+
+    package.json:16:6:
+      16 Γöé       "require": "./dist/core.js",
+         Γò╡       ~~~~~~~~~
+
+Γû▓ [WARNING] The condition "types" here will never be used as it comes after both "import" and "require" [package.json]
+
+    package.json:22:6:
+      22 Γöé       "types": "./dist/react.d.ts"
+         Γò╡       ~~~~~~~
+
+  The "import" condition comes earlier and will be used for all "import" statements:
+
+    package.json:20:6:
+      20 Γöé       "import": "./dist/react.mjs",
+         Γò╡       ~~~~~~~~
+
+  The "require" condition comes earlier and will be used for all "require" calls:
+
+    package.json:21:6:
+      21 Γöé       "require": "./dist/react.js",
+         Γò╡       ~~~~~~~~~
+
+Γû▓ [WARNING] The condition "types" here will never be used as it comes after both "import" and "require" [package.json]
+
+    package.json:27:6:
+      27 Γöé       "types": "./dist/presets/default.d.ts"
+         Γò╡       ~~~~~~~
+
+  The "import" condition comes earlier and will be used for all "import" statements:
+
+    package.json:25:6:
+      25 Γöé       "import": "./dist/presets/default.mjs",
+         Γò╡       ~~~~~~~~
+
+  The "require" condition comes earlier and will be used for all "require" calls:
+
+    package.json:26:6:
+      26 Γöé       "require": "./dist/presets/default.js",
+         Γò╡       ~~~~~~~~~
+
+[34mCLI[39m Building entry: {"index":"index.ts","core":"core/index.ts","react":"react/index.ts","presets/default":"presets/default/index.ts"}
+[34mCLI[39m Using tsconfig: tsconfig.json
+[34mCLI[39m tsup v8.5.1
+[34mCLI[39m Using tsup config: C:\Users\User\Projects\comment-section-package\packages\comment-section\tsup.config.ts
+[34mDTS[39m Build start
+presets/default/CommentSection.tsx(8,8): error TS1192: Module '"C:/Users/User/Projects/comment-section-package/packages/comment-section/react/index"' has no default export.
+presets/default/CommentSection.tsx(8,17): error TS2305: Module '"react"' has no exported member 'useState'.
+presets/default/CommentSection.tsx(8,27): error TS2305: Module '"react"' has no exported member 'useCallback'.
+presets/default/CommentSection.tsx(8,40): error TS2305: Module '"react"' has no exported member 'useMemo'.
+presets/default/CommentSection.tsx(32,13): error TS7031: Binding element 'externalComments' implicitly has an 'any' type.
+presets/default/CommentSection.tsx(33,3): error TS7031: Binding element 'currentUser' implicitly has an 'any' type.
+presets/default/CommentSection.tsx(34,3): error TS7031: Binding element 'onSubmitComment' implicitly has an 'any' type.
+presets/default/CommentSection.tsx(35,3): error TS7031: Binding element 'onReply' implicitly has an 'any' type.
+presets/default/CommentSection.tsx(36,3): error TS7031: Binding element 'onReaction' implicitly has an 'any' type.
+presets/default/CommentSection.tsx(37,3): error TS7031: Binding element 'onEdit' implicitly has an 'any' type.
+presets/default/CommentSection.tsx(38,3): error TS7031: Binding element 'onDelete' implicitly has an 'any' type.
+presets/default/CommentSection.tsx(39,3): error TS7031: Binding element 'onLoadMore' implicitly has an 'any' type.
+presets/default/CommentSection.tsx(43,3): error TS7031: Binding element 'renderComment' implicitly has an 'any' type.
+presets/default/CommentSection.tsx(44,3): error TS7031: Binding element 'renderContent' implicitly has an 'any' type.
+presets/default/CommentSection.tsx(45,3): error TS7031: Binding element 'renderAvatar' implicitly has an 'any' type.
+presets/default/CommentSection.tsx(46,3): error TS7031: Binding element 'renderReactions' implicitly has an 'any' type.
+presets/default/CommentSection.tsx(47,3): error TS7031: Binding element 'renderActions' implicitly has an 'any' type.
+presets/default/CommentSection.tsx(48,3): error TS7031: Binding element 'renderTimestamp' implicitly has an 'any' type.
+presets/default/CommentSection.tsx(49,3): error TS7031: Binding element 'renderEmpty' implicitly has an 'any' type.
+presets/default/CommentSection.tsx(50,3): error TS7031: Binding element 'renderLoading' implicitly has an 'any' type.
+presets/default/CommentSection.tsx(51,3): error TS7031: Binding element 'renderError' implicitly has an 'any' type.
+presets/default/CommentSection.tsx(52,3): error TS7031: Binding element 'renderHeader' implicitly has an 'any' type.
+presets/default/CommentSection.tsx(53,3): error TS7031: Binding element 'renderFooter' implicitly has an 'any' type.
+presets/default/CommentSection.tsx(56,3): error TS7031: Binding element 'availableReactions' implicitly has an 'any' type.
+presets/default/CommentSection.tsx(61,3): error TS7031: Binding element 'texts' implicitly has an 'any' type.
+presets/default/CommentSection.tsx(63,3): error TS7031: Binding element 'internalTheme' implicitly has an 'any' type.
+presets/default/CommentSection.tsx(64,3): error TS7031: Binding element 'inputPlaceholder' implicitly has an 'any' type.
+presets/default/CommentSection.tsx(65,3): error TS7031: Binding element 'maxCharLimit' implicitly has an 'any' type.
+presets/default/CommentSection.tsx(99,43): error TS2345: Argument of type 'string' is not assignable to parameter of type '"asc" | "desc" | "oldest" | "newest" | "popular" | undefined'.
+presets/default/CommentSection.tsx(403,33): error TS7006: Parameter 'comment' implicitly has an 'any' type.
+presets/default/CommentSection.tsx(544,63): error TS7006: Parameter 'props' implicitly has an 'any' type.
+
+[31mError: error occurred in dts build
+    at Worker.<anonymous> (C:\Users\User\Projects\comment-section-package\node_modules\.pnpm\tsup@8.5.1_postcss@8.4.31_typescript@5.9.3\node_modules\tsup\dist\index.js:1545:26)
+    at Worker.emit (node:events:507:28)
+    at MessagePort.<anonymous> (node:internal/worker:268:53)
+    at [nodejs.internal.kHybridDispatch] (node:internal/event_target:827:20)
+    at MessagePort.<anonymous> (node:internal/per_context/messageport:23:28)[39m
+[31mDTS[39m [31mBuild error[39m

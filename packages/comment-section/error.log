@@ -1,0 +1,22 @@
+﻿components/ActionBar.tsx(8,27): error TS6133: 'useRef' is declared but its value is never read.
+components/ActionBar.tsx(18,3): error TS6133: 'currentUser' is declared but its value is never read.
+components/ActionBar.tsx(251,19): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+components/ActionBar.tsx(317,19): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+components/ReplyForm.tsx(8,40): error TS6133: 'useRef' is declared but its value is never read.
+types/index.ts(481,3): error TS2484: Export declaration conflicts with exported declaration of 'Comment'.
+types/index.ts(482,3): error TS2484: Export declaration conflicts with exported declaration of 'CommentUser'.
+types/index.ts(483,3): error TS2484: Export declaration conflicts with exported declaration of 'Reaction'.
+types/index.ts(484,3): error TS2484: Export declaration conflicts with exported declaration of 'ReactionConfig'.
+types/index.ts(485,3): error TS2484: Export declaration conflicts with exported declaration of 'CommentItemProps'.
+types/index.ts(486,3): error TS2484: Export declaration conflicts with exported declaration of 'CommentSectionProps'.
+types/index.ts(487,3): error TS2484: Export declaration conflicts with exported declaration of 'CommentTexts'.
+types/index.ts(488,3): error TS2484: Export declaration conflicts with exported declaration of 'CommentTheme'.
+types/index.ts(489,3): error TS2484: Export declaration conflicts with exported declaration of 'OptimisticState'.
+types/index.ts(490,3): error TS2484: Export declaration conflicts with exported declaration of 'ReplyFormProps'.
+types/index.ts(491,3): error TS2484: Export declaration conflicts with exported declaration of 'ReactionButtonProps'.
+types/index.ts(492,3): error TS2484: Export declaration conflicts with exported declaration of 'AvatarProps'.
+types/index.ts(493,3): error TS2484: Export declaration conflicts with exported declaration of 'ActionBarProps'.
+types/index.ts(494,3): error TS2484: Export declaration conflicts with exported declaration of 'CommentSectionContextValue'.
+utils/helpers.ts(76,3): error TS6133: 'locale' is declared but its value is never read.
