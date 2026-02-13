@@ -138,7 +138,7 @@ function App() {
           <div className="rounded-md border border-border p-4">
             <p className="font-medium">Core (framework-agnostic)</p>
             <p className="text-sm text-muted-foreground mt-1">
-              Pure functions for tree manipulation (<code>addToTree</code>, <code>removeFromTree</code>, <code>updateInTree</code>, <code>toggleReactionInTree</code>), sorting, filtering, and the adapter interface. Zero React dependency &mdash; use these in Node.js, Vue, or any runtime.
+              Pure functions for tree manipulation (<code>addToTree</code>, <code>removeFromTree</code>, <code>updateInTree</code>, <code>toggleReactionInTree</code>, <code>exclusiveToggleReactionInTree</code>), sorting, filtering, and the adapter interface. Zero React dependency &mdash; use these in Node.js, Vue, or any runtime.
             </p>
             <p className="text-xs text-muted-foreground mt-2 font-mono">import {'{ addToTree, sortComments }'} from &apos;@hasthiya_/headless-comments-react/core&apos;</p>
           </div>
@@ -185,6 +185,22 @@ function MyComments() {
 
   return <div>{/* render tree.comments */}</div>;
 }`}
+          lang="tsx"
+        />
+
+        <p className="font-medium mt-6 mb-2">Mutually exclusive reactions</p>
+        <p className="text-sm text-muted-foreground mb-2">Enable <code>mutuallyExclusiveReactions</code> to allow only one active reaction per comment. Clicking a new emoji deactivates the previous one, matching patterns like Facebook (one reaction at a time) or Reddit (up/down vote).</p>
+        <CodeBlock
+          code={`const tree = useCommentTree({
+  initialComments,
+  currentUser,
+  mutuallyExclusiveReactions: true, // Only one active reaction per comment
+});
+
+// Clicking 👍 when ❤️ is active:
+//   ❤️ count goes down, 👍 count goes up
+// Clicking 👍 when 👍 is already active:
+//   👍 count goes down (deactivated)`}
           lang="tsx"
         />
 
@@ -248,6 +264,7 @@ function MyComments() {
               <tr><td className="py-2 pr-4 font-mono text-xs">generateId</td><td className="py-2 pr-4 text-muted-foreground">() =&gt; string</td><td className="py-2">Custom ID generator (default: generateUniqueId)</td></tr>
               <tr><td className="py-2 pr-4 font-mono text-xs">defaultReactions</td><td className="py-2 pr-4 text-muted-foreground">ReactionConfig[]</td><td className="py-2">Default reactions for new comments</td></tr>
               <tr><td className="py-2 pr-4 font-mono text-xs">onError</td><td className="py-2 pr-4 text-muted-foreground">(error: Error) =&gt; void</td><td className="py-2">Called when an adapter operation fails (after rollback)</td></tr>
+              <tr><td className="py-2 pr-4 font-mono text-xs">mutuallyExclusiveReactions</td><td className="py-2 pr-4 text-muted-foreground">boolean</td><td className="py-2">When true, only one reaction can be active per comment at a time. Clicking a new reaction deactivates the previous one.</td></tr>
             </tbody>
           </table>
         </div>
@@ -578,6 +595,7 @@ const myAdapter: CommentAdapter = {
   removeFromTree,
   updateInTree,
   toggleReactionInTree,
+  exclusiveToggleReactionInTree,
   findCommentById,
   flattenComments,
   buildCommentTree,
@@ -595,6 +613,10 @@ const afterEdit = updateInTree(tree, commentId, { content: 'new content', isEdit
 
 // Toggle a reaction (auto increments/decrements count and flips isActive)
 const afterReaction = toggleReactionInTree(tree, commentId, 'like');
+
+// Toggle with mutual exclusivity (only one active reaction at a time)
+// If 'heart' is active: deactivates it, then activates 'like'
+const exclusive = exclusiveToggleReactionInTree(tree, commentId, 'like');
 
 // Find a comment by ID (recursive)
 const comment = findCommentById(tree, 'comment-123');
@@ -652,6 +674,7 @@ const results = searchComments(comments, 'react hooks');`}
               <tr><td className="py-2 pr-4 font-mono text-xs">removeFromTree</td><td className="py-2 pr-4 text-muted-foreground">(tree, commentId) =&gt; Comment[]</td><td className="py-2">Remove comment and its subtree</td></tr>
               <tr><td className="py-2 pr-4 font-mono text-xs">updateInTree</td><td className="py-2 pr-4 text-muted-foreground">(tree, commentId, partial) =&gt; Comment[]</td><td className="py-2">Update comment fields</td></tr>
               <tr><td className="py-2 pr-4 font-mono text-xs">toggleReactionInTree</td><td className="py-2 pr-4 text-muted-foreground">(tree, commentId, reactionId) =&gt; Comment[]</td><td className="py-2">Toggle reaction with count update</td></tr>
+              <tr><td className="py-2 pr-4 font-mono text-xs">exclusiveToggleReactionInTree</td><td className="py-2 pr-4 text-muted-foreground">(tree, commentId, reactionId) =&gt; Comment[]</td><td className="py-2">Toggle reaction with mutual exclusivity (one active at a time)</td></tr>
               <tr><td className="py-2 pr-4 font-mono text-xs">findCommentById</td><td className="py-2 pr-4 text-muted-foreground">(tree, id) =&gt; Comment | undefined</td><td className="py-2">Find comment recursively</td></tr>
               <tr><td className="py-2 pr-4 font-mono text-xs">flattenComments</td><td className="py-2 pr-4 text-muted-foreground">(tree) =&gt; Comment[]</td><td className="py-2">Flatten to array</td></tr>
               <tr><td className="py-2 pr-4 font-mono text-xs">buildCommentTree</td><td className="py-2 pr-4 text-muted-foreground">(flat) =&gt; Comment[]</td><td className="py-2">Build nested tree from flat list</td></tr>
@@ -870,7 +893,7 @@ const tree = useCommentTree<{ score: number; flair: string }>({
 
       {/* ── BYO UI Example ───────────────────────────────────────────────── */}
       <DocSection id="bring-your-own-ui" title="Bring Your Own UI">
-        <p>Use the headless hooks and components with your own design system. The BYO page demonstrates Reddit, Instagram, Facebook, and Slack-style UIs all powered by the same <code>useCommentTree</code> instance.</p>
+        <p>Use the headless hooks and components with your own design system. The BYO page demonstrates Reddit, Instagram, Facebook, and Slack-style UIs each with their own <code>useCommentTree</code> instance and <code>mutuallyExclusiveReactions</code> enabled. Each tab has independent state with a 5-emoji picker (Like, Love, Laugh, Wow, Angry) or Reddit-style up/down votes.</p>
         <p>
           <Link
             href="/bring-your-own-ui"
