@@ -24,14 +24,14 @@ export interface CommentItemProps {
     comment: Comment;
     /** Current logged-in user */
     currentUser?: CommentUser | null;
-    /** Callback when a reply is submitted */
-    onReply?: (commentId: string, content: string) => Promise<Comment> | Comment;
+    /** Callback when a reply is submitted (sync) */
+    onReply?: (commentId: string, content: string) => void;
     /** Callback when a reaction is toggled */
-    onReaction?: (commentId: string, reactionId: string) => Promise<void> | void;
-    /** Callback when a comment is edited */
-    onEdit?: (commentId: string, content: string) => Promise<Comment> | Comment;
+    onReaction?: (commentId: string, reactionId: string) => void;
+    /** Callback when a comment is edited (sync) */
+    onEdit?: (commentId: string, content: string) => void;
     /** Callback when a comment is deleted */
-    onDelete?: (commentId: string) => Promise<void> | void;
+    onDelete?: (commentId: string) => void;
     /** Maximum depth for nested replies */
     maxDepth?: number;
     /** Current depth level */
@@ -80,6 +80,8 @@ export interface CommentItemProps {
     readOnly?: boolean;
     /** Custom theme configuration */
     theme?: CommentTheme;
+    /** Max lines before "Read more" truncation (default 5) */
+    maxCommentLines?: number;
 }
 
 /**
@@ -91,21 +93,29 @@ export interface CommentSectionProps {
     /** Current logged-in user */
     currentUser?: CommentUser | null;
     /** Callback when a new comment is submitted */
-    onSubmitComment?: (content: string) => Promise<Comment> | Comment;
+    onSubmitComment?: (content: string) => Comment;
     /** Callback when a reply is submitted */
-    onReply?: (commentId: string, content: string) => Promise<Comment> | Comment;
+    onReply?: (commentId: string, content: string) => Comment;
     /** Callback when a reaction is toggled */
-    onReaction?: (commentId: string, reactionId: string) => Promise<void> | void;
+    onReaction?: (commentId: string, reactionId: string) => void;
     /** Callback when a comment is edited */
-    onEdit?: (commentId: string, content: string) => Promise<Comment> | Comment;
+    onEdit?: (commentId: string, content: string) => Comment;
     /** Callback when a comment is deleted */
-    onDelete?: (commentId: string) => Promise<void> | void;
+    onDelete?: (commentId: string) => void;
+    /** Callback when a comment is reported */
+    onReport?: (commentId: string, reason: string) => void;
     /** Callback when more comments are loaded */
-    onLoadMore?: () => Promise<Comment[]> | Comment[];
+    onLoadMore?: () => Comment[] | void;
     /** Whether more comments are available */
     hasMore?: boolean;
     /** Whether comments are currently loading */
     isLoading?: boolean;
+    /** User-controlled: new comment form is submitting (e.g. API in progress) */
+    isSubmittingComment?: boolean;
+    /** User-controlled: reply form is submitting */
+    isSubmittingReply?: boolean;
+    /** Custom render for the new comment / reply form (user supplies UI) */
+    renderReplyForm?: (props: RenderReplyFormProps) => ReactNode;
     /** Maximum depth for nested replies */
     maxDepth?: number;
     /** Custom render function for a comment */
@@ -156,6 +166,8 @@ export interface CommentSectionProps {
     initialValue?: string;
     /** Maximum character limit for comments */
     maxCharLimit?: number;
+    /** Max lines before "Read more" truncation (default 5) */
+    maxCommentLines?: number;
     /** Show character count */
     showCharCount?: boolean;
     /** Auto focus the input on mount */
@@ -166,10 +178,28 @@ export interface CommentSectionProps {
     sortComments?: (comments: Comment[]) => Comment[];
     /** Sort order for comments */
     sortOrder?: 'asc' | 'desc' | 'oldest' | 'newest' | 'popular';
+    /** localStorage key for persisting sort preference */
+    sortOrderKey?: string;
+    /** Include dislike reaction in defaults (guideline: avoid unless required) */
+    includeDislike?: boolean;
     /** Enable optimistic updates */
     enableOptimisticUpdates?: boolean;
     /** Custom unique ID generator */
     generateId?: () => string;
+}
+
+/**
+ * Props passed to renderReplyForm when user supplies custom form UI
+ */
+export interface RenderReplyFormProps {
+    /** Submit handler (sync) */
+    onSubmit: (content: string) => void;
+    onCancel?: () => void;
+    placeholder?: string;
+    disabled?: boolean;
+    /** Whether the form is in a submitting state (from isSubmittingComment / isSubmittingReply) */
+    isSubmitting?: boolean;
+    parentComment?: Comment;
 }
 
 /**
@@ -180,8 +210,8 @@ export interface ReplyFormProps {
     parentComment?: Comment;
     /** Current user */
     currentUser?: CommentUser | null;
-    /** Callback when reply is submitted */
-    onSubmit: (content: string) => Promise<Comment> | Comment;
+    /** Callback when reply is submitted (sync) */
+    onSubmit: (content: string) => void;
     /** Callback when cancelled */
     onCancel?: () => void;
     /** Placeholder text */
@@ -302,28 +332,33 @@ export interface CommentSectionContextValue {
     error: Error | null;
     /** Set error state */
     setError: (error: Error | null) => void;
-    /** Submit a new comment */
-    submitComment: (content: string) => Promise<Comment>;
-    /** Reply to a comment */
-    replyToComment: (commentId: string, content: string) => Promise<Comment>;
-    /** Toggle a reaction */
-    toggleReaction: (commentId: string, reactionId: string) => Promise<void>;
-    /** Edit a comment */
-    editComment: (commentId: string, content: string) => Promise<Comment>;
-    /** Delete a comment */
-    deleteComment: (commentId: string) => Promise<void>;
+    /** Submit a new comment (sync) */
+    submitComment: (content: string) => void;
+    /** Reply to a comment (sync) */
+    replyToComment: (commentId: string, content: string) => void;
+    /** Toggle a reaction (sync) */
+    toggleReaction: (commentId: string, reactionId: string) => void;
+    /** Edit a comment (sync) */
+    editComment: (commentId: string, content: string) => void;
+    /** Delete a comment (sync) */
+    deleteComment: (commentId: string) => void;
+    /** Report a comment */
+    reportComment?: (commentId: string, reason: string) => void;
 
     // Pagination
-    onLoadMore?: () => Promise<Comment[]> | Comment[];
+    onLoadMore?: () => Comment[] | void;
     hasMore: boolean;
     isLoading: boolean;
     isLoadingMore: boolean;
-    loadMore: () => Promise<void>;
+    loadMore: () => void;
 
-    // Keep legacy signatures for backward compatibility if needed, 
-    // but the Provider will likely map them.
-    onReply?: (commentId: string, content: string) => Promise<Comment> | Comment;
-    onReaction?: (commentId: string, reactionId: string) => Promise<void> | void;
-    onEdit?: (commentId: string, content: string) => Promise<Comment> | Comment;
-    onDelete?: (commentId: string) => Promise<void> | void;
+    /** User-controlled: new comment form is submitting */
+    isSubmittingComment: boolean;
+    /** User-controlled: reply form is submitting */
+    isSubmittingReply: boolean;
+
+    /** Current sort order */
+    sortOrder: 'asc' | 'desc' | 'oldest' | 'newest' | 'popular';
+    /** Change sort order (persists to localStorage when sortOrderKey is set) */
+    setSortOrder: (order: 'asc' | 'desc' | 'oldest' | 'newest' | 'popular') => void;
 }

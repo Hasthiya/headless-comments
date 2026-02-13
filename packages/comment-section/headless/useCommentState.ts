@@ -12,16 +12,18 @@ export interface UseCommentStateProps {
     enableOptimisticUpdates?: boolean;
     sortOrder?: 'asc' | 'desc' | 'oldest' | 'newest' | 'popular';
     generateId?: () => string;
-    // Callbacks
-    onSubmitComment?: (content: string) => Promise<Comment> | Comment;
-    onReply?: (commentId: string, content: string) => Promise<Comment> | Comment;
-    onReaction?: (commentId: string, reactionId: string) => Promise<void> | void;
-    onEdit?: (commentId: string, content: string) => Promise<Comment> | Comment;
-    onDelete?: (commentId: string) => Promise<void> | void;
+    // Callbacks (sync)
+    onSubmitComment?: (content: string) => Comment;
+    onReply?: (commentId: string, content: string) => Comment;
+    onReaction?: (commentId: string, reactionId: string) => void;
+    onEdit?: (commentId: string, content: string) => Comment;
+    onDelete?: (commentId: string) => void;
     // Pagination
-    onLoadMore?: () => Promise<Comment[]> | Comment[];
+    onLoadMore?: () => Comment[] | void;
     hasMore?: boolean;
     isLoading?: boolean;
+    isSubmittingComment?: boolean;
+    isSubmittingReply?: boolean;
 }
 
 export type CommentStateValue = {
@@ -29,17 +31,18 @@ export type CommentStateValue = {
     sortedComments: Comment[];
     error: Error | null;
     setError: (error: Error | null) => void;
-    submitComment: (content: string) => Promise<Comment>;
-    replyToComment: (commentId: string, content: string) => Promise<Comment>;
-    toggleReaction: (commentId: string, reactionId: string) => Promise<void>;
-    editComment: (commentId: string, content: string) => Promise<Comment>;
-    deleteComment: (commentId: string) => Promise<void>;
-    // Pagination
-    onLoadMore?: () => Promise<Comment[]> | Comment[];
+    submitComment: (content: string) => void;
+    replyToComment: (commentId: string, content: string) => void;
+    toggleReaction: (commentId: string, reactionId: string) => void;
+    editComment: (commentId: string, content: string) => void;
+    deleteComment: (commentId: string) => void;
+    onLoadMore?: () => Comment[] | void;
     hasMore: boolean;
     isLoading: boolean;
     isLoadingMore: boolean;
-    loadMore: () => Promise<void>;
+    loadMore: () => void;
+    isSubmittingComment: boolean;
+    isSubmittingReply: boolean;
 };
 
 export const useCommentState = ({
@@ -56,6 +59,8 @@ export const useCommentState = ({
     onLoadMore,
     hasMore = false,
     isLoading = false,
+    isSubmittingComment = false,
+    isSubmittingReply = false,
 }: UseCommentStateProps): CommentStateValue => {
     // Optimistic updates state
     const optimistic = useOptimisticUpdates<Comment>(externalComments);
@@ -67,9 +72,9 @@ export const useCommentState = ({
         return sortComments(commentsToSort, sortOrder);
     }, [enableOptimisticUpdates, optimistic.data, externalComments, sortOrder]);
 
-    // Handle new comment submission
+    // Handle new comment submission (sync)
     const submitComment = useCallback(
-        async (content: string): Promise<Comment> => {
+        (content: string) => {
             if (!onSubmitComment) throw new Error('onSubmitComment is required');
             setError(null);
 
@@ -89,34 +94,20 @@ export const useCommentState = ({
                     isPending: true,
                     replies: [],
                 };
-
                 optimistic.add(optimisticComment);
-
-                try {
-                    const result = await onSubmitComment(content);
-                    optimistic.update(optimisticComment.id, {
-                        ...result,
-                        isPending: false,
-                    });
-                    optimistic.confirm();
-                    return result;
-                } catch (err) {
-                    optimistic.update(optimisticComment.id, {
-                        isPending: false,
-                        hasError: true,
-                        errorMessage: err instanceof Error ? err.message : 'Failed to submit',
-                    });
-                    throw err;
-                }
+                const result = onSubmitComment(content);
+                optimistic.update(optimisticComment.id, { ...result, isPending: false });
+                optimistic.confirm();
+            } else {
+                onSubmitComment(content);
             }
-            return await Promise.resolve(onSubmitComment(content));
         },
         [onSubmitComment, enableOptimisticUpdates, currentUser, generateId, optimistic]
     );
 
-    // Handle reply
+    // Handle reply (sync)
     const replyToComment = useCallback(
-        async (commentId: string, content: string): Promise<Comment> => {
+        (commentId: string, content: string) => {
             if (!onReply) throw new Error('onReply is required');
 
             if (enableOptimisticUpdates && currentUser) {
@@ -136,37 +127,21 @@ export const useCommentState = ({
                     isPending: true,
                     replies: [],
                 };
-
                 optimistic.add(optimisticReply);
-
-                try {
-                    const result = await onReply(commentId, content);
-                    optimistic.update(optimisticReply.id, {
-                        ...result,
-                        isPending: false,
-                    });
-                    optimistic.confirm();
-                    return result;
-                } catch (err) {
-                    optimistic.update(optimisticReply.id, {
-                        isPending: false,
-                        hasError: true,
-                        errorMessage: err instanceof Error ? err.message : 'Failed to submit reply',
-                    });
-                    throw err;
-                }
+                const result = onReply(commentId, content);
+                optimistic.update(optimisticReply.id, { ...result, isPending: false });
+                optimistic.confirm();
+            } else {
+                onReply(commentId, content);
             }
-            return onReply(commentId, content);
         },
         [onReply, enableOptimisticUpdates, currentUser, generateId, optimistic]
     );
 
-    // Handle reaction
+    // Handle reaction (sync)
     const toggleReaction = useCallback(
-        async (commentId: string, reactionId: string) => {
+        (commentId: string, reactionId: string) => {
             if (!onReaction) return;
-
-            // Optimistic update
             if (enableOptimisticUpdates) {
                 const comment = optimistic.data.find((c) => c.id === commentId);
                 if (comment) {
@@ -183,69 +158,35 @@ export const useCommentState = ({
                     optimistic.update(commentId, { reactions: updatedReactions });
                 }
             }
-
-            try {
-                await onReaction(commentId, reactionId);
-                if (enableOptimisticUpdates) {
-                    optimistic.confirm();
-                }
-            } catch (err) {
-                if (enableOptimisticUpdates) {
-                    optimistic.rollback();
-                }
-                setError(err instanceof Error ? err : new Error('Failed to react'));
-            }
+            onReaction(commentId, reactionId);
+            if (enableOptimisticUpdates) optimistic.confirm();
         },
         [onReaction, enableOptimisticUpdates, optimistic]
     );
 
-    // Handle edit
+    // Handle edit (sync)
     const editComment = useCallback(
-        async (commentId: string, content: string): Promise<Comment> => {
+        (commentId: string, content: string) => {
             if (!onEdit) throw new Error('onEdit is required');
-
             if (enableOptimisticUpdates) {
                 optimistic.update(commentId, { content, isEdited: true, isPending: true });
             }
-
-            try {
-                const result = await onEdit(commentId, content);
-                if (enableOptimisticUpdates) {
-                    optimistic.update(commentId, { ...result, isPending: false });
-                    optimistic.confirm();
-                }
-                return result;
-            } catch (err) {
-                if (enableOptimisticUpdates) {
-                    optimistic.rollback();
-                }
-                setError(err instanceof Error ? err : new Error('Failed to edit'));
-                throw err;
+            const result = onEdit(commentId, content);
+            if (enableOptimisticUpdates) {
+                optimistic.update(commentId, { ...result, isPending: false });
+                optimistic.confirm();
             }
         },
         [onEdit, enableOptimisticUpdates, optimistic]
     );
 
-    // Handle delete
+    // Handle delete (sync)
     const deleteComment = useCallback(
-        async (commentId: string) => {
+        (commentId: string) => {
             if (!onDelete) return;
-
-            if (enableOptimisticUpdates) {
-                optimistic.remove(commentId);
-            }
-
-            try {
-                await onDelete(commentId);
-                if (enableOptimisticUpdates) {
-                    optimistic.confirm();
-                }
-            } catch (err) {
-                if (enableOptimisticUpdates) {
-                    optimistic.rollback();
-                }
-                setError(err instanceof Error ? err : new Error('Failed to delete'));
-            }
+            if (enableOptimisticUpdates) optimistic.remove(commentId);
+            onDelete(commentId);
+            if (enableOptimisticUpdates) optimistic.confirm();
         },
         [onDelete, enableOptimisticUpdates, optimistic]
     );
@@ -253,12 +194,11 @@ export const useCommentState = ({
     // Handle load more
     const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-    const loadMore = useCallback(async () => {
+    const loadMore = useCallback(() => {
         if (!onLoadMore || isLoadingMore || !hasMore) return;
-
         setIsLoadingMore(true);
         try {
-            await onLoadMore();
+            onLoadMore();
         } catch (err) {
             setError(err instanceof Error ? err : new Error('Failed to load more comments'));
         } finally {
@@ -281,5 +221,7 @@ export const useCommentState = ({
         isLoading,
         isLoadingMore,
         loadMore,
+        isSubmittingComment,
+        isSubmittingReply,
     };
 };

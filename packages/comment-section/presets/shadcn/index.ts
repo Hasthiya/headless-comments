@@ -11,6 +11,7 @@ export { ShadcnActionBar } from './ShadcnActionBar';
 export { ShadcnReplyForm } from './ShadcnReplyForm';
 export { ShadcnReactionButton } from './ShadcnReactionButton';
 export { ShadcnAvatar } from './ShadcnAvatar';
+export { ShadcnCommentSkeleton } from './ShadcnCommentSkeleton';
 
 // Default export
 export { ShadcnCommentSection as default } from './ShadcnCommentSection';

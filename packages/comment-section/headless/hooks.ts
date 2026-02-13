@@ -6,6 +6,9 @@
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react';
+import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
+import type { CommentTexts } from '../core/types';
+import { formatRelativeTime } from '../core/utils';
 
 /**
  * Hook for textarea auto-resize
@@ -68,6 +71,31 @@ export const useClickOutside = <T extends HTMLElement>(
     }, [callback, enabled]);
 
     return ref;
+};
+
+/**
+ * Hook for Enter/Shift+Enter submit behavior in textarea.
+ * Enter (no Shift) → submit; Shift+Enter → newline.
+ * Returns onKeyDown handler to attach to textarea.
+ */
+export const useEnterSubmit = (
+    onSubmit: () => void,
+    disabled: boolean,
+    options: { submitOnEnter?: boolean } = {}
+) => {
+    const { submitOnEnter = true } = options;
+
+    return useCallback(
+        (e: ReactKeyboardEvent<HTMLTextAreaElement>) => {
+            if (e.key !== 'Enter') return;
+            if (e.shiftKey) return; // Shift+Enter = newline (default behavior)
+            if (!submitOnEnter || disabled) return;
+
+            e.preventDefault();
+            onSubmit();
+        },
+        [onSubmit, disabled, submitOnEnter]
+    );
 };
 
 /**
@@ -203,6 +231,33 @@ export const useFocus = <T extends HTMLElement>() => {
     }, []);
 
     return { ref, focus, blur };
+};
+
+/**
+ * Hook for relative time that auto-updates at interval.
+ * Returns formatted relative time string (e.g. "5m ago").
+ */
+export const useRelativeTime = (
+    date: Date | string,
+    locale: string,
+    texts: Required<CommentTexts>,
+    intervalMs: number = 60000
+): string => {
+    const [formatted, setFormatted] = useState(() =>
+        formatRelativeTime(date, locale, texts)
+    );
+
+    useEffect(() => {
+        setFormatted(formatRelativeTime(date, locale, texts));
+
+        const id = setInterval(() => {
+            setFormatted(formatRelativeTime(date, locale, texts));
+        }, intervalMs);
+
+        return () => clearInterval(id);
+    }, [date, locale, texts, intervalMs]);
+
+    return formatted;
 };
 
 /**

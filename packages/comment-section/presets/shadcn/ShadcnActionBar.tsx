@@ -5,13 +5,13 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import type { ActionBarProps } from '../../headless/types';
 import type { Reaction } from '../../core/types';
 import { useCommentSection } from '../../headless/useComments';
 import { useClickOutside } from '../../headless/hooks';
 import { ShadcnReactionButton } from './ShadcnReactionButton';
-import { cn } from '../../core/utils';
+import { cn, getCommentPermalink, copyToClipboard } from '../../core/utils';
 
 /**
  * ShadcnActionBar component displays action buttons for a comment
@@ -34,10 +34,14 @@ export const ShadcnActionBar: React.FC<ActionBarProps & { className?: string }> 
 }) => {
     const context = useCommentSection();
     const texts = customTexts || context.texts;
+    const reportComment = context.reportComment;
     const reactions = availableReactions || context.availableReactions;
 
     const [showReactionPicker, setShowReactionPicker] = useState(false);
     const [showMoreMenu, setShowMoreMenu] = useState(false);
+    const [showReportSubmenu, setShowReportSubmenu] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [reportThanks, setReportThanks] = useState(false);
 
     const reactionPickerRef = useClickOutside<HTMLDivElement>(
         () => setShowReactionPicker(false),
@@ -71,6 +75,41 @@ export const ShadcnActionBar: React.FC<ActionBarProps & { className?: string }> 
         }
     };
 
+    const handleReport = useCallback(
+        (reason: string) => {
+            const reportComment = context.reportComment;
+            if (reportComment) {
+                reportComment(comment.id, reason);
+            }
+            setShowReportSubmenu(false);
+            setShowMoreMenu(false);
+            setReportThanks(true);
+            setTimeout(() => setReportThanks(false), 3000);
+        },
+        [comment.id, context.reportComment]
+    );
+
+    const handleCopyLink = useCallback(async () => {
+        const url = getCommentPermalink(comment.id);
+        const ok = await copyToClipboard(url);
+        if (ok) {
+            setShowMoreMenu(false);
+        }
+    }, [comment.id]);
+
+    const handleDeleteClick = useCallback(() => {
+        setShowMoreMenu(false);
+        setShowDeleteConfirm(true);
+    }, []);
+
+    const handleDeleteConfirm = useCallback(() => {
+        onDelete?.();
+        setShowDeleteConfirm(false);
+    }, [onDelete]);
+
+    const handleDeleteCancel = useCallback(() => {
+        setShowDeleteConfirm(false);
+    }, []);
 
     return (
         <div className={cn("flex items-center gap-3 mt-2", className)}>
@@ -197,12 +236,7 @@ export const ShadcnActionBar: React.FC<ActionBarProps & { className?: string }> 
                                 <button
                                     type="button"
                                     className="relative flex w-full cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-xs outline-none hover:bg-destructive/10 text-destructive hover:text-destructive"
-                                    onClick={() => {
-                                        if (window.confirm(texts.deleteConfirm)) {
-                                            onDelete();
-                                        }
-                                        setShowMoreMenu(false);
-                                    }}
+                                    onClick={handleDeleteClick}
                                 >
                                     <svg
                                         width="14"
@@ -222,34 +256,132 @@ export const ShadcnActionBar: React.FC<ActionBarProps & { className?: string }> 
                                     {texts.delete}
                                 </button>
                             )}
-                            {!isAuthor && (
-                                <button
-                                    type="button"
-                                    className="relative flex w-full cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-xs outline-none hover:bg-accent hover:text-accent-foreground"
-                                    onClick={() => setShowMoreMenu(false)}
+                            <button
+                                type="button"
+                                className="relative flex w-full cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-xs outline-none hover:bg-accent hover:text-accent-foreground"
+                                onClick={handleCopyLink}
+                            >
+                                <svg
+                                    width="14"
+                                    height="14"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
                                 >
-                                    <svg
-                                        width="14"
-                                        height="14"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
+                                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                                </svg>
+                                {texts.copyLink}
+                            </button>
+                            {!isAuthor && reportComment && (
+                                showReportSubmenu ? (
+                                    <div className="space-y-0.5 border-t pt-1 mt-1">
+                                        <button
+                                            type="button"
+                                            className="relative flex w-full cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-xs outline-none hover:bg-accent hover:text-accent-foreground"
+                                            onClick={() => handleReport('spam')}
+                                        >
+                                            {texts.reportSpam}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="relative flex w-full cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-xs outline-none hover:bg-accent hover:text-accent-foreground"
+                                            onClick={() => handleReport('harassment')}
+                                        >
+                                            {texts.reportHarassment}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="relative flex w-full cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-xs outline-none hover:bg-accent hover:text-accent-foreground"
+                                            onClick={() => handleReport('off-topic')}
+                                        >
+                                            {texts.reportOffTopic}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="relative flex w-full cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-xs outline-none hover:bg-accent hover:text-accent-foreground"
+                                            onClick={() => handleReport('other')}
+                                        >
+                                            {texts.reportOther}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="relative flex w-full cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-xs outline-none text-muted-foreground hover:bg-accent"
+                                            onClick={() => setShowReportSubmenu(false)}
+                                        >
+                                            Back
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        className="relative flex w-full cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-xs outline-none hover:bg-accent hover:text-accent-foreground"
+                                        onClick={() => setShowReportSubmenu(true)}
                                     >
-                                        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
-                                        <line x1="4" y1="22" x2="4" y2="15" />
-                                    </svg>
-                                    Report
-                                </button>
+                                        <svg
+                                            width="14"
+                                            height="14"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        >
+                                            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+                                            <line x1="4" y1="22" x2="4" y2="15" />
+                                        </svg>
+                                        {texts.report}
+                                    </button>
+                                )
                             )}
                         </div>
                     )}
                 </div>
             )}
-        </div>
-    );
+        {/* Delete confirmation dialog */}
+        {showDeleteConfirm && (
+            <div
+                className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="delete-confirm-title"
+            >
+                <div className="mx-4 max-w-sm rounded-lg border bg-popover p-4 shadow-lg">
+                    <h3 id="delete-confirm-title" className="font-semibold text-foreground">
+                        {texts.deleteConfirm}
+                    </h3>
+                    <div className="mt-4 flex justify-end gap-2">
+                        <button
+                            type="button"
+                            className="rounded-md border border-input px-3 py-1.5 text-sm font-medium hover:bg-accent"
+                            onClick={handleDeleteCancel}
+                        >
+                            {texts.cancel}
+                        </button>
+                        <button
+                            type="button"
+                            className="rounded-md bg-destructive px-3 py-1.5 text-sm font-medium text-destructive-foreground hover:bg-destructive/90"
+                            onClick={handleDeleteConfirm}
+                        >
+                            {texts.delete}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
+
+        {/* Report thanks feedback */}
+        {reportThanks && (
+            <div className="fixed bottom-4 left-1/2 z-[100] -translate-x-1/2 rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground shadow-lg">
+                {texts.reportThanks}
+            </div>
+        )}
+    </div>
+);
 };
 
 ShadcnActionBar.displayName = 'ShadcnActionBar';

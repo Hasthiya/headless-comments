@@ -2,12 +2,13 @@
 
 import { useCallback, useState } from 'react';
 import {
-  CommentSection,
-  defaultTheme,
+  ShadcnCommentSection,
   generateUniqueId,
   type Comment,
   type CommentUser,
 } from '@comment-section/react';
+import { themeAwareDemoTheme } from '@/lib/demo-theme';
+
 
 const currentUser: CommentUser = {
   id: 'current',
@@ -51,10 +52,32 @@ const sampleComments: Comment[] = [
       { id: 'like', label: 'Like', emoji: '👍', count: 0, isActive: false },
     ],
   },
+  {
+    id: '3',
+    content: 'The nested replies and reactions make it feel really polished. Great for community features!',
+    author: { id: 'u4', name: 'Dana', isVerified: true },
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
+    reactions: [
+      { id: 'like', label: 'Like', emoji: '👍', count: 3, isActive: false },
+      { id: 'heart', label: 'Heart', emoji: '❤️', count: 0, isActive: false },
+    ],
+    replies: [
+      {
+        id: '3-1',
+        content: 'Same here — we shipped it in a week.',
+        author: { id: 'u5', name: 'Eve' },
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 20),
+        parentId: '3',
+        reactions: [
+          { id: 'like', label: 'Like', emoji: '👍', count: 1, isActive: false },
+        ],
+      },
+    ],
+  },
 ];
 
 export function CommentSectionShowcase() {
-  const [comments, setComments] = useState<Comment[]>(sampleComments);
+  const [comments, setComments] = useState<Comment[]>(() => sampleComments);
 
   const handleSubmitComment = useCallback(
     (content: string): Comment => {
@@ -73,7 +96,6 @@ export function CommentSectionShowcase() {
     },
     []
   );
-
   const handleReply = useCallback(
     (commentId: string, content: string): Comment => {
       const newReply: Comment = {
@@ -185,18 +207,21 @@ export function CommentSectionShowcase() {
   }, []);
 
   return (
-    <CommentSection
-      comments={comments}
-      currentUser={currentUser}
-      onSubmitComment={handleSubmitComment}
-      onReply={handleReply}
-      onReaction={handleReaction}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
-      theme={defaultTheme}
-      showReactions
-      showMoreOptions
-      inputPlaceholder="Add a comment..."
-    />
+    <div className="space-y-4">
+      <ShadcnCommentSection
+        comments={comments}
+        currentUser={currentUser}
+        onSubmitComment={handleSubmitComment}
+        onReply={handleReply}
+        onReaction={handleReaction}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        theme={themeAwareDemoTheme}
+        showReactions
+        showMoreOptions
+        inputPlaceholder="Add a comment..."
+        enableOptimisticUpdates
+      />
+    </div>
   );
 }

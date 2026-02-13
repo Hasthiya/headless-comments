@@ -21,6 +21,7 @@ export type {
 } from './core/types';
 
 export {
+  getCommentPermalink,
   defaultTexts,
   defaultTheme,
   defaultReactions,
@@ -29,9 +30,11 @@ export {
   formatDate,
   mergeTexts,
   mergeTheme,
+  defaultReactionsWithoutDislike,
   mergeReactions,
   themeToCSSVariables,
   truncateText,
+  truncateToLines,
   escapeHtml,
   parseMentions,
   debounce,
@@ -58,6 +61,7 @@ export type {
   CommentSectionProps,
   CommentItemProps,
   ReplyFormProps,
+  RenderReplyFormProps,
   ReactionButtonProps,
   AvatarProps,
   ActionBarProps,
@@ -74,12 +78,14 @@ export {
   useAutoResize,
   useCharacterCount,
   useClickOutside,
+  useEnterSubmit,
   useKeyboardShortcut,
   useLocalStorage,
   useDebouncedValue,
   useInfiniteScroll,
   useFocus,
   useAnimationState,
+  useRelativeTime,
 } from './headless/hooks';
 
 export { HeadlessCommentItem } from './headless/CommentItem';
@@ -105,6 +111,7 @@ export {
   ShadcnReplyForm,
   ShadcnReactionButton,
   ShadcnAvatar,
+  ShadcnCommentSkeleton,
 } from './presets/shadcn';
 
 // Default export for backwards compatibility

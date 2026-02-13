@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useCommentSection } from './useComments';
-import { useAutoResize, useCharacterCount, useKeyboardShortcut } from './hooks';
+import { useAutoResize, useCharacterCount, useEnterSubmit } from './hooks';
 
 export interface HeadlessReplyFormChildrenProps {
     content: string;
@@ -11,21 +11,22 @@ export interface HeadlessReplyFormChildrenProps {
     characterCount: number;
     isOverLimit: boolean;
     remainingCharacters?: number;
-    onSubmit: () => Promise<void>;
+    onSubmit: () => void;
     onCancel: () => void;
+    onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
     disabled: boolean;
     currentUser: any;
 }
 
 export interface HeadlessReplyFormProps {
     children: (props: HeadlessReplyFormChildrenProps) => React.ReactNode;
-    onSubmit: (content: string) => Promise<void>;
+    onSubmit: (content: string) => void;
     onCancel?: () => void;
     maxCharLimit?: number;
     autoFocus?: boolean;
     disabled?: boolean;
     initialContent?: string;
-    submitOnEnter?: boolean; // Ctrl+Enter
+    submitOnEnter?: boolean;
 }
 
 export const HeadlessReplyForm: React.FC<HeadlessReplyFormProps> = ({
@@ -40,39 +41,31 @@ export const HeadlessReplyForm: React.FC<HeadlessReplyFormProps> = ({
 }) => {
     const context = useCommentSection();
     const currentUser = context.currentUser;
+    const isSubmittingFromContext = context.isSubmittingComment ?? context.isSubmittingReply ?? false;
 
     const [content, setContent] = useState(initialContent);
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const textareaRef = useAutoResize(content, 200);
     const { count, isOverLimit, remaining } = useCharacterCount(content, maxCharLimit);
 
-    // Sync ref focus
     useEffect(() => {
         if (autoFocus && textareaRef.current) {
             textareaRef.current.focus();
         }
     }, [autoFocus, textareaRef]);
 
-    const handleSubmit = useCallback(async () => {
-        if (!content.trim() || isSubmitting || isOverLimit) {
-            return;
-        }
-
-        setIsSubmitting(true);
+    const handleSubmit = useCallback(() => {
+        if (!content.trim() || isSubmittingFromContext || isOverLimit) return;
         setError(null);
-
         try {
-            await onSubmit(content.trim());
+            onSubmit(content.trim());
             setContent('');
             onCancel?.();
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to submit');
-        } finally {
-            setIsSubmitting(false);
         }
-    }, [content, isSubmitting, isOverLimit, onSubmit, onCancel]);
+    }, [content, isSubmittingFromContext, isOverLimit, onSubmit, onCancel]);
 
     const handleCancel = useCallback(() => {
         setContent('');
@@ -80,23 +73,15 @@ export const HeadlessReplyForm: React.FC<HeadlessReplyFormProps> = ({
         onCancel?.();
     }, [onCancel]);
 
-    // Keyboard shortcut for submit (Ctrl/Cmd + Enter)
-    useKeyboardShortcut(
-        'Enter',
-        () => {
-            if (submitOnEnter && !isSubmitting && content.trim() && !isOverLimit) {
-                handleSubmit();
-            }
-        },
-        { ctrl: true }
-    );
+    const isSubmitDisabled = !content.trim() || isSubmittingFromContext || isOverLimit || disabled;
+    const onKeyDown = useEnterSubmit(handleSubmit, isSubmitDisabled, { submitOnEnter });
 
     return (
         <>
             {children({
                 content,
                 setContent,
-                isSubmitting,
+                isSubmitting: isSubmittingFromContext,
                 error,
                 textareaRef,
                 characterCount: count,
@@ -104,6 +89,7 @@ export const HeadlessReplyForm: React.FC<HeadlessReplyFormProps> = ({
                 remainingCharacters: remaining,
                 onSubmit: handleSubmit,
                 onCancel: handleCancel,
+                onKeyDown,
                 disabled,
                 currentUser,
             })}

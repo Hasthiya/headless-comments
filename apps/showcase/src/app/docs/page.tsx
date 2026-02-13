@@ -1,22 +1,27 @@
 import Link from 'next/link';
-import { DocSection, CodeBlock } from '@/components/docs';
+import { DocSection, CodeBlock, CodeTabs } from '@/components/docs';
+import { HeadlessDemo } from '@/components/HeadlessDemo';
+import { CommentSectionShowcase } from '@/components/CommentSectionShowcase';
 
 export default function DocsPage() {
   return (
-    <div className="container max-w-3xl py-10 px-4 lg:px-8">
-      <h1 className="text-3xl font-bold tracking-tight mb-2">
-        @comment-section/react Documentation
-      </h1>
-      <p className="text-muted-foreground mb-10">
-        Full API and usage reference for the comment section package.
-      </p>
+    <div className="container max-w-3xl mx-auto py-8 px-4 lg:px-8 space-y-12">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground mb-4">
+          @comment-section/react
+        </h1>
+        <p className="text-muted-foreground">
+          Full API and usage reference for the comment section package.
+        </p>
+      </div>
 
+      {/* ── Overview ─────────────────────────────────────────────────── */}
       <DocSection id="overview" title="Overview">
         <p className="mb-4">
           <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono">
             @comment-section/react
           </code>{' '}
-          is a highly customizable, TypeScript-ready React comment section component with reply support, reactions, and optimistic updates.
+          is a highly customizable, TypeScript-ready React comment section component with reply support, reactions, and optimistic updates. The library uses a <strong>sync API</strong> for all data callbacks (no Promises required) and supports <strong>user-controlled loading</strong> via <code>isSubmittingComment</code> and <code>isSubmittingReply</code>. It is <strong>headless-first</strong>: the default <code>CommentSection</code> has minimal unstyled UI; use <code>ShadcnCommentSection</code> for a styled preset, or <code>renderReplyForm</code> and <code>renderComment</code> to supply your own UI.
         </p>
         <ul className="list-disc pl-6 space-y-1 mb-4">
           <li><strong>Optimistic updates</strong> – Instant UI updates before server confirmation</li>
@@ -30,6 +35,7 @@ export default function DocsPage() {
         </ul>
       </DocSection>
 
+      {/* ── Installation ─────────────────────────────────────────────── */}
       <DocSection id="installation" title="Installation">
         <p className="mb-4">Install with your package manager:</p>
         <CodeBlock
@@ -42,10 +48,14 @@ pnpm add @comment-section/react`}
         />
       </DocSection>
 
+      {/* ── Quick Start ──────────────────────────────────────────────── */}
       <DocSection id="quick-start" title="Quick Start">
-        <p className="mb-4">Minimal example with comments, current user, and submit handler:</p>
-        <CodeBlock
-          code={`import { CommentSection, type Comment, type CommentUser } from '@comment-section/react';
+        <p className="mb-4">Use a sync handler: update your state and return the new comment. Choose between <code>CommentSection</code> (headless) or <code>ShadcnCommentSection</code> (styled).</p>
+        <CodeTabs
+          tabs={[
+            {
+              label: 'ShadCN Preset',
+              code: `import { ShadcnCommentSection, generateUniqueId, type Comment, type CommentUser } from '@comment-section/react';
 
 const currentUser: CommentUser = {
   id: 'user-1',
@@ -54,28 +64,43 @@ const currentUser: CommentUser = {
   isVerified: true,
 };
 
-const comments: Comment[] = [
-  {
-    id: 'comment-1',
-    content: 'This is a great post!',
-    author: {
-      id: 'user-2',
-      name: 'Jane Smith',
-      avatarUrl: 'https://example.com/avatar2.jpg',
-    },
-    createdAt: new Date(),
-    reactions: [
-      { id: 'like', label: 'Like', emoji: '👍', count: 5, isActive: false },
-    ],
-    replies: [],
-  },
-];
+function App() {
+  const [comments, setComments] = useState<Comment[]>([]);
+
+  const handleSubmit = (content: string): Comment => {
+    const newComment: Comment = {
+      id: generateUniqueId(),
+      content,
+      author: currentUser,
+      createdAt: new Date(),
+      reactions: [{ id: 'like', label: 'Like', emoji: '👍', count: 0, isActive: false }],
+      replies: [],
+    };
+    setComments((prev) => [newComment, ...prev]);
+    return newComment;
+  };
+
+  return (
+    <ShadcnCommentSection
+      comments={comments}
+      currentUser={currentUser}
+      onSubmitComment={handleSubmit}
+      showReactions
+    />
+  );
+}`,
+            },
+            {
+              label: 'Headless',
+              code: `import { CommentSection, generateUniqueId, type Comment, type CommentUser } from '@comment-section/react';
 
 function App() {
-  const handleSubmit = async (content: string) => {
-    // Send to your API and return the new comment
-    const res = await fetch('/api/comments', { method: 'POST', body: JSON.stringify({ content }) });
-    return res.json();
+  const [comments, setComments] = useState<Comment[]>([]);
+
+  const handleSubmit = (content: string): Comment => {
+    const newComment = { id: generateUniqueId(), content, author: currentUser, createdAt: new Date(), reactions: [], replies: [] };
+    setComments((prev) => [newComment, ...prev]);
+    return newComment;
   };
 
   return (
@@ -83,32 +108,70 @@ function App() {
       comments={comments}
       currentUser={currentUser}
       onSubmitComment={handleSubmit}
-      enableOptimisticUpdates
+      renderReplyForm={({ onSubmit, placeholder }) => (
+        <MyCustomForm onSubmit={onSubmit} placeholder={placeholder} />
+      )}
     />
   );
-}`}
+}`,
+            },
+            {
+              label: 'Headless Hooks',
+              code: `import { CommentSectionProvider, useCommentSection, HeadlessCommentItem } from '@comment-section/react';
+
+function CustomComments() {
+  const { comments, addComment } = useCommentSection();
+  return (
+    <div>
+      {comments.map(c => (
+        <HeadlessCommentItem key={c.id} comment={c}>
+          {({ content, author, onReply }) => (
+            <div>
+              <strong>{author.name}</strong>
+              <p>{content}</p>
+              <button onClick={onReply}>Reply</button>
+            </div>
+          )}
+        </HeadlessCommentItem>
+      ))}
+    </div>
+  );
+}`,
+            },
+          ]}
         />
       </DocSection>
 
+      {/* ═══════════════════  INTERACTIVE DEMOS  ═══════════════════════ */}
+      <DocSection id="demo-headless" title="Demo: Headless Preset">
+        <p className="mb-4">
+          The default <code>CommentSection</code> renders a minimal, unstyled UI. Perfect for building fully custom interfaces with your own components and styles.
+        </p>
+        <HeadlessDemo />
+      </DocSection>
+
+      <DocSection id="demo-shadcn" title="Demo: ShadCN Preset">
+        <p className="mb-4">
+          The <code>ShadcnCommentSection</code> preset gives you a polished Tailwind + Radix styled experience out of the box.
+        </p>
+        <CommentSectionShowcase />
+      </DocSection>
+
+      {/* ── API Reference ────────────────────────────────────────────── */}
       <DocSection id="api-reference" title="API Reference">
         <p className="mb-4">
-          The package exports styled presets (default and shadcn), headless components and hooks, core utilities, and types. The sections below summarize components, props, hooks, types, and core helpers.
+          The default preset is headless with minimal UI; the Shadcn preset provides styled components; headless building blocks (Provider, HeadlessCommentItem, HeadlessReplyForm) are available for full custom UI. The sections below summarize components, props, hooks, types, and core helpers.
         </p>
       </DocSection>
 
       <DocSection id="api-components" title="Components">
-        <p className="mb-2 font-medium">Default preset (re-exports Shadcn)</p>
+        <p className="mb-2 font-medium">Default preset</p>
         <ul className="list-disc pl-6 mb-4 space-y-1 text-sm">
-          <li><code>CommentSection</code> – Main container</li>
-          <li><code>CommentItem</code> – Single comment row</li>
-          <li><code>ActionBar</code> – Reply, edit, delete, reactions</li>
-          <li><code>ReplyForm</code> – Reply / edit input</li>
-          <li><code>ReactionButton</code> – One reaction control</li>
-          <li><code>Avatar</code> – User avatar</li>
+          <li><code>CommentSection</code> – Headless default with <strong>minimal unstyled</strong> UI (plain form + comment rows). Use <code>renderReplyForm</code> and <code>renderComment</code> to supply your own UI. Also exports <code>CommentItem</code>, <code>ActionBar</code>, <code>ReplyForm</code>, <code>ReactionButton</code>, <code>Avatar</code> (Shadcn re-exports for convenience).</li>
         </ul>
         <p className="mb-2 font-medium">Shadcn preset</p>
         <ul className="list-disc pl-6 mb-4 space-y-1 text-sm">
-          <li><code>ShadcnCommentSection</code>, <code>ShadcnCommentItem</code>, <code>ShadcnActionBar</code>, <code>ShadcnReplyForm</code>, <code>ShadcnReactionButton</code>, <code>ShadcnAvatar</code></li>
+          <li><code>ShadcnCommentSection</code>, <code>ShadcnCommentItem</code>, <code>ShadcnActionBar</code>, <code>ShadcnReplyForm</code>, <code>ShadcnReactionButton</code>, <code>ShadcnAvatar</code> – styled, Tailwind/shadcn-friendly.</li>
         </ul>
         <p className="mb-2 font-medium">Headless (build your own UI)</p>
         <ul className="list-disc pl-6 space-y-1 text-sm">
@@ -123,22 +186,24 @@ function App() {
         <ul className="list-disc pl-6 mb-4 space-y-1 text-sm">
           <li><code>comments</code> – Comment[] (required)</li>
           <li><code>currentUser</code> – CommentUser | null</li>
-          <li><code>onSubmitComment</code> – (content: string) =&gt; Promise&lt;Comment&gt; | Comment</li>
-          <li><code>onReply</code>, <code>onReaction</code>, <code>onEdit</code>, <code>onDelete</code> – callbacks</li>
+          <li><strong>Callbacks (all sync):</strong> <code>onSubmitComment</code> – (content: string) =&gt; Comment; <code>onReply</code> – (commentId, content) =&gt; Comment; <code>onEdit</code> – (commentId, content) =&gt; Comment; <code>onReaction</code> – (commentId, reactionId) =&gt; void; <code>onDelete</code> – (commentId) =&gt; void</li>
+          <li><code>isSubmittingComment</code>, <code>isSubmittingReply</code> – boolean (user-controlled loading)</li>
+          <li><code>renderReplyForm</code> – (props: RenderReplyFormProps) =&gt; ReactNode</li>
+          <li><code>onLoadMore</code> – () =&gt; Comment[] | void (sync)</li>
           <li><code>maxDepth</code> – number (default 3)</li>
           <li><code>theme</code> – CommentTheme</li>
           <li><code>readOnly</code>, <code>showReactions</code>, <code>showMoreOptions</code></li>
           <li><code>sortOrder</code> – &apos;asc&apos; | &apos;desc&apos; | &apos;oldest&apos; | &apos;newest&apos; | &apos;popular&apos;</li>
           <li><code>inputPlaceholder</code>, <code>texts</code>, <code>availableReactions</code></li>
-          <li><code>renderContent</code>, <code>renderAvatar</code>, <code>renderTimestamp</code>, <code>renderEmpty</code>, etc.</li>
+          <li><code>renderContent</code>, <code>renderAvatar</code>, <code>renderTimestamp</code>, <code>renderEmpty</code>, <code>renderComment</code>, etc.</li>
         </ul>
-        <p className="mb-2"><strong>CommentItemProps</strong>, <strong>ReplyFormProps</strong>, <strong>ReactionButtonProps</strong>, <strong>AvatarProps</strong>, <strong>ActionBarProps</strong> – see TypeScript types exported from the package.</p>
+        <p className="mb-2"><strong>CommentItemProps</strong>, <strong>ReplyFormProps</strong>, <strong>RenderReplyFormProps</strong> (onSubmit, onCancel, placeholder, disabled, isSubmitting, parentComment), <strong>ReactionButtonProps</strong>, <strong>AvatarProps</strong>, <strong>ActionBarProps</strong> – see TypeScript types exported from the package.</p>
       </DocSection>
 
       <DocSection id="api-hooks" title="Hooks">
         <p className="mb-2 font-medium">Comment section hooks</p>
         <ul className="list-disc pl-6 mb-4 space-y-1 text-sm">
-          <li><code>useCommentSection</code> – Access context (comments, submit, reply, etc.)</li>
+          <li><code>useCommentSection</code> – Access context (comments, submit, reply, etc.). Context also exposes <code>isSubmittingComment</code> and <code>isSubmittingReply</code> for use in custom forms.</li>
           <li><code>useOptimisticUpdates</code> – Optimistic state: data, add, update, remove, rollback, confirm</li>
           <li><code>useReplyForm</code> – Reply form state and handlers</li>
           <li><code>useEditMode</code> – Edit mode state and handlers</li>
@@ -170,6 +235,7 @@ function App() {
           <li><code>CommentTheme</code> – primaryColor, backgroundColor, textColor, borderRadius, etc.</li>
           <li><code>CommentTexts</code> – reply, edit, delete, cancel, submit, noComments, etc.</li>
           <li><code>OptimisticState&lt;T&gt;</code> – data, isPending, add, update, remove, rollback, confirm</li>
+          <li><code>RenderReplyFormProps</code> – onSubmit, onCancel, placeholder, disabled, isSubmitting, parentComment</li>
           <li><code>CommentAdapter</code>, <code>CommentSectionContextValue</code>, <code>CommentSectionProps</code>, <code>CommentItemProps</code>, and related prop types</li>
         </ul>
         <CodeBlock
@@ -182,6 +248,7 @@ function App() {
   CommentTexts,
   CommentSectionProps,
   CommentItemProps,
+  RenderReplyFormProps,
 } from '@comment-section/react';`}
         />
       </DocSection>
@@ -201,14 +268,49 @@ function App() {
 
       <DocSection id="presets" title="Presets">
         <ul className="list-disc pl-6 space-y-2">
-          <li><strong>Default preset</strong> – Exports <code>CommentSection</code>, <code>CommentItem</code>, etc.; implemented as re-exports of the Shadcn preset for a single styled implementation.</li>
-          <li><strong>Shadcn preset</strong> – <code>ShadcnCommentSection</code>, <code>ShadcnCommentItem</code>, <code>ShadcnActionBar</code>, <code>ShadcnReplyForm</code>, <code>ShadcnReactionButton</code>, <code>ShadcnAvatar</code>. Styled with Tailwind/shadcn-friendly classes.</li>
+          <li><strong>Default preset</strong> – <code>CommentSection</code> is the <strong>headless default</strong> with minimal unstyled UI. Use it with <code>renderReplyForm</code> and <code>renderComment</code> for your own UI, or use Shadcn for a styled preset.</li>
+          <li><strong>Shadcn preset</strong> – <code>ShadcnCommentSection</code>, <code>ShadcnCommentItem</code>, <code>ShadcnActionBar</code>, <code>ShadcnReplyForm</code>, <code>ShadcnReactionButton</code>, <code>ShadcnAvatar</code>. Styled, Tailwind/shadcn-friendly; import <code>ShadcnCommentSection</code> when you want the pre-built look.</li>
           <li><strong>Headless</strong> – Use <code>CommentSectionProvider</code>, <code>HeadlessCommentItem</code>, <code>HeadlessReplyForm</code>, and hooks to build a fully custom UI.</li>
         </ul>
       </DocSection>
 
       <DocSection id="customization" title="Customization">
-        <p className="mb-2 font-medium">Theme (CommentTheme)</p>
+        <p className="mb-2 font-medium">Custom form (renderReplyForm)</p>
+        <p className="mb-2 text-sm text-muted-foreground">Pass a function that receives <code>{'{ onSubmit, placeholder, disabled, isSubmitting }'}</code> (and optionally <code>onCancel</code>, <code>parentComment</code>) and renders your own form.</p>
+        <CodeBlock
+          code={`<CommentSection
+  renderReplyForm={({ onSubmit, placeholder, disabled, isSubmitting }) => (
+    <div>
+      <textarea placeholder={placeholder} disabled={disabled} />
+      <button onClick={() => onSubmit(content)} disabled={disabled || isSubmitting}>
+        {isSubmitting ? 'Submitting...' : 'Submit'}
+      </button>
+    </div>
+  )}
+  {...props}
+/>`}
+        />
+        <p className="mb-2 mt-4 font-medium">Loading state</p>
+        <p className="mb-2 text-sm text-muted-foreground">Set <code>isSubmittingComment</code> (or <code>isSubmittingReply</code>) to <code>true</code> before an async API call and back to <code>false</code> when done; the preset disables the submit button and shows &quot;Submitting…&quot;.</p>
+        <CodeBlock
+          code={`const [isSubmitting, setIsSubmitting] = useState(false);
+
+const handleSubmit = (content: string): Comment => {
+  const newComment = createComment(content);
+  setComments((prev) => [newComment, ...prev]);
+  setIsSubmitting(true);
+  fetch('/api/comments', { method: 'POST', body: JSON.stringify({ content }) })
+    .finally(() => setIsSubmitting(false));
+  return newComment;
+};
+
+<CommentSection
+  onSubmitComment={handleSubmit}
+  isSubmittingComment={isSubmitting}
+  {...props}
+/>`}
+        />
+        <p className="mb-2 mt-4 font-medium">Theme (CommentTheme)</p>
         <CodeBlock
           code={`const theme = {
   primaryColor: '#f97316',
@@ -254,50 +356,63 @@ function App() {
 
       <DocSection id="examples" title="Examples">
         <p className="mb-2 font-medium">With API integration</p>
-        <CodeBlock
-          code={`const [comments, setComments] = useState<Comment[]>([]);
-const [isLoading, setIsLoading] = useState(true);
+        <p className="mb-2 text-sm text-muted-foreground">Use a sync handler that updates state and returns the new comment. Optionally set <code>isSubmittingComment</code> / <code>isSubmittingReply</code> and pass them to the component for loading UI.</p>
+        <CodeTabs
+          tabs={[
+            {
+              label: 'ShadCN + API',
+              code: `const [comments, setComments] = useState<Comment[]>([]);
+const [isSubmitting, setIsSubmitting] = useState(false);
 
-useEffect(() => {
-  fetchComments().then((data) => {
-    setComments(data);
-    setIsLoading(false);
-  });
-}, []);
+const handleSubmit = (content: string): Comment => {
+  const newComment = {
+    id: generateUniqueId(),
+    content,
+    author: currentUser,
+    createdAt: new Date(),
+    reactions: [{ id: 'like', label: 'Like', emoji: '👍', count: 0, isActive: false }],
+    replies: [],
+  };
+  setComments((prev) => [newComment, ...prev]);
+  setIsSubmitting(true);
+  fetch('/api/comments', { method: 'POST', body: JSON.stringify({ content }) })
+    .finally(() => setIsSubmitting(false));
+  return newComment;
+};
 
-const handleSubmit = async (content: string) => {
-  const res = await fetch('/api/comments', {
-    method: 'POST',
-    body: JSON.stringify({ content }),
+<ShadcnCommentSection
+  comments={comments}
+  currentUser={currentUser}
+  onSubmitComment={handleSubmit}
+  isSubmittingComment={isSubmitting}
+/>`,
+            },
+            {
+              label: 'Load More',
+              code: `const loadMore = () => {
+  fetchMoreComments().then((newComments) => {
+    setComments((prev) => [...prev, ...newComments]);
   });
-  return res.json();
 };
 
 <CommentSection
   comments={comments}
-  currentUser={currentUser}
-  onSubmitComment={handleSubmit}
-  isLoading={isLoading}
-/>`}
-        />
-        <p className="mb-2 mt-4 font-medium">Load more / pagination</p>
-        <CodeBlock
-          code={`<CommentSection
-  comments={comments}
   hasMore={hasMore}
   onLoadMore={loadMore}
   {...props}
-/>`}
+/>`,
+            },
+          ]}
         />
       </DocSection>
 
       <DocSection id="live-demo" title="Live Demo">
         <p className="mb-4">
-          A full interactive demo with comments, replies, reactions, edit, and delete is available on the homepage. Try it with the button below.
+          A full interactive demo with comments, replies, reactions, edit, and delete is available on the homepage.
         </p>
         <Link
           href="/"
-          className="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:bg-primary/90"
+          className="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:bg-primary/90 transition-colors"
         >
           Open live demo
         </Link>

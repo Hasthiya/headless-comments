@@ -17,6 +17,7 @@ import {
 } from '../../core/utils';
 import { ShadcnCommentItem } from './ShadcnCommentItem';
 import { ShadcnReplyForm } from './ShadcnReplyForm';
+import { ShadcnCommentSkeleton } from './ShadcnCommentSkeleton';
 
 /**
  * Internal component that renders the comment section content
@@ -28,6 +29,7 @@ const CommentSectionInternal: React.FC<
   Omit<CommentSectionProps, 'comments' | 'currentUser' | 'onSubmitComment'> & { internalTheme: CommentThemeRequired }
 > = ({
   renderComment,
+  renderReplyForm,
   renderContent,
   renderAvatar,
   renderReactions,
@@ -50,13 +52,15 @@ const CommentSectionInternal: React.FC<
   internalTheme,
   inputPlaceholder,
   maxCharLimit,
+  maxCommentLines,
   showCharCount = false,
   autoFocus = false,
+  sortOrderKey: _sortOrderKey,
 }) => {
-    // Consume context
     const {
       comments,
       currentUser,
+      texts: contextTexts,
       error,
       setError,
       submitComment,
@@ -69,14 +73,14 @@ const CommentSectionInternal: React.FC<
       hasMore,
       loadMore,
       maxDepth,
+      isSubmittingComment,
+      sortOrder,
+      setSortOrder,
     } = useComments();
 
-    // Scroll sentinel for infinite scroll
     const scrollSentinelRef = useInfiniteScroll(
-      async () => {
-        if (hasMore && !isLoadingMore) {
-          await loadMore();
-        }
+      () => {
+        if (hasMore && !isLoadingMore) loadMore();
       },
       { enabled: hasMore && !isLoadingMore }
     );
@@ -99,13 +103,10 @@ const CommentSectionInternal: React.FC<
           className={cn("w-full space-y-4", className)}
           style={containerStyle}
         >
-          {renderLoading ? (
+            {renderLoading ? (
             renderLoading()
           ) : (
-            <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-              <p className="mt-2 text-sm">Loading comments...</p>
-            </div>
+            <ShadcnCommentSkeleton count={4} />
           )}
         </div>
       );
@@ -144,17 +145,54 @@ const CommentSectionInternal: React.FC<
         {/* Header */}
         {renderHeader && renderHeader()}
 
+        {/* Sort Toggle */}
+        {comments.length > 1 && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">Sort:</span>
+            <div className="flex flex-wrap gap-1">
+              {(['newest', 'oldest', 'popular'] as const).map((order) => (
+                <button
+                  key={order}
+                  type="button"
+                  onClick={() => setSortOrder(order)}
+                  className={cn(
+                    "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+                    sortOrder === order
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  )}
+                  aria-label={`Sort by ${order}`}
+                  aria-pressed={sortOrder === order}
+                >
+                  {order === 'newest' && contextTexts.sortNewest}
+                  {order === 'oldest' && contextTexts.sortOldest}
+                  {order === 'popular' && contextTexts.sortTop}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* New Comment Form */}
         {!readOnly && currentUser && submitComment && (
-          <ShadcnReplyForm
-            currentUser={currentUser}
-            onSubmit={submitComment}
-            placeholder={inputPlaceholder}
-            maxCharLimit={maxCharLimit}
-            showCharCount={showCharCount}
-            autoFocus={autoFocus}
-            theme={internalTheme}
-          />
+          renderReplyForm ? (
+            renderReplyForm({
+              onSubmit: submitComment,
+              placeholder: inputPlaceholder,
+              disabled: false,
+              isSubmitting: isSubmittingComment,
+            })
+          ) : (
+            <ShadcnReplyForm
+              currentUser={currentUser}
+              onSubmit={submitComment}
+              placeholder={inputPlaceholder ?? contextTexts.inputPlaceholder}
+              maxCharLimit={maxCharLimit}
+              showCharCount={showCharCount}
+              autoFocus={autoFocus}
+              theme={internalTheme}
+            />
+          )
         )}
 
         {/* Comments List */}
@@ -164,7 +202,7 @@ const CommentSectionInternal: React.FC<
               renderEmpty()
             ) : (
               <div className="py-8 text-center text-muted-foreground bg-muted/50 rounded-lg">
-                {texts?.noComments || 'No comments yet. Be the first to comment!'}
+                {contextTexts.noComments}
               </div>
             )
           ) : (
@@ -199,8 +237,8 @@ const CommentSectionInternal: React.FC<
                   currentUser={currentUser}
                   onReply={replyToComment}
                   onReaction={toggleReaction}
-                  onEdit={editComment}
-                  onDelete={deleteComment}
+      onEdit={editComment}
+      onDelete={deleteComment}
                   maxDepth={maxDepth}
                   depth={0}
                   renderContent={renderContent}
@@ -215,6 +253,7 @@ const CommentSectionInternal: React.FC<
                   showVerifiedBadge={showVerifiedBadge}
                   readOnly={readOnly}
                   theme={internalTheme}
+                  maxCommentLines={maxCommentLines}
                 />
               )
             )
@@ -270,7 +309,6 @@ const CommentSectionInternal: React.FC<
  */
 export const ShadcnCommentSection: React.FC<CommentSectionProps> = (props) => {
   const {
-    // Props handled by provider
     comments,
     currentUser,
     onSubmitComment,
@@ -278,20 +316,24 @@ export const ShadcnCommentSection: React.FC<CommentSectionProps> = (props) => {
     onReaction,
     onEdit,
     onDelete,
+    onReport,
     onLoadMore,
     hasMore,
     isLoading,
+    isSubmittingComment,
+    isSubmittingReply,
     enableOptimisticUpdates,
     maxDepth,
     readOnly,
     generateId,
     availableReactions,
+    includeDislike,
     texts,
     theme,
     locale,
     sortComments,
     sortOrder,
-    // Rest are UI props
+    sortOrderKey,
     ...rest
   } = props;
 
@@ -309,6 +351,7 @@ export const ShadcnCommentSection: React.FC<CommentSectionProps> = (props) => {
       comments={comments}
       currentUser={currentUser}
       availableReactions={availableReactions}
+      includeDislike={includeDislike}
       texts={texts}
       theme={mergedTheme}
       locale={locale}
@@ -317,16 +360,20 @@ export const ShadcnCommentSection: React.FC<CommentSectionProps> = (props) => {
       readOnly={readOnly}
       generateId={generateId}
       sortOrder={sortOrder}
+      sortOrderKey={sortOrderKey}
       onLoadMore={onLoadMore}
       hasMore={hasMore}
       isLoading={isLoading}
+      isSubmittingComment={isSubmittingComment}
+      isSubmittingReply={isSubmittingReply}
       onSubmitComment={onSubmitComment}
       onReply={onReply}
       onReaction={onReaction}
       onEdit={onEdit}
       onDelete={onDelete}
+      onReport={onReport}
     >
-      <CommentSectionInternal {...rest} internalTheme={mergedTheme} texts={texts} />
+      <CommentSectionInternal {...rest} internalTheme={mergedTheme} texts={texts} sortOrderKey={sortOrderKey} />
     </CommentSectionProvider>
   );
 };

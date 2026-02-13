@@ -49,7 +49,8 @@ export const ShadcnReactionButton: React.FC<ReactionButtonProps> = ({
         <button
             type="button"
             className={cn(
-                "inline-flex items-center justify-center rounded-full border border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+                "inline-flex items-center justify-center rounded-full border border-transparent transition-transform duration-150 ease-[cubic-bezier(0.77,0,0.175,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+                "active:scale-90 hover:scale-105",
                 sizeClasses[size],
                 isActive
                     ? "bg-primary/10 text-primary hover:bg-primary/20"

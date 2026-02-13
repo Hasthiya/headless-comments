@@ -13,10 +13,10 @@ export interface HeadlessCommentItemChildrenProps {
     toggleReplies: () => void;
     onReplyOpen: () => void;
     onEditStart: () => void;
-    onEditSubmit: (content: string) => Promise<void>;
+    onEditSubmit: (content: string) => void;
     onEditCancel: () => void;
-    onDelete: () => Promise<void>;
-    onReaction: (reactionId: string) => Promise<void>;
+    onDelete: () => void;
+    onReaction: (reactionId: string) => void;
     isReactionPending: (commentId: string, reactionId: string) => boolean;
     currentUser: any;
     replies: Comment[];
@@ -27,10 +27,10 @@ export interface HeadlessCommentItemChildrenProps {
 export interface HeadlessCommentItemProps {
     comment: Comment;
     children: (props: HeadlessCommentItemChildrenProps) => React.ReactNode;
-    onReply?: (commentId: string, content: string) => Promise<Comment>;
-    onReaction?: (commentId: string, reactionId: string) => Promise<void>;
-    onEdit?: (commentId: string, content: string) => Promise<Comment>;
-    onDelete?: (commentId: string) => Promise<void>;
+    onReply?: (commentId: string, content: string) => void;
+    onReaction?: (commentId: string, reactionId: string) => void;
+    onEdit?: (commentId: string, content: string) => void;
+    onDelete?: (commentId: string) => void;
     depth?: number;
     maxDepth?: number;
 }
@@ -75,24 +75,22 @@ export const HeadlessCommentItem: React.FC<HeadlessCommentItemProps> = ({
     }, [comment.id, comment.content, editMode]);
 
     const handleEditSubmit = useCallback(
-        async (content: string) => {
+        (content: string) => {
             if (onEdit) {
-                await onEdit(comment.id, content);
+                onEdit(comment.id, content);
                 editMode.cancelEdit();
             }
         },
         [comment.id, onEdit, editMode]
     );
 
-    const handleDelete = useCallback(async () => {
-        if (onDelete) {
-            await onDelete(comment.id);
-        }
+    const handleDelete = useCallback(() => {
+        if (onDelete) onDelete(comment.id);
     }, [comment.id, onDelete]);
 
     const handleReaction = useCallback(
-        async (reactionId: string) => {
-            await toggleReaction(comment.id, reactionId);
+        (reactionId: string) => {
+            toggleReaction(comment.id, reactionId);
         },
         [comment.id, toggleReaction]
     );

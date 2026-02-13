@@ -15,6 +15,8 @@ export interface CommentUser {
     avatarUrl?: string;
     /** Whether the user is verified */
     isVerified?: boolean;
+    /** User role for badge display (instructor, moderator, staff) */
+    role?: 'verified' | 'instructor' | 'moderator' | 'staff';
     /** Additional metadata for the user */
     metadata?: Record<string, unknown>;
 }
@@ -105,6 +107,8 @@ export interface CommentTexts {
     loading?: string;
     /** Text for delete confirmation */
     deleteConfirm?: string;
+    /** Placeholder for new comment input (main form) */
+    inputPlaceholder?: string;
     /** Placeholder for reply input */
     replyPlaceholder?: string;
     /** Placeholder for edit input */
@@ -119,6 +123,26 @@ export interface CommentTexts {
     edited?: string;
     /** Text for verified badge */
     verified?: string;
+    /** Copy link */
+    copyLink?: string;
+    /** Report */
+    report?: string;
+    /** Report reason: Spam */
+    reportSpam?: string;
+    /** Report reason: Harassment */
+    reportHarassment?: string;
+    /** Report reason: Off-topic */
+    reportOffTopic?: string;
+    /** Report reason: Other */
+    reportOther?: string;
+    /** Badge: Instructor */
+    instructor?: string;
+    /** Badge: Moderator */
+    moderator?: string;
+    /** Badge: Staff */
+    staff?: string;
+    /** Thanks for report feedback */
+    reportThanks?: string;
     /** Text for just now */
     justNow?: string;
     /** Text for minutes ago */
@@ -127,6 +151,14 @@ export interface CommentTexts {
     hoursAgo?: string;
     /** Text for days ago */
     daysAgo?: string;
+    /** Sort: Newest */
+    sortNewest?: string;
+    /** Sort: Oldest */
+    sortOldest?: string;
+    /** Sort: Top (popular) */
+    sortTop?: string;
+    /** Read more button */
+    readMore?: string;
 }
 
 /**

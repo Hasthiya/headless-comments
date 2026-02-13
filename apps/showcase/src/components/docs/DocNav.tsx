@@ -17,7 +17,7 @@ export function DocNav({ sections }: DocNavProps) {
         <li key={id}>
           <a
             href={`#${id}`}
-            className="block py-1 text-muted-foreground hover:text-foreground rounded px-2 hover:bg-muted"
+            className="block py-2 px-2 text-muted-foreground hover:text-foreground rounded hover:bg-muted transition-colors duration-300 ease-heartbeat"
           >
             {label}
           </a>

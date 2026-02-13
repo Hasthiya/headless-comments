@@ -8,7 +8,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import type { ReplyFormProps } from '../../headless/types';
 import { useCommentSection } from '../../headless/useComments';
-import { useAutoResize, useCharacterCount, useKeyboardShortcut } from '../../headless/hooks';
+import { useAutoResize, useCharacterCount, useEnterSubmit } from '../../headless/hooks';
 import { cn } from '../../core/utils';
 import { ShadcnAvatar } from './ShadcnAvatar';
 
@@ -30,50 +30,34 @@ export const ShadcnReplyForm: React.FC<ReplyFormProps> = ({
 }) => {
     const context = useCommentSection();
     const texts = context.texts;
+    const isSubmitting = parentComment ? context.isSubmittingReply : context.isSubmittingComment;
 
     const [content, setContent] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const textareaRef = useAutoResize(content, 200);
     const { count, isOverLimit, remaining } = useCharacterCount(content, maxCharLimit);
 
-    // Sync ref
     useEffect(() => {
         if (autoFocus && textareaRef.current) {
             textareaRef.current.focus();
         }
     }, [autoFocus, textareaRef]);
 
-    // Keyboard shortcut for submit (Ctrl/Cmd + Enter)
-    useKeyboardShortcut(
-        'Enter',
-        () => {
-            if (!isSubmitting && content.trim() && !isOverLimit) {
-                handleSubmit();
-            }
-        },
-        { ctrl: true }
-    );
-
-    const handleSubmit = useCallback(async () => {
-        if (!content.trim() || isSubmitting || isOverLimit) {
-            return;
-        }
-
-        setIsSubmitting(true);
+    const handleSubmit = useCallback(() => {
+        if (!content.trim() || isSubmitting || isOverLimit) return;
         setError(null);
-
         try {
-            await onSubmit(content.trim());
+            onSubmit(content.trim());
             setContent('');
             onCancel?.();
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to submit');
-        } finally {
-            setIsSubmitting(false);
         }
     }, [content, isSubmitting, isOverLimit, onSubmit, onCancel]);
+
+    const isSubmitDisabled = !content.trim() || isSubmitting || isOverLimit || disabled;
+    const onKeyDown = useEnterSubmit(handleSubmit, isSubmitDisabled);
 
     const handleCancel = useCallback(() => {
         setContent('');
@@ -85,8 +69,8 @@ export const ShadcnReplyForm: React.FC<ReplyFormProps> = ({
     const inputPlaceholder =
         placeholder ||
         (parentComment
-            ? `${texts.replyPlaceholder}`
-            : 'Write a comment...');
+            ? texts.replyPlaceholder
+            : texts.inputPlaceholder);
 
     return (
         <div className={cn("flex gap-3 py-3", className)}>
@@ -114,6 +98,7 @@ export const ShadcnReplyForm: React.FC<ReplyFormProps> = ({
                     ref={textareaRef}
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
+                    onKeyDown={onKeyDown}
                     placeholder={inputPlaceholder}
                     disabled={disabled || isSubmitting}
                     className={cn(

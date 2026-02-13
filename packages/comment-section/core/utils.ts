@@ -17,20 +17,35 @@ export const defaultTexts: Required<CommentTexts> = {
     cancel: 'Cancel',
     submit: 'Submit',
     loadMore: 'Load more comments',
-    noComments: 'No comments yet. Be the first to comment!',
+    noComments: 'No comments yet. Be the first to share your thoughts!',
     loading: 'Loading comments...',
     deleteConfirm: 'Are you sure you want to delete this comment?',
-    replyPlaceholder: 'Write a reply...',
+    inputPlaceholder: 'Add a comment…',
+    replyPlaceholder: 'Write a reply…',
     editPlaceholder: 'Edit your comment...',
     replies: 'replies',
     hideReplies: 'Hide replies',
     showReplies: 'Show replies',
     edited: '(edited)',
     verified: 'Verified',
+    copyLink: 'Copy link',
+    report: 'Report',
+    reportSpam: 'Spam',
+    reportHarassment: 'Harassment',
+    reportOffTopic: 'Off-topic',
+    reportOther: 'Other',
+    reportThanks: 'Thanks for your feedback',
+    instructor: 'Instructor',
+    moderator: 'Moderator',
+    staff: 'Staff',
     justNow: 'Just now',
     minutesAgo: 'minutes ago',
     hoursAgo: 'hours ago',
     daysAgo: 'days ago',
+    sortNewest: 'Newest',
+    sortOldest: 'Oldest',
+    sortTop: 'Top',
+    readMore: 'Read more',
 };
 
 /**
@@ -62,6 +77,11 @@ export const defaultReactions: ReactionConfig[] = [
     { id: 'heart', label: 'Love', emoji: '❤️', activeColor: '#ef4444' },
     { id: 'laugh', label: 'Laugh', emoji: '😂', activeColor: '#fbbf24' },
 ];
+
+/** Reactions without dislike (per UX guideline: avoid dislikes unless required) */
+export const defaultReactionsWithoutDislike: ReactionConfig[] = defaultReactions.filter(
+    (r) => r.id !== 'dislike'
+);
 
 /**
  * Generate a unique ID
@@ -178,6 +198,23 @@ export const themeToCSSVariables = (theme: Required<CommentTheme>): Record<strin
 };
 
 /**
+ * Truncate text to approximate max lines (by character heuristic).
+ * Returns { text, isTruncated }.
+ */
+export const truncateToLines = (
+    text: string,
+    maxLines: number,
+    charsPerLine: number = 60
+): { text: string; isTruncated: boolean } => {
+    const maxChars = maxLines * charsPerLine;
+    if (text.length <= maxChars) return { text, isTruncated: false };
+    const truncated = text.substring(0, maxChars).trim();
+    const lastSpace = truncated.lastIndexOf(' ');
+    const cut = lastSpace > maxChars * 0.7 ? lastSpace : maxChars;
+    return { text: truncated.substring(0, cut) + '...', isTruncated: true };
+};
+
+/**
  * Truncate text to a maximum length
  */
 export const truncateText = (text: string, maxLength: number): string => {
@@ -276,6 +313,15 @@ export const getDefaultAvatar = (name: string): string => {
     const colors = ['f97316', '3b82f6', '10b981', '8b5cf6', 'ec4899', '06b6d4'];
     const colorIndex = name.length % colors.length;
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=${colors[colorIndex]}&color=fff`;
+};
+
+/**
+ * Get comment permalink URL
+ */
+export const getCommentPermalink = (commentId: string, baseUrl?: string): string => {
+    const base = baseUrl ?? (typeof window !== 'undefined' ? window.location.href.split('#')[0] : '');
+    const separator = base.includes('?') ? '&' : '?';
+    return `${base}${separator}comment=${encodeURIComponent(commentId)}`;
 };
 
 /**

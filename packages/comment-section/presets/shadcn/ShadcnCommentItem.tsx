@@ -5,17 +5,37 @@
 
 'use client';
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import type { CommentItemProps } from '../../headless/types';
-import type { Comment } from '../../core/types';
+import type { CommentUser } from '../../core/types';
 import { useCommentSection } from '../../headless/useComments';
 import { useReplyForm } from '../../headless/useReplyForm';
 import { useEditMode } from '../../headless/useEditMode';
 import { useReactions } from '../../headless/useReactions';
-import { formatRelativeTime, cn } from '../../core/utils';
+import { useRelativeTime } from '../../headless/hooks';
+import { formatDate, cn, truncateToLines } from '../../core/utils';
 import { ShadcnAvatar } from './ShadcnAvatar';
 import { ShadcnActionBar } from './ShadcnActionBar';
 import { ShadcnReplyForm } from './ShadcnReplyForm';
+import type { CommentTexts } from '../../core/types';
+
+function UserBadge({ author, texts }: { author: CommentUser; texts: Required<CommentTexts> }) {
+  const role = author.role ?? (author.isVerified ? 'verified' : null);
+  if (!role) return null;
+  const label = role === 'verified' ? texts.verified : role === 'instructor' ? texts.instructor : role === 'moderator' ? texts.moderator : texts.staff;
+  return (
+    <span
+      className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-500 text-white text-[10px]"
+      title={label}
+      aria-label={label}
+      role="img"
+    >
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+      </svg>
+    </span>
+  );
+}
 
 /**
  * ShadcnCommentItem component displays a single comment with all features
@@ -44,6 +64,7 @@ export const ShadcnCommentItem: React.FC<CommentItemProps> = ({
   showVerifiedBadge = true,
   readOnly = false,
   theme: customTheme,
+  maxCommentLines,
 }) => {
   const context = useCommentSection();
   const texts = context.texts;
@@ -78,52 +99,53 @@ export const ShadcnCommentItem: React.FC<CommentItemProps> = ({
     editMode.startEdit(comment.id, comment.content);
   }, [comment.id, comment.content, editMode]);
 
-  // Handle reaction
+  // Handle reaction (sync)
   const handleReaction = useCallback(
-    async (reactionId: string) => {
+    (reactionId: string) => {
       if (!isReactionPending(comment.id, reactionId)) {
-        await toggleReaction(comment.id, reactionId);
+        toggleReaction(comment.id, reactionId);
       }
     },
     [comment.id, toggleReaction, isReactionPending]
   );
 
-  // Handle delete
-  const handleDelete = useCallback(async () => {
-    if (onDelete) {
-      await onDelete(comment.id);
-    }
+  // Handle delete (sync)
+  const handleDelete = useCallback(() => {
+    if (onDelete) onDelete(comment.id);
   }, [comment.id, onDelete]);
 
-  // Handle reply submit
+  // Handle reply submit (sync)
   const handleReplySubmit = useCallback(
-    async (content: string): Promise<Comment> => {
+    (content: string) => {
       if (!onReply) throw new Error('onReply is required');
-      const result = await onReply(comment.id, content);
+      onReply(comment.id, content);
       replyForm.closeReply();
-      return result;
     },
     [comment.id, onReply, replyForm]
   );
 
-  // Handle edit submit
+  // Handle edit submit (sync)
   const handleEditSubmit = useCallback(
-    async (content: string) => {
+    (content: string) => {
       if (onEdit) {
-        await onEdit(comment.id, content);
+        onEdit(comment.id, content);
         editMode.cancelEdit();
       }
     },
     [comment.id, onEdit, editMode]
   );
 
-  // Format timestamp
-  const formattedTime = useMemo(() => {
-    if (renderTimestamp) {
-      return renderTimestamp(comment.createdAt);
-    }
-    return formatRelativeTime(comment.createdAt, localeValue, texts);
-  }, [comment.createdAt, renderTimestamp, localeValue, texts]);
+  // Format timestamp (auto-updates every 60s)
+  const relativeTime = useRelativeTime(comment.createdAt, localeValue, texts);
+  const formattedTime = renderTimestamp
+    ? renderTimestamp(comment.createdAt)
+    : relativeTime;
+
+  // Long comment "Read more"
+  const [expanded, setExpanded] = useState(false);
+  const maxLines = maxCommentLines ?? 5;
+  const { text: displayContent, isTruncated } = truncateToLines(comment.content, maxLines);
+  const showReadMore = isTruncated && !expanded;
 
 
   return (
@@ -160,19 +182,16 @@ export const ShadcnCommentItem: React.FC<CommentItemProps> = ({
           {/* Header */}
           <div className="flex items-center gap-2 mb-1">
             <span className="font-semibold text-sm">{comment.author.name}</span>
-            {showVerifiedBadge && comment.author.isVerified && (
-              <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-500 text-white text-[10px]" title={texts.verified}>
-                <svg
-                  width="10"
-                  height="10"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                </svg>
-              </span>
+            {showVerifiedBadge && (comment.author.isVerified || comment.author.role) && (
+              <UserBadge author={comment.author} texts={texts} />
             )}
-            <span className="text-xs text-muted-foreground">{formattedTime}</span>
+            <span
+              className="text-xs text-muted-foreground cursor-help"
+              title={formatDate(comment.createdAt, localeValue)}
+              aria-label={`Posted at ${formatDate(comment.createdAt, localeValue)}`}
+            >
+              {formattedTime}
+            </span>
             {comment.isEdited && <span className="text-xs text-muted-foreground italic">{texts.edited}</span>}
           </div>
 
@@ -204,7 +223,19 @@ export const ShadcnCommentItem: React.FC<CommentItemProps> = ({
             </div>
           ) : (
             <div className="text-sm leading-relaxed whitespace-pre-wrap break-words text-foreground">
-              {renderContent ? renderContent(comment) : comment.content}
+              {renderContent
+                ? renderContent(comment)
+                : (showReadMore ? displayContent : comment.content)}
+              {showReadMore && (
+                <button
+                  type="button"
+                  className="ml-1 text-xs font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  onClick={() => setExpanded(true)}
+                  aria-label={texts.readMore}
+                >
+                  {texts.readMore}
+                </button>
+              )}
             </div>
           )}
 
@@ -300,6 +331,7 @@ export const ShadcnCommentItem: React.FC<CommentItemProps> = ({
                   <ShadcnCommentItem
                     key={reply.id}
                     comment={reply}
+                    maxCommentLines={maxCommentLines}
                     currentUser={currentUser}
                     onReply={onReply}
                     onReaction={onReaction}

@@ -1,16 +1,22 @@
 /**
- * Default preset — re-exports shadcn preset for backward compatibility
+ * Default preset — headless CommentSection with minimal unstyled UI.
+ * Use renderReplyForm / renderComment for your own UI, or import ShadcnCommentSection for styled UI.
  * @module @comment-section/presets/default
  */
 
+export { DefaultCommentSection as CommentSection, DefaultCommentSection } from './DefaultCommentSection';
 export {
-    ShadcnCommentSection as CommentSection,
-    ShadcnCommentItem as CommentItem,
-    ShadcnActionBar as ActionBar,
-    ShadcnReplyForm as ReplyForm,
-    ShadcnReactionButton as ReactionButton,
-    ShadcnAvatar as Avatar,
+  ShadcnCommentSection,
+  ShadcnCommentItem as CommentItem,
+  ShadcnActionBar as ActionBar,
+  ShadcnReplyForm as ReplyForm,
+  ShadcnReactionButton as ReactionButton,
+  ShadcnAvatar as Avatar,
+  ShadcnCommentItem,
+  ShadcnActionBar,
+  ShadcnReplyForm,
+  ShadcnReactionButton,
+  ShadcnAvatar,
 } from '../shadcn';
 
-// Default export
-export { ShadcnCommentSection as default } from '../shadcn';
+export { DefaultCommentSection as default } from './DefaultCommentSection';

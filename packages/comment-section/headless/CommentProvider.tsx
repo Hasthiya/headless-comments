@@ -5,7 +5,7 @@
  * @module @comment-section/react/CommentProvider
  */
 
-import React, { createContext } from 'react';
+import React, { createContext, useCallback } from 'react';
 import type {
     Comment,
     CommentUser,
@@ -21,8 +21,10 @@ import {
     mergeReactions,
     generateUniqueId,
     defaultReactions,
+    defaultReactionsWithoutDislike,
 } from '../core/utils';
 import { useCommentState } from './useCommentState';
+import { useLocalStorage } from './hooks';
 
 /**
  * Context for the Comment Section
@@ -45,18 +47,27 @@ export interface CommentSectionProviderProps {
     readOnly?: boolean;
     generateId?: () => string;
     sortOrder?: 'asc' | 'desc' | 'oldest' | 'newest' | 'popular';
+    /** localStorage key for persisting sort preference; when set, sort order is saved */
+    sortOrderKey?: string;
+    /** Called when user changes sort order */
+    onSortOrderChange?: (order: 'asc' | 'desc' | 'oldest' | 'newest' | 'popular') => void;
     /** New adapter-based data layer (optional — falls back to callback props) */
     adapter?: CommentAdapter;
-    /** Legacy callback props (still supported for backwards compatibility) */
-    onSubmitComment?: (content: string) => Promise<Comment> | Comment;
-    onReply?: (commentId: string, content: string) => Promise<Comment> | Comment;
-    onReaction?: (commentId: string, reactionId: string) => Promise<void> | void;
-    onEdit?: (commentId: string, content: string) => Promise<Comment> | Comment;
-    onDelete?: (commentId: string) => Promise<void> | void;
+    /** Callback props (sync) */
+    onSubmitComment?: (content: string) => Comment;
+    onReply?: (commentId: string, content: string) => Comment;
+    onReaction?: (commentId: string, reactionId: string) => void;
+    onEdit?: (commentId: string, content: string) => Comment;
+    onDelete?: (commentId: string) => void;
+    onReport?: (commentId: string, reason: string) => void;
+    /** Include dislike reaction in defaults (guideline: avoid unless required) */
+    includeDislike?: boolean;
     // Pagination
-    onLoadMore?: () => Promise<Comment[]> | Comment[];
+    onLoadMore?: () => Comment[] | void;
     hasMore?: boolean;
     isLoading?: boolean;
+    isSubmittingComment?: boolean;
+    isSubmittingReply?: boolean;
 }
 
 /**
@@ -66,7 +77,7 @@ export const CommentSectionProvider: React.FC<CommentSectionProviderProps> = ({
     children,
     comments,
     currentUser,
-    availableReactions = defaultReactions,
+    availableReactions: availableReactionsProp,
     texts,
     theme,
     locale = 'en',
@@ -74,37 +85,48 @@ export const CommentSectionProvider: React.FC<CommentSectionProviderProps> = ({
     maxDepth = 3,
     readOnly = false,
     generateId = generateUniqueId,
-    sortOrder = 'newest',
-    adapter,
+    sortOrder: sortOrderProp = 'newest',
+    sortOrderKey,
+    onSortOrderChange,
+    adapter: _adapter,
     onSubmitComment,
     onReply,
     onReaction,
     onEdit,
     onDelete,
+    onReport,
+    includeDislike = false,
     onLoadMore,
     hasMore,
     isLoading,
+    isSubmittingComment = false,
+    isSubmittingReply = false,
 }) => {
-    // If an adapter is provided, use its methods; otherwise fall back to callback props
-    const resolvedOnSubmit = adapter
-        ? (content: string) => adapter.createComment(content)
-        : onSubmitComment;
+    const availableReactions = availableReactionsProp ?? (includeDislike ? defaultReactions : defaultReactionsWithoutDislike);
 
-    const resolvedOnReply = adapter
-        ? (commentId: string, content: string) => adapter.createComment(content, commentId)
-        : onReply;
+    type SortOrder = 'asc' | 'desc' | 'oldest' | 'newest' | 'popular';
+    const [storedSortOrder, setStoredSortOrder] = useLocalStorage<SortOrder>(
+        sortOrderKey ? sortOrderKey : 'comment-section-sort',
+        sortOrderProp
+    );
+    const effectiveSortOrder = (sortOrderKey ? storedSortOrder : sortOrderProp) as SortOrder;
 
-    const resolvedOnReaction = adapter
-        ? (commentId: string, reactionId: string) => adapter.toggleReaction(commentId, reactionId)
-        : onReaction;
+    const setSortOrder = useCallback(
+        (order: SortOrder) => {
+            if (sortOrderKey) {
+                setStoredSortOrder(order);
+            }
+            onSortOrderChange?.(order);
+        },
+        [sortOrderKey, setStoredSortOrder, onSortOrderChange]
+    );
 
-    const resolvedOnEdit = adapter
-        ? (commentId: string, content: string) => adapter.updateComment(commentId, content)
-        : onEdit;
-
-    const resolvedOnDelete = adapter
-        ? (commentId: string) => adapter.deleteComment(commentId)
-        : onDelete;
+    // When adapter is provided, it returns Promises; we use sync callbacks only (adapter not used in sync API).
+    const resolvedOnSubmit = onSubmitComment;
+    const resolvedOnReply = onReply;
+    const resolvedOnReaction = onReaction;
+    const resolvedOnEdit = onEdit;
+    const resolvedOnDelete = onDelete;
 
     // Adapter should also support pagination if we wanted to be complete, but keeping it simple for now as adapter interface wasn't fully defined for it in user prompt. 
     // Assuming onLoadMore is passed as prop if not using adapter or if adapter handles it via side channels (or we should add it to adapter later).
@@ -125,7 +147,7 @@ export const CommentSectionProvider: React.FC<CommentSectionProviderProps> = ({
         comments,
         currentUser,
         enableOptimisticUpdates,
-        sortOrder,
+        sortOrder: effectiveSortOrder,
         generateId,
         onSubmitComment: resolvedOnSubmit,
         onReply: resolvedOnReply,
@@ -135,6 +157,8 @@ export const CommentSectionProvider: React.FC<CommentSectionProviderProps> = ({
         onLoadMore,
         hasMore,
         isLoading,
+        isSubmittingComment,
+        isSubmittingReply,
     });
 
     const value: CommentSectionContextValue = {
@@ -147,27 +171,24 @@ export const CommentSectionProvider: React.FC<CommentSectionProviderProps> = ({
         maxDepth,
         readOnly,
         generateId,
-        // State
         comments: sortedComments,
         error,
         setError,
-        // Actions
         submitComment,
         replyToComment,
         toggleReaction,
         editComment,
         deleteComment,
-        // Pagination
+        reportComment: onReport,
         onLoadMore,
         hasMore: !!hasMore,
         isLoading: !!isLoading,
         isLoadingMore,
         loadMore,
-        // Legacy/Direct backward compat
-        onReply: replyToComment,
-        onReaction: toggleReaction,
-        onEdit: editComment,
-        onDelete: deleteComment,
+        isSubmittingComment,
+        isSubmittingReply,
+        sortOrder: effectiveSortOrder,
+        setSortOrder,
     };
 
     return (

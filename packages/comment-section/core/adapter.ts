@@ -37,45 +37,42 @@ export interface CommentAdapter {
 }
 
 /**
- * Callback-style props that match the existing CommentSection API
+ * Callback-style props (sync). createCallbackAdapter wraps these in Promise for the adapter interface.
  */
 export interface CallbackAdapterConfig {
-    onSubmitComment?: (content: string) => Promise<Comment> | Comment;
-    onReply?: (commentId: string, content: string) => Promise<Comment> | Comment;
-    onEdit?: (commentId: string, content: string) => Promise<Comment> | Comment;
-    onDelete?: (commentId: string) => Promise<void> | void;
-    onReaction?: (commentId: string, reactionId: string) => Promise<void> | void;
+    onSubmitComment?: (content: string) => Comment;
+    onReply?: (commentId: string, content: string) => Comment;
+    onEdit?: (commentId: string, content: string) => Comment;
+    onDelete?: (commentId: string) => void;
+    onReaction?: (commentId: string, reactionId: string) => void;
 }
 
 /**
- * Creates a CommentAdapter from the legacy callback-style props.
- * This bridges the old API to the new adapter interface for backwards compatibility.
+ * Creates a CommentAdapter from sync callback-style props.
+ * Wraps sync callbacks in Promise so the adapter interface (Promise-based) is satisfied.
  */
 export function createCallbackAdapter(config: CallbackAdapterConfig): CommentAdapter {
     return {
         async createComment(content: string, parentId?: string): Promise<Comment> {
             if (parentId && config.onReply) {
-                const result = await config.onReply(parentId, content);
-                return result;
+                return Promise.resolve(config.onReply(parentId, content));
             }
             if (config.onSubmitComment) {
-                const result = await config.onSubmitComment(content);
-                return result;
+                return Promise.resolve(config.onSubmitComment(content));
             }
             throw new Error('No createComment or onSubmitComment handler provided');
         },
 
         async updateComment(id: string, content: string): Promise<Comment> {
             if (config.onEdit) {
-                const result = await config.onEdit(id, content);
-                return result;
+                return Promise.resolve(config.onEdit(id, content));
             }
             throw new Error('No updateComment or onEdit handler provided');
         },
 
         async deleteComment(id: string): Promise<void> {
             if (config.onDelete) {
-                await config.onDelete(id);
+                config.onDelete(id);
                 return;
             }
             throw new Error('No deleteComment or onDelete handler provided');
@@ -83,7 +80,7 @@ export function createCallbackAdapter(config: CallbackAdapterConfig): CommentAda
 
         async toggleReaction(commentId: string, reactionId: string): Promise<void> {
             if (config.onReaction) {
-                await config.onReaction(commentId, reactionId);
+                config.onReaction(commentId, reactionId);
                 return;
             }
             throw new Error('No toggleReaction or onReaction handler provided');
