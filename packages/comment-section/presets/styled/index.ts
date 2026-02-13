@@ -2,10 +2,10 @@
  * Styled preset — a polished, ready-to-use comment section with zero external dependencies.
  * Import the CSS file alongside this module:
  *
- *   import '@comment-section/react/presets/styled/styles.css';
- *   import { StyledCommentSection } from '@comment-section/react/presets/styled';
+ *   import '@headless-comments/react/presets/styled/styles.css';
+ *   import { StyledCommentSection } from '@headless-comments/react/presets/styled';
  *
- * @module @comment-section/presets/styled
+ * @module @headless-comments/react/presets/styled
  */
 
 export { StyledCommentSection } from './StyledCommentSection';

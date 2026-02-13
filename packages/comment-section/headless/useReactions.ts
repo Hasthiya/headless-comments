@@ -2,7 +2,7 @@
 
 /**
  * Hook for handling reactions
- * @module @comment-section/react/useReactions
+ * @module @headless-comments/react/useReactions
  */
 
 import { useState, useCallback } from 'react';

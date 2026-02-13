@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import type { RenderReplyFormProps } from '@comment-section/react';
+import type { RenderReplyFormProps } from '@headless-comments/react';
 import {
   useCommentSection,
   useAutoResize,
   useEnterSubmit,
-} from '@comment-section/react';
-import { getDefaultAvatar } from '@comment-section/react';
+} from '@headless-comments/react';
+import { getDefaultAvatar } from '@headless-comments/react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';

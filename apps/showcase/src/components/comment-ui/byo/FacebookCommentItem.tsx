@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import type { CommentItemProps } from '@comment-section/react';
+import type { CommentItemProps } from '@headless-comments/react';
 import {
   useCommentSection,
   useReplyForm,
@@ -12,7 +12,7 @@ import {
   formatDate,
   getDefaultAvatar,
   truncateToLines,
-} from '@comment-section/react';
+} from '@headless-comments/react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';

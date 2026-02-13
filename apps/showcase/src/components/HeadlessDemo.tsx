@@ -7,7 +7,7 @@ import {
     type Comment,
     type CommentUser,
     type Reaction,
-} from '@comment-section/react';
+} from '@headless-comments/react';
 
 const demoUser: CommentUser = {
     id: 'headless-user',

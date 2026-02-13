@@ -1,6 +1,6 @@
 /**
  * General utilities, defaults, and merge functions
- * @module @comment-section/core/utils
+ * @module @headless-comments/react/core/utils
  */
 
 import type { CommentTexts, CommentTheme, ReactionConfig } from './types';

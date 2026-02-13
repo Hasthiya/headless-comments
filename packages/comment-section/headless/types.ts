@@ -1,6 +1,6 @@
 /**
  * React-dependent types for the comment system
- * @module @comment-section/react/types
+ * @module @headless-comments/react/types
  */
 
 import * as React from 'react';

@@ -1,4 +1,4 @@
-import type { CommentTheme } from '@comment-section/react';
+import type { CommentTheme } from '@headless-comments/react';
 
 /**
  * Theme-aware theme for demos. Uses CSS variables from the design system

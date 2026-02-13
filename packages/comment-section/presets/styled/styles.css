@@ -1,11 +1,11 @@
 /**
- * @comment-section/react — Styled Preset
+ * @headless-comments/react — Styled Preset
  * A polished, ready-to-use comment section with zero external dependencies.
  * All styling uses CSS custom properties for easy theming.
  *
  * Usage:
- *   import '@comment-section/react/presets/styled/styles.css';
- *   import { StyledCommentSection } from '@comment-section/react/presets/styled';
+ *   import '@headless-comments/react/presets/styled/styles.css';
+ *   import { StyledCommentSection } from '@headless-comments/react/presets/styled';
  */
 
 /* ── CSS Variables (override these to theme) ──────────────────────────── */

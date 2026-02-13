@@ -19,7 +19,7 @@ export function Footer() {
           >
             GitHub
           </a>
-          <span className="font-mono text-xs">@comment-section/react</span>
+          <span className="font-mono text-xs">@headless-comments/react</span>
         </div>
       </div>
     </footer>

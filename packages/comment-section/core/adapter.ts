@@ -1,6 +1,6 @@
 /**
  * Adapter interface for the comment data layer
- * @module @comment-section/core/adapter
+ * @module @headless-comments/react/core/adapter
  */
 
 import type { Comment } from './types';

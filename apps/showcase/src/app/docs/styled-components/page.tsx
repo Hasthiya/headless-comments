@@ -21,8 +21,8 @@ export default function StyledComponentsPage() {
       <DocSection id="quick-start" title="Quick start">
         <p>Import the preset CSS and render <code>StyledCommentSection</code>. All data callbacks are synchronous: update your state and return the new comment.</p>
         <CodeBlock
-          code={`import '@comment-section/react/presets/styled/styles.css';
-import { StyledCommentSection, generateUniqueId, type Comment, type CommentUser } from '@comment-section/react';
+          code={`import '@headless-comments/react/presets/styled/styles.css';
+import { StyledCommentSection, generateUniqueId, type Comment, type CommentUser } from '@headless-comments/react';
 
 const currentUser: CommentUser = {
   id: 'user-1',

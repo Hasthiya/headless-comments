@@ -9,7 +9,7 @@ const PRESETS = [
   {
     name: 'Headless',
     desc: 'Unstyled primitives with render props, hooks & full control. Build your own UI from scratch.',
-    code: `import { CommentSection } from '@comment-section/react';
+    code: `import { CommentSection } from '@headless-comments/react';
 
 <CommentSection
   renderComment={({ comment }) => (
@@ -21,7 +21,7 @@ const PRESETS = [
   {
     name: 'Default',
     desc: 'Minimal, clean UI with sensible defaults. Drop in and go — works everywhere.',
-    code: `import { CommentSection } from '@comment-section/react';
+    code: `import { CommentSection } from '@headless-comments/react';
 
 <CommentSection
   comments={comments}
@@ -32,8 +32,8 @@ const PRESETS = [
   {
     name: 'Styled',
     desc: 'CSS-only preset from the package. Zero Tailwind/Radix — import the stylesheet and theme via --cs-* variables.',
-    code: `import '@comment-section/react/presets/styled/styles.css';
-import { StyledCommentSection } from '@comment-section/react';
+    code: `import '@headless-comments/react/presets/styled/styles.css';
+import { StyledCommentSection } from '@headless-comments/react';
 
 <StyledCommentSection
   comments={comments}
@@ -60,7 +60,7 @@ const STEPS = [
   {
     num: '01',
     title: 'Install',
-    code: 'npm install @comment-section/react',
+    code: 'npm install @headless-comments/react',
   },
   {
     num: '02',
@@ -134,7 +134,7 @@ export default function Home() {
         {/* Install snippet — 8pt padding */}
         <div className="anim-fade-up anim-fade-up-d4">
           <code className="inline-flex items-center gap-2 bg-muted text-muted-foreground px-4 py-3 rounded-full text-sm font-mono border border-border select-all">
-            <span className="text-foreground/40">$</span> npm install @comment-section/react
+            <span className="text-foreground/40">$</span> npm install @headless-comments/react
           </code>
         </div>
       </section>
@@ -188,7 +188,7 @@ export default function Home() {
           </Button>
         </div>
         <code className="inline-flex items-center gap-2 bg-muted text-muted-foreground px-4 py-3 rounded-full text-sm font-mono border border-border select-all">
-          <span className="text-foreground/40">$</span> npm install @comment-section/react
+          <span className="text-foreground/40">$</span> npm install @headless-comments/react
         </code>
       </section>
 

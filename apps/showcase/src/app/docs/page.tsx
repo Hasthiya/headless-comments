@@ -6,7 +6,7 @@ export default function DocsPage() {
     <div className="container max-w-3xl mx-auto py-8 px-4 lg:px-8 space-y-20">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground mb-4">
-          @comment-section/react
+          @headless-comments/react
         </h1>
         <p className="text-muted-foreground text-lg">
           Headless-first React comment section: sync API, TypeScript, nested replies and reactions. Use the Styled preset for drop-in UI or bring your own with render props and hooks.
@@ -16,11 +16,11 @@ export default function DocsPage() {
       <DocSection id="installation" title="Installation">
         <p>Install the package with your package manager. Only React and React-DOM are required as peer dependencies.</p>
         <CodeBlock
-          code={`npm install @comment-section/react
+          code={`npm install @headless-comments/react
 # or
-yarn add @comment-section/react
+yarn add @headless-comments/react
 # or
-pnpm add @comment-section/react`}
+pnpm add @headless-comments/react`}
           lang="bash"
         />
       </DocSection>
@@ -31,13 +31,13 @@ pnpm add @comment-section/react`}
           tabs={[
             {
               label: 'Styled preset',
-              code: `import '@comment-section/react/presets/styled/styles.css';
+              code: `import '@headless-comments/react/presets/styled/styles.css';
 import {
   StyledCommentSection,
   generateUniqueId,
   type Comment,
   type CommentUser,
-} from '@comment-section/react';
+} from '@headless-comments/react';
 
 const currentUser: CommentUser = {
   id: 'user-1',
@@ -73,7 +73,7 @@ function App() {
             },
             {
               label: 'Headless',
-              code: `import { CommentSection, generateUniqueId, type Comment, type CommentUser } from '@comment-section/react';
+              code: `import { CommentSection, generateUniqueId, type Comment, type CommentUser } from '@headless-comments/react';
 
 function App() {
   const [comments, setComments] = useState<Comment[]>([]);
@@ -109,8 +109,8 @@ function App() {
             <p className="font-medium mb-1">Styled preset (CSS variables)</p>
             <p className="text-muted-foreground text-sm mb-2">Import the preset stylesheet and override <code>--cs-*</code> variables (e.g. <code>--cs-primary-color</code>, <code>--cs-bg-color</code>). See the <Link href="/docs/styled-components" className="text-primary underline hover:no-underline">Styled Components</Link> page for the full list.</p>
             <CodeBlock
-              code={`import '@comment-section/react/presets/styled/styles.css';
-import { StyledCommentSection } from '@comment-section/react';
+              code={`import '@headless-comments/react/presets/styled/styles.css';
+import { StyledCommentSection } from '@headless-comments/react';
 
 <StyledCommentSection comments={comments} currentUser={currentUser} onSubmitComment={onSubmit} />`}
               lang="tsx"
@@ -250,7 +250,7 @@ import { ShadcnCommentSection } from '@/components/comment-ui';
             <p className="font-medium mb-1">Timestamp</p>
             <p className="text-muted-foreground text-sm mb-2"><code>renderTimestamp</code> receives a <code>Date</code>; use <code>formatRelativeTime</code> from the package or your own formatter.</p>
             <CodeBlock
-              code={`import { formatRelativeTime } from '@comment-section/react';
+              code={`import { formatRelativeTime } from '@headless-comments/react';
 
 <CommentSection
   renderTimestamp={({ date }) => (
@@ -371,7 +371,7 @@ const handleSubmit = (content: string): Comment => {
       </DocSection>
 
       <DocSection id="component-api" title="Component API">
-        <p>Reference for all props, hooks, types, and core utilities. All types are exported from <code>@comment-section/react</code>.</p>
+        <p>Reference for all props, hooks, types, and core utilities. All types are exported from <code>@headless-comments/react</code>.</p>
 
         <p className="font-medium mt-8 mb-2">CommentSectionProps</p>
         <div className="overflow-x-auto">

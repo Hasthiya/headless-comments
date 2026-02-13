@@ -1,6 +1,6 @@
 /**
  * Core module — framework-agnostic logic for the comment system
- * @module @comment-section/core
+ * @module @headless-comments/react/core
  */
 
 // Types

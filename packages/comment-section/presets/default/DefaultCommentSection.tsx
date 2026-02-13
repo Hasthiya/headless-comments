@@ -1,7 +1,7 @@
 /**
  * Default (headless) CommentSection — Provider + minimal unstyled UI.
  * Use renderReplyForm / renderComment to supply your own UI.
- * @module @comment-section/presets/default/DefaultCommentSection
+ * @module @headless-comments/react/presets/default/DefaultCommentSection
  */
 
 'use client';

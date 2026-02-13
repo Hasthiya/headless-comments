@@ -2,7 +2,7 @@
 
 /**
  * Hook for optimistic updates
- * @module @comment-section/react/useOptimisticUpdates
+ * @module @headless-comments/react/useOptimisticUpdates
  */
 
 import { useState, useCallback, useEffect, useMemo } from 'react';

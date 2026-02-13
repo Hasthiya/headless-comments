@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import type { ReplyFormProps } from '@comment-section/react';
+import type { ReplyFormProps } from '@headless-comments/react';
 import {
   useCommentSection,
   useAutoResize,
   useCharacterCount,
   useEnterSubmit,
-} from '@comment-section/react';
+} from '@headless-comments/react';
 import { cn } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';

@@ -6,7 +6,7 @@ import {
   type Comment,
   type CommentUser,
   type ReactionConfig,
-} from '@comment-section/react';
+} from '@headless-comments/react';
 import { ShadcnCommentSection } from '@/components/comment-ui';
 import {
   InstagramCommentItem,

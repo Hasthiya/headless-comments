@@ -1,6 +1,6 @@
 /**
  * Core types for the comment system — framework-agnostic
- * @module @comment-section/core/types
+ * @module @headless-comments/react/core/types
  */
 
 /**

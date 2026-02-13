@@ -1,6 +1,6 @@
 /**
  * Tree operations for nested comment structures
- * @module @comment-section/core/tree
+ * @module @headless-comments/react/core/tree
  */
 
 import type { Comment } from './types';

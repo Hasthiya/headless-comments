@@ -4,7 +4,7 @@
  * Headless Comments React Component
  * A highly customizable, TypeScript-ready comment section with reply and reaction support
  *
- * @package @comment-section/react
+ * @package @headless-comments/react
  * @version 1.0.0
  * @license MIT
  */

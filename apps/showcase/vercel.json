@@ -1,4 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "pnpm --filter @comment-section/react run build && pnpm run build"
+  "buildCommand": "pnpm --filter @headless-comments/react run build && pnpm run build"
 }

@@ -2,7 +2,7 @@
 
 /**
  * Hook for managing reply form state
- * @module @comment-section/react/useReplyForm
+ * @module @headless-comments/react/useReplyForm
  */
 
 import { useState, useCallback } from 'react';

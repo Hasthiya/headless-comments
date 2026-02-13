@@ -7,8 +7,8 @@ import {
   generateUniqueId,
   type Comment,
   type CommentUser,
-} from '@comment-section/react';
-import '@comment-section/react/presets/styled/styles.css';
+} from '@headless-comments/react';
+import '@headless-comments/react/presets/styled/styles.css';
 import { ShadcnCommentSection } from '@/components/comment-ui';
 import { themeAwareDemoTheme } from '@/lib/demo-theme';
 

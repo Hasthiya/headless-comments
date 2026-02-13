@@ -2,7 +2,7 @@
 
 /**
  * Hook for managing edit mode
- * @module @comment-section/react/useEditMode
+ * @module @headless-comments/react/useEditMode
  */
 
 import { useState, useCallback } from 'react';

@@ -1,6 +1,6 @@
 /**
  * Sorting utilities for comments
- * @module @comment-section/core/sorting
+ * @module @headless-comments/react/core/sorting
  */
 
 import type { Comment } from './types';

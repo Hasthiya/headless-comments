@@ -2,7 +2,7 @@
 
 /**
  * CommentSection Provider — owns context and provides it to children
- * @module @comment-section/react/CommentProvider
+ * @module @headless-comments/react/CommentProvider
  */
 
 import React, { createContext, useCallback } from 'react';

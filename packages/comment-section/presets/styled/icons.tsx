@@ -1,7 +1,7 @@
 /**
  * Inline SVG icons — no external icon library needed.
  * Each icon is a tiny React component rendering an inline SVG.
- * @module @comment-section/presets/styled/icons
+ * @module @headless-comments/react/presets/styled/icons
  */
 
 import React from 'react';

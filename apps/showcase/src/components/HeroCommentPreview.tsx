@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import { generateUniqueId, type Comment, type CommentUser } from '@comment-section/react';
+import { generateUniqueId, type Comment, type CommentUser } from '@headless-comments/react';
 import { ShadcnCommentSection } from '@/components/comment-ui';
 import { themeAwareDemoTheme } from '@/lib/demo-theme';
 

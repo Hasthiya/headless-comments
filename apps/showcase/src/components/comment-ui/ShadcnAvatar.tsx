@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import type { AvatarProps } from '@comment-section/react';
-import { getDefaultAvatar, useCommentSection } from '@comment-section/react';
+import type { AvatarProps } from '@headless-comments/react';
+import { getDefaultAvatar, useCommentSection } from '@headless-comments/react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 

@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import type { ActionBarProps } from '@comment-section/react';
-import type { Reaction } from '@comment-section/react';
+import type { ActionBarProps } from '@headless-comments/react';
+import type { Reaction } from '@headless-comments/react';
 import {
   useCommentSection,
   useClickOutside,
   getCommentPermalink,
   copyToClipboard,
-} from '@comment-section/react';
+} from '@headless-comments/react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {

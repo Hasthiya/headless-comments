@@ -2,7 +2,7 @@
 
 /**
  * Hook to access the Headless Comments context
- * @module @comment-section/react/useComments
+ * @module @headless-comments/react/useComments
  */
 
 import { useContext } from 'react';

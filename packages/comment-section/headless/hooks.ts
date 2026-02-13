@@ -2,7 +2,7 @@
 
 /**
  * Utility hooks for the comment system
- * @module @comment-section/react/hooks
+ * @module @headless-comments/react/hooks
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react';

@@ -1,9 +1,9 @@
-# @comment-section/react
+# @headless-comments/react
 
 A highly customizable, TypeScript-ready React comment section component with reply support, reactions, and optimistic updates. The API is **sync** (no Promises required for callbacks) and **headless-first**: the default `CommentSection` uses minimal unstyled UI; supply your own UI via render props or build a styled layer with the headless API. **Zero dependencies** (only React as peer).
 
-![npm version](https://img.shields.io/npm/v/@comment-section/react)
-![License](https://img.shields.io/npm/l/@comment-section/react)
+![npm version](https://img.shields.io/npm/v/@headless-comments/react)
+![License](https://img.shields.io/npm/l/@headless-comments/react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-ready-blue)
 
 ## Table of contents
@@ -41,11 +41,11 @@ A highly customizable, TypeScript-ready React comment section component with rep
 ## Installation
 
 ```bash
-npm install @comment-section/react
+npm install @headless-comments/react
 # or
-yarn add @comment-section/react
+yarn add @headless-comments/react
 # or
-pnpm add @comment-section/react
+pnpm add @headless-comments/react
 ```
 
 ## Quick Start — Styled Preset (recommended)
@@ -53,13 +53,13 @@ pnpm add @comment-section/react
 Get a polished, fully styled comment section with **zero extra dependencies**. Just import the component + its CSS file:
 
 ```tsx
-import '@comment-section/react/presets/styled/styles.css';
+import '@headless-comments/react/presets/styled/styles.css';
 import {
   StyledCommentSection,
   generateUniqueId,
   type Comment,
   type CommentUser,
-} from '@comment-section/react';
+} from '@headless-comments/react';
 
 const currentUser: CommentUser = {
   id: 'user-1',
@@ -110,7 +110,7 @@ The styled preset includes avatars, reactions, nested replies, sort bar, loading
 For full control, use the headless `CommentSection` (minimal unstyled UI) and supply your own components via `renderReplyForm` and `renderComment`. Or use the headless building blocks (`CommentSectionProvider`, `HeadlessCommentItem`, `HeadlessReplyForm`, hooks) to build a fully custom interface.
 
 ```tsx
-import { CommentSection } from '@comment-section/react';
+import { CommentSection } from '@headless-comments/react';
 
 <CommentSection
   comments={comments}
@@ -123,7 +123,7 @@ Callbacks are **synchronous**: update your state and return the new comment. The
 
 ## Choosing an approach
 
-- **Zero config, no Tailwind?** Use the **Styled preset**: import `@comment-section/react/presets/styled/styles.css` and `<StyledCommentSection />`. Theme via CSS variables (`--cs-*`).
+- **Zero config, no Tailwind?** Use the **Styled preset**: import `@headless-comments/react/presets/styled/styles.css` and `<StyledCommentSection />`. Theme via CSS variables (`--cs-*`).
 - **Using Tailwind / shadcn/ui?** Copy the **Shadcn-style** comment UI from `apps/showcase/src/components/comment-ui/` into your project and use `<ShadcnCommentSection />`.
 - **Full control / custom design?** Use the **headless** `CommentSection` with `renderReplyForm` and `renderComment`, or build with `CommentSectionProvider`, `HeadlessCommentItem`, `HeadlessReplyForm`, and hooks.
 
@@ -159,12 +159,12 @@ Callbacks are **synchronous**: update your state and return the new comment. The
 
 | Import path | What you get |
 |---|---|
-| `@comment-section/react` | Everything: `StyledCommentSection`, `CommentSection` (default headless), headless components, hooks, types, core utilities |
-| `@comment-section/react/presets/styled` | `StyledCommentSection` + styled sub-components only |
-| `@comment-section/react/presets/styled/styles.css` | CSS file for the styled preset |
-| `@comment-section/react/presets/default` | `CommentSection` (minimal unstyled) only |
-| `@comment-section/react/headless` | Provider, `HeadlessCommentItem`, `HeadlessReplyForm`, hooks |
-| `@comment-section/react/core` | Types, tree, sorting, utilities (framework-agnostic) |
+| `@headless-comments/react` | Everything: `StyledCommentSection`, `CommentSection` (default headless), headless components, hooks, types, core utilities |
+| `@headless-comments/react/presets/styled` | `StyledCommentSection` + styled sub-components only |
+| `@headless-comments/react/presets/styled/styles.css` | CSS file for the styled preset |
+| `@headless-comments/react/presets/default` | `CommentSection` (minimal unstyled) only |
+| `@headless-comments/react/headless` | Provider, `HeadlessCommentItem`, `HeadlessReplyForm`, hooks |
+| `@headless-comments/react/core` | Types, tree, sorting, utilities (framework-agnostic) |
 
 ## Styled preset: CSS variables
 
@@ -216,7 +216,7 @@ If you use **Tailwind CSS** and **shadcn/ui**, this repository includes a comple
 1. **Install peer dependencies** (if not already installed):
 
    ```bash
-   pnpm add @comment-section/react lucide-react
+   pnpm add @headless-comments/react lucide-react
    ```
 
 2. **Add required shadcn/ui components** (if not already added):
@@ -281,7 +281,7 @@ const theme = {
 Supply your own form UI with the `RenderReplyFormProps` type. You receive `onSubmit`, `onCancel`, `placeholder`, `disabled`, `isSubmitting`, and optional `parentComment` (when replying).
 
 ```tsx
-import type { RenderReplyFormProps } from '@comment-section/react';
+import type { RenderReplyFormProps } from '@headless-comments/react';
 
 <CommentSection
   renderReplyForm={({ onSubmit, placeholder, disabled, isSubmitting }) => (
@@ -359,7 +359,7 @@ import {
   useReplyForm,
   useEditMode,
   useReactions,
-} from '@comment-section/react';
+} from '@headless-comments/react';
 ```
 
 Context from `useCommentSection` includes `isSubmittingComment` and `isSubmittingReply` for use in custom forms.
@@ -393,12 +393,12 @@ import type {
   CommentSectionProps,
   CommentItemProps,
   RenderReplyFormProps,
-} from '@comment-section/react';
+} from '@headless-comments/react';
 ```
 
 ## Troubleshooting / FAQ
 
-- **CSS not applying for Styled preset?** Ensure you import the stylesheet: `import '@comment-section/react/presets/styled/styles.css';` (in your root layout or the page that renders `StyledCommentSection`).
+- **CSS not applying for Styled preset?** Ensure you import the stylesheet: `import '@headless-comments/react/presets/styled/styles.css';` (in your root layout or the page that renders `StyledCommentSection`).
 - **Comments not updating after submit?** Callbacks are sync: your handler must update your state (e.g. `setComments`) and **return** the new comment. The library then clears the form and closes the reply UI.
 - **Next.js App Router?** Import the Styled preset CSS in your root layout (`app/layout.tsx`) or in the page/layout that uses the component so it’s included in the bundle.
 - **Dark mode (Styled preset)?** Add the class `cs-root--dark` to a parent of the comment section, or set `data-cs-theme="dark"` on the wrapper. The stylesheet also respects the `.dark` class on an ancestor (e.g. from next-themes with `attribute="class"`), so the Styled preset can follow your app’s theme automatically.
