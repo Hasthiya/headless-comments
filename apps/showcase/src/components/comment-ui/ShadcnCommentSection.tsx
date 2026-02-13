@@ -73,8 +73,6 @@ const CommentSectionInternal: React.FC<
     loadMore,
     maxDepth,
     isSubmittingComment,
-    sortOrder,
-    setSortOrder,
   } = useCommentSection();
 
   const scrollSentinelRef = useInfiniteScroll(
@@ -126,29 +124,6 @@ const CommentSectionInternal: React.FC<
   return (
     <div className={cn('w-full space-y-4', className)} style={containerStyle}>
       {renderHeader && renderHeader()}
-      {comments.length > 1 && (
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">Sort:</span>
-          <div className="flex flex-wrap gap-1">
-            {(['newest', 'oldest', 'popular'] as const).map((order) => (
-              <Button
-                key={order}
-                type="button"
-                variant={sortOrder === order ? 'secondary' : 'ghost'}
-                size="sm"
-                className="h-8 px-2.5 text-xs"
-                onClick={() => setSortOrder(order)}
-                aria-label={`Sort by ${order}`}
-                aria-pressed={sortOrder === order}
-              >
-                {order === 'newest' && contextTexts.sortNewest}
-                {order === 'oldest' && contextTexts.sortOldest}
-                {order === 'popular' && contextTexts.sortTop}
-              </Button>
-            ))}
-          </div>
-        </div>
-      )}
       {!readOnly && currentUser && submitComment && (
         renderReplyForm ? (
           renderReplyForm({
