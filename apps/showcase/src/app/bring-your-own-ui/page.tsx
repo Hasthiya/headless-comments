@@ -11,9 +11,11 @@ import { ShadcnCommentSection } from '@/components/comment-ui';
 import {
   InstagramCommentItem,
   FacebookCommentItem,
+  SlackCommentItem,
   RedditReplyForm,
   InstagramReplyForm,
   FacebookReplyForm,
+  SlackReplyForm,
   RedditInlineReplyForm,
 } from '@/components/comment-ui/byo';
 import { themeAwareDemoTheme } from '@/lib/demo-theme';
@@ -301,12 +303,13 @@ function useByoCommentState() {
   };
 }
 
-type TabId = 'reddit' | 'instagram' | 'facebook';
+type TabId = 'reddit' | 'instagram' | 'facebook' | 'slack';
 
 const TABS: { id: TabId; label: string; description: string }[] = [
   { id: 'reddit', label: 'Reddit', description: 'Upvote / downvote strip, compact type.' },
   { id: 'instagram', label: 'Instagram', description: 'Compact rows, heart for like, minimal Reply link.' },
   { id: 'facebook', label: 'Facebook', description: 'Rounded avatars, bubble comments, Like and Reply links.' },
+  { id: 'slack', label: 'Slack', description: 'Clean layout, name + time, thread summary with avatars and reply count.' },
 ];
 
 export default function BringYourOwnUIPage() {
@@ -340,8 +343,8 @@ export default function BringYourOwnUIPage() {
           Bring Your Own UI
         </h1>
         <p className="text-muted-foreground mb-8">
-          The same headless comment engine drives three different UIs. One state, one set of
-          handlers — switch tabs to see Reddit-style votes, Instagram-style hearts, and Facebook-style bubbles.
+          The same headless comment engine drives four different UIs. One state, one set of
+          handlers — switch tabs to see Reddit-style votes, Instagram-style hearts, Facebook-style bubbles, and Slack-style threads.
         </p>
 
         <div
@@ -450,6 +453,36 @@ export default function BringYourOwnUIPage() {
                 )}
                 renderComment={(comment, props) => (
                   <FacebookCommentItem key={comment.id} {...props} comment={comment} />
+                )}
+                showReactions
+                showMoreOptions={false}
+              />
+            </div>
+          )}
+          {activeTab === 'slack' && (
+            <div
+              role="tabpanel"
+              id="panel-slack"
+              aria-labelledby="tab-slack"
+              className="space-y-2"
+            >
+              <p className="text-sm text-muted-foreground mb-4">
+                {TABS.find((t) => t.id === 'slack')?.description}
+              </p>
+              <ShadcnCommentSection
+                {...commonProps}
+                availableReactions={facebookReactions}
+                includeDislike={false}
+                renderReplyForm={({ onSubmit, placeholder, disabled, isSubmitting }) => (
+                  <SlackReplyForm
+                    onSubmit={onSubmit}
+                    placeholder={placeholder}
+                    disabled={disabled}
+                    isSubmitting={isSubmitting}
+                  />
+                )}
+                renderComment={(comment, props) => (
+                  <SlackCommentItem key={comment.id} {...props} comment={comment} />
                 )}
                 showReactions
                 showMoreOptions={false}
