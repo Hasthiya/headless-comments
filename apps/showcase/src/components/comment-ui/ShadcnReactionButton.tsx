@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import type { ReactionButtonProps } from '@headless-comments/react';
-import { useCommentSection } from '@headless-comments/react';
+import type { ReactionButtonProps } from '@hasthiya_/headless-comments-react';
+import { useCommentSection } from '@hasthiya_/headless-comments-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -58,3 +58,4 @@ export const ShadcnReactionButton: React.FC<ReactionButtonProps> = ({
 };
 
 ShadcnReactionButton.displayName = 'ShadcnReactionButton';
+

@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import type { CommentSectionProps, Comment, ReplyFormProps } from '@headless-comments/react';
+import type { CommentSectionProps, Comment, ReplyFormProps } from '@hasthiya_/headless-comments-react';
 import {
   CommentSectionProvider,
   useCommentSection,
   useInfiniteScroll,
   themeToCSSVariables,
   mergeTheme,
-} from '@headless-comments/react';
+} from '@hasthiya_/headless-comments-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ShadcnCommentItem } from './ShadcnCommentItem';
@@ -291,3 +291,4 @@ export const ShadcnCommentSection: React.FC<ShadcnCommentSectionProps> = (props)
 };
 
 ShadcnCommentSection.displayName = 'ShadcnCommentSection';
+

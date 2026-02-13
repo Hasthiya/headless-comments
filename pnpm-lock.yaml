@@ -14,7 +14,7 @@ importers:
 
   apps/showcase:
     dependencies:
-      '@headless-comments/react':
+      '@hasthiya_/headless-comments-react':
         specifier: workspace:*
         version: link:../../packages/comment-section
       '@radix-ui/react-alert-dialog':

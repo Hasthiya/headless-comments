@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import type { ActionBarProps } from '@headless-comments/react';
-import type { Reaction } from '@headless-comments/react';
+import type { ActionBarProps } from '@hasthiya_/headless-comments-react';
+import type { Reaction } from '@hasthiya_/headless-comments-react';
 import {
   useCommentSection,
   useClickOutside,
   getCommentPermalink,
   copyToClipboard,
-} from '@headless-comments/react';
+} from '@hasthiya_/headless-comments-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -268,3 +268,4 @@ export const ShadcnActionBar: React.FC<ActionBarProps & { className?: string }> 
 };
 
 ShadcnActionBar.displayName = 'ShadcnActionBar';
+

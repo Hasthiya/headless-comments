@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import type { ReplyFormProps } from '@headless-comments/react';
+import type { ReplyFormProps } from '@hasthiya_/headless-comments-react';
 import {
   useCommentSection,
   useAutoResize,
   useEnterSubmit,
-} from '@headless-comments/react';
-import { getDefaultAvatar } from '@headless-comments/react';
+} from '@hasthiya_/headless-comments-react';
+import { getDefaultAvatar } from '@hasthiya_/headless-comments-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -375,3 +375,4 @@ export function SlackInlineReplyForm({
     </div>
   );
 }
+

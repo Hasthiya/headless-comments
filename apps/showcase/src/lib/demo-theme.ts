@@ -1,4 +1,4 @@
-import type { CommentTheme } from '@headless-comments/react';
+import type { CommentTheme } from '@hasthiya_/headless-comments-react';
 
 /**
  * Theme-aware theme for demos. Uses CSS variables from the design system
@@ -16,3 +16,4 @@ export const themeAwareDemoTheme: CommentTheme = {
   fontSize: '14px',
   borderRadius: 'var(--radius)',
 };
+

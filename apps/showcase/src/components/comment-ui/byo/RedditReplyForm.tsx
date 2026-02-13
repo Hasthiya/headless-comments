@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import type { RenderReplyFormProps } from '@headless-comments/react';
+import type { RenderReplyFormProps } from '@hasthiya_/headless-comments-react';
 import {
   useCommentSection,
   useAutoResize,
   useEnterSubmit,
-} from '@headless-comments/react';
-import { getDefaultAvatar } from '@headless-comments/react';
+} from '@hasthiya_/headless-comments-react';
+import { getDefaultAvatar } from '@hasthiya_/headless-comments-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
@@ -91,3 +91,4 @@ export function RedditReplyForm({
     </div>
   );
 }
+

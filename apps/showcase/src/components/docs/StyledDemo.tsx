@@ -6,8 +6,8 @@ import {
   generateUniqueId,
   type Comment,
   type CommentUser,
-} from '@headless-comments/react';
-import '@headless-comments/react/presets/styled/styles.css';
+} from '@hasthiya_/headless-comments-react';
+import '@hasthiya_/headless-comments-react/presets/styled/styles.css';
 import { themeAwareDemoTheme } from '@/lib/demo-theme';
 
 const currentUser: CommentUser = {
@@ -149,3 +149,4 @@ export function StyledDemo() {
     </div>
   );
 }
+

@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import type { ReplyFormProps } from '@headless-comments/react';
+import type { ReplyFormProps } from '@hasthiya_/headless-comments-react';
 import {
   useCommentSection,
   useAutoResize,
   useCharacterCount,
   useEnterSubmit,
-} from '@headless-comments/react';
+} from '@hasthiya_/headless-comments-react';
 import { cn } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -145,3 +145,4 @@ export const ShadcnReplyForm: React.FC<ReplyFormProps> = ({
 };
 
 ShadcnReplyForm.displayName = 'ShadcnReplyForm';
+

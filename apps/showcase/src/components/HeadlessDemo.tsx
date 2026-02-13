@@ -7,7 +7,7 @@ import {
     type Comment,
     type CommentUser,
     type Reaction,
-} from '@headless-comments/react';
+} from '@hasthiya_/headless-comments-react';
 
 const demoUser: CommentUser = {
     id: 'headless-user',
@@ -175,3 +175,4 @@ export function HeadlessDemo() {
         </div>
     );
 }
+

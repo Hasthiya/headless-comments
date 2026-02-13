@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import type { AvatarProps } from '@headless-comments/react';
-import { getDefaultAvatar, useCommentSection } from '@headless-comments/react';
+import type { AvatarProps } from '@hasthiya_/headless-comments-react';
+import { getDefaultAvatar, useCommentSection } from '@hasthiya_/headless-comments-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 
@@ -50,3 +50,4 @@ export const ShadcnAvatar: React.FC<AvatarProps> = ({
 };
 
 ShadcnAvatar.displayName = 'ShadcnAvatar';
+

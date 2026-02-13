@@ -6,7 +6,7 @@ import {
   type Comment,
   type CommentUser,
   type ReactionConfig,
-} from '@headless-comments/react';
+} from '@hasthiya_/headless-comments-react';
 import { ShadcnCommentSection } from '@/components/comment-ui';
 import {
   InstagramCommentItem,
@@ -494,3 +494,4 @@ export default function BringYourOwnUIPage() {
     </main>
   );
 }
+

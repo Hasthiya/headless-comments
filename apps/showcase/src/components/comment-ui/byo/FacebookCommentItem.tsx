@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import type { CommentItemProps } from '@headless-comments/react';
+import type { CommentItemProps } from '@hasthiya_/headless-comments-react';
 import {
   useCommentSection,
   useReplyForm,
@@ -12,7 +12,7 @@ import {
   formatDate,
   getDefaultAvatar,
   truncateToLines,
-} from '@headless-comments/react';
+} from '@hasthiya_/headless-comments-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -409,3 +409,4 @@ export const FacebookCommentItem: React.FC<CommentItemProps> = ({
 };
 
 FacebookCommentItem.displayName = 'FacebookCommentItem';
+

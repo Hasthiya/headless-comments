@@ -7,8 +7,8 @@ import {
   generateUniqueId,
   type Comment,
   type CommentUser,
-} from '@headless-comments/react';
-import '@headless-comments/react/presets/styled/styles.css';
+} from '@hasthiya_/headless-comments-react';
+import '@hasthiya_/headless-comments-react/presets/styled/styles.css';
 import { ShadcnCommentSection } from '@/components/comment-ui';
 import { themeAwareDemoTheme } from '@/lib/demo-theme';
 
@@ -337,3 +337,4 @@ export function CommentSectionShowcase() {
     </div>
   );
 }
+
