@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import type { CommentSectionProps, Comment } from '@comment-section/react';
+import type { CommentSectionProps, Comment, ReplyFormProps } from '@comment-section/react';
 import {
   CommentSectionProvider,
   useCommentSection,
@@ -23,10 +23,12 @@ const CommentSectionInternal: React.FC<
     internalTheme: CommentThemeRequired;
     texts?: CommentSectionProps['texts'];
     sortOrderKey?: string;
+    renderInlineReplyForm?: (props: ReplyFormProps) => React.ReactNode;
   }
 > = ({
   renderComment,
   renderReplyForm,
+  renderInlineReplyForm,
   renderContent,
   renderAvatar,
   renderReactions,
@@ -221,6 +223,7 @@ const CommentSectionInternal: React.FC<
                 readOnly={readOnly}
                 theme={internalTheme}
                 maxCommentLines={maxCommentLines}
+                renderInlineReplyForm={renderInlineReplyForm}
               />
             )
           )
@@ -244,7 +247,11 @@ const CommentSectionInternal: React.FC<
   );
 };
 
-export const ShadcnCommentSection: React.FC<CommentSectionProps> = (props) => {
+export type ShadcnCommentSectionProps = CommentSectionProps & {
+  renderInlineReplyForm?: (props: ReplyFormProps) => React.ReactNode;
+};
+
+export const ShadcnCommentSection: React.FC<ShadcnCommentSectionProps> = (props) => {
   const {
     comments,
     currentUser,

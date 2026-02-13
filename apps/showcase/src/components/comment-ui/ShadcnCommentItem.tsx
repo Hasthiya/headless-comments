@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useMemo } from 'react';
-import type { CommentItemProps } from '@comment-section/react';
+import type { CommentItemProps, ReplyFormProps } from '@comment-section/react';
 import type { CommentUser, CommentTexts } from '@comment-section/react';
 import {
   useCommentSection,
@@ -45,7 +45,9 @@ function UserBadge({ author, texts }: { author: CommentUser; texts: Required<Com
   );
 }
 
-export const ShadcnCommentItem: React.FC<CommentItemProps> = ({
+export const ShadcnCommentItem: React.FC<
+  CommentItemProps & { renderInlineReplyForm?: (props: ReplyFormProps) => React.ReactNode }
+> = ({
   comment,
   currentUser,
   onReply,
@@ -70,6 +72,7 @@ export const ShadcnCommentItem: React.FC<CommentItemProps> = ({
   readOnly = false,
   theme: customTheme,
   maxCommentLines,
+  renderInlineReplyForm,
 }) => {
   const context = useCommentSection();
   const texts = context.texts;
@@ -85,7 +88,7 @@ export const ShadcnCommentItem: React.FC<CommentItemProps> = ({
     onReaction,
     context.enableOptimisticUpdates
   );
-  const [showReplies, setShowReplies] = useState(true);
+  const [showReplies, setShowReplies] = useState(false);
   const isAuthor = currentUser?.id === comment.author.id;
 
   const hasVoteStrip = useMemo(() => {
@@ -301,16 +304,27 @@ export const ShadcnCommentItem: React.FC<CommentItemProps> = ({
 
             {replyForm.isOpen && replyForm.activeCommentId === comment.id && (
               <div className="mt-3">
-                <ShadcnReplyForm
-                  parentComment={comment}
-                  currentUser={currentUser}
-                  onSubmit={handleReplySubmit}
-                  onCancel={replyForm.closeReply}
-                  maxCharLimit={500}
-                  showCharCount
-                  autoFocus
-                  theme={theme}
-                />
+                {renderInlineReplyForm ? (
+                  renderInlineReplyForm({
+                    parentComment: comment,
+                    currentUser: currentUser ?? undefined,
+                    onSubmit: handleReplySubmit,
+                    onCancel: replyForm.closeReply,
+                    placeholder: texts.replyPlaceholder,
+                    autoFocus: true,
+                  })
+                ) : (
+                  <ShadcnReplyForm
+                    parentComment={comment}
+                    currentUser={currentUser}
+                    onSubmit={handleReplySubmit}
+                    onCancel={replyForm.closeReply}
+                    maxCharLimit={500}
+                    showCharCount
+                    autoFocus
+                    theme={theme}
+                  />
+                )}
               </div>
             )}
 

@@ -28,6 +28,12 @@ export function Navbar() {
             >
               Docs
             </Link>
+            <Link
+              href="/bring-your-own-ui"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Bring Your Own UI
+            </Link>
           </div>
         </div>
         <div className="flex items-center gap-2">
