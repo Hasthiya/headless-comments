@@ -129,8 +129,72 @@ export function CommentSectionShowcase() {
   );
 
   const handleReaction = useCallback((commentId: string, reactionId: string) => {
-    const updateReactions = (reactions: Comment['reactions']) => {
+    const updateReactions = (reactions: Comment['reactions']): Comment['reactions'] => {
       const list = reactions ?? [];
+
+      if (reactionId === 'like' || reactionId === 'dislike') {
+        const like = list.find((r) => r.id === 'like');
+        const dislike = list.find((r) => r.id === 'dislike');
+        const ensureReaction = (
+          id: 'like' | 'dislike',
+          current: (typeof list)[0] | undefined
+        ) => ({
+          id,
+          label: id === 'dislike' ? 'Dislike' : 'Like',
+          emoji: id === 'dislike' ? '👎' : '👍',
+          count: current?.count ?? 0,
+          isActive: current?.isActive ?? false,
+        });
+        let nextLike = ensureReaction('like', like);
+        let nextDislike = ensureReaction('dislike', dislike);
+
+        if (reactionId === 'like') {
+          if (nextDislike.isActive) {
+            nextDislike = {
+              ...nextDislike,
+              count: Math.max(0, nextDislike.count - 1),
+              isActive: false,
+            };
+          }
+          if (nextLike.isActive) {
+            nextLike = {
+              ...nextLike,
+              count: Math.max(0, nextLike.count - 1),
+              isActive: false,
+            };
+          } else {
+            nextLike = {
+              ...nextLike,
+              count: nextLike.count + 1,
+              isActive: true,
+            };
+          }
+        } else {
+          if (nextLike.isActive) {
+            nextLike = {
+              ...nextLike,
+              count: Math.max(0, nextLike.count - 1),
+              isActive: false,
+            };
+          }
+          if (nextDislike.isActive) {
+            nextDislike = {
+              ...nextDislike,
+              count: Math.max(0, nextDislike.count - 1),
+              isActive: false,
+            };
+          } else {
+            nextDislike = {
+              ...nextDislike,
+              count: nextDislike.count + 1,
+              isActive: true,
+            };
+          }
+        }
+        const rest = list.filter((r) => r.id !== 'like' && r.id !== 'dislike');
+        return [...rest, nextLike, nextDislike];
+      }
+
       const existing = list.find((r) => r.id === reactionId);
       if (existing) {
         return list.map((r) =>

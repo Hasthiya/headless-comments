@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { CommentSectionShowcase } from '@/components/CommentSectionShowcase';
-import { HeroCommentPreview } from '@/components/HeroCommentPreview';
 import { Button } from '@/components/ui/button';
 
 /* ─── Preset cards ───────────────────────────────────────────────────── */
@@ -107,7 +106,7 @@ export default function Home() {
         </h1>
 
         <p className="anim-fade-up anim-fade-up-d2 text-lg sm:text-xl text-muted-foreground max-w-xl mx-auto mb-8 leading-relaxed">
-          A drop-in, headless-first React comment section. Nested replies, reactions, optimistic updates, full TypeScript — zero backend required.
+          The comment section you actually want to ship. Headless React, full TypeScript, nested replies & reactions — drop in and go, no backend required.
         </p>
 
         {/* CTAs — primary = CTA color, secondary = outline */}
@@ -120,27 +119,12 @@ export default function Home() {
           </Button>
         </div>
 
-        {/* Hero comment preview — compact, 1–2 comments */}
-        <div className="anim-fade-up anim-fade-up-d3 mb-8">
-          <HeroCommentPreview />
-        </div>
-
         {/* Install snippet — 8pt padding */}
         <div className="anim-fade-up anim-fade-up-d4">
           <code className="inline-flex items-center gap-2 bg-muted text-muted-foreground px-4 py-3 rounded-full text-sm font-mono border border-border select-all">
             <span className="text-foreground/40">$</span> npm install @comment-section/react
           </code>
         </div>
-      </section>
-
-      {/* ══════════════════════  QUICK HIGHLIGHTS  ═══════════════════ */}
-      <section
-        className="container mx-auto max-w-3xl px-6 py-8 sm:py-12"
-        aria-label="Quick highlights"
-      >
-        <p className="text-center text-sm text-muted-foreground">
-          Headless · Reactions · TypeScript · Accessible
-        </p>
       </section>
 
       {/* ══════════════════════  LIVE DEMO  ═════════════════════════════ */}
@@ -159,67 +143,6 @@ export default function Home() {
         </div>
 
         <CommentSectionShowcase />
-      </section>
-
-      {/* ══════════════════════  PRESETS  ════════════════════════════════ */}
-      <section
-        className="container mx-auto max-w-5xl px-6 py-16 sm:py-24 border-t border-border"
-        aria-labelledby="presets-heading"
-      >
-        <div className="text-center mb-12">
-          <h2 id="presets-heading" className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-4">
-            Three ways to use it
-          </h2>
-          <p className="text-muted-foreground max-w-lg mx-auto">
-            Start with full control, grab the unstyled default, or plug into your ShadCN design system.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {PRESETS.map((preset) => (
-            <div
-              key={preset.name}
-              className="rounded-xl border border-border bg-card overflow-hidden transition-colors duration-300 ease-heartbeat hover:border-foreground/20"
-            >
-              <div className="p-6 border-b border-border">
-                <h3 className="font-display font-bold text-lg text-foreground mb-2">{preset.name}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{preset.desc}</p>
-              </div>
-              <pre className="p-4 text-xs font-mono leading-relaxed text-muted-foreground overflow-x-auto bg-muted/50">
-                <code>{preset.code}</code>
-              </pre>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ══════════════════════  HOW IT WORKS  ══════════════════════════ */}
-      <section
-        className="container mx-auto max-w-4xl px-6 py-16 sm:py-24 border-t border-border"
-        aria-labelledby="steps-heading"
-      >
-        <div className="text-center mb-12">
-          <h2 id="steps-heading" className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-4">
-            Up and running in minutes
-          </h2>
-          <p className="text-muted-foreground max-w-md mx-auto">
-            Three steps. That&apos;s it.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {STEPS.map((step) => (
-            <div key={step.num} className="relative">
-              <span className="font-display text-5xl font-black text-border leading-none mb-4 block">
-                {step.num}
-              </span>
-              <h3 className="font-display font-bold text-lg text-foreground mb-4">{step.title}</h3>
-              <pre className="rounded-lg border border-border bg-muted/50 p-4 text-xs font-mono leading-relaxed text-muted-foreground overflow-x-auto">
-                <code>{step.code}</code>
-              </pre>
-            </div>
-          ))}
-        </div>
       </section>
 
       {/* ══════════════════════  TECH STACK  ════════════════════════════ */}

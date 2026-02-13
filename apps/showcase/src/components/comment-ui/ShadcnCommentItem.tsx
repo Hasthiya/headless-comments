@@ -98,6 +98,8 @@ export const ShadcnCommentItem: React.FC<CommentItemProps> = ({
   const voteScore = (likeReaction?.count ?? 0) - (dislikeReaction?.count ?? 0);
   const isUpvoted = likeReaction?.isActive ?? false;
   const isDownvoted = dislikeReaction?.isActive ?? false;
+  const showUpHighlight = isUpvoted && !isDownvoted;
+  const showDownHighlight = isDownvoted && !isUpvoted;
 
   const handleReplyClick = useCallback(
     () => replyForm.openReply(comment.id),
@@ -165,12 +167,12 @@ export const ShadcnCommentItem: React.FC<CommentItemProps> = ({
               size="icon"
               className={cn(
                 'h-6 w-6 text-muted-foreground hover:text-foreground',
-                isUpvoted && 'text-primary'
+                showUpHighlight && 'text-primary'
               )}
               onClick={() => handleReaction('like')}
               disabled={isReactionPending(comment.id, 'like')}
               aria-label="Upvote"
-              aria-pressed={isUpvoted}
+              aria-pressed={showUpHighlight}
             >
               <ChevronUp className="h-4 w-4" />
             </Button>
@@ -183,12 +185,12 @@ export const ShadcnCommentItem: React.FC<CommentItemProps> = ({
               size="icon"
               className={cn(
                 'h-6 w-6 text-muted-foreground hover:text-foreground',
-                isDownvoted && 'text-primary'
+                showDownHighlight && 'text-destructive'
               )}
               onClick={() => handleReaction('dislike')}
               disabled={isReactionPending(comment.id, 'dislike')}
               aria-label="Downvote"
-              aria-pressed={isDownvoted}
+              aria-pressed={showDownHighlight}
             >
               <ChevronDown className="h-4 w-4" />
             </Button>
