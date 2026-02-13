@@ -13,7 +13,6 @@ import type {
     CommentTexts,
     CommentTheme,
 } from '../core/types';
-import type { CommentAdapter } from '../core/adapter';
 import type { CommentSectionContextValue } from './types';
 import {
     mergeTexts,
@@ -26,13 +25,20 @@ import {
 import { useCommentState } from './useCommentState';
 import { useLocalStorage } from './hooks';
 
+const SORT_ORDERS = ['asc', 'desc', 'oldest', 'newest', 'popular'] as const;
+type SortOrder = (typeof SORT_ORDERS)[number];
+
+function isSortOrder(value: unknown): value is SortOrder {
+    return typeof value === 'string' && SORT_ORDERS.includes(value as SortOrder);
+}
+
 /**
  * Context for the Comment Section
  */
 export const CommentSectionContext = createContext<CommentSectionContextValue | null>(null);
 
 /**
- * Provider props
+ * Props for CommentSectionProvider. Supply comments and sync callbacks; for async backends, call your API inside the callbacks and update your state.
  */
 export interface CommentSectionProviderProps {
     children: React.ReactNode;
@@ -51,9 +57,7 @@ export interface CommentSectionProviderProps {
     sortOrderKey?: string;
     /** Called when user changes sort order */
     onSortOrderChange?: (order: 'asc' | 'desc' | 'oldest' | 'newest' | 'popular') => void;
-    /** New adapter-based data layer (optional — falls back to callback props) */
-    adapter?: CommentAdapter;
-    /** Callback props (sync) */
+    /** Callback props (sync). For async backends, call your API inside the callback and update your state. */
     onSubmitComment?: (content: string) => Comment;
     onReply?: (commentId: string, content: string) => Comment;
     onReaction?: (commentId: string, reactionId: string) => void;
@@ -71,7 +75,7 @@ export interface CommentSectionProviderProps {
 }
 
 /**
- * Provider component for the Comment Section context
+ * Provides comment section context (comments, handlers, theme, texts) to children. Required for HeadlessCommentItem, HeadlessReplyForm, and useCommentSection.
  */
 export const CommentSectionProvider: React.FC<CommentSectionProviderProps> = ({
     children,
@@ -88,7 +92,6 @@ export const CommentSectionProvider: React.FC<CommentSectionProviderProps> = ({
     sortOrder: sortOrderProp = 'newest',
     sortOrderKey,
     onSortOrderChange,
-    adapter: _adapter,
     onSubmitComment,
     onReply,
     onReaction,
@@ -104,12 +107,12 @@ export const CommentSectionProvider: React.FC<CommentSectionProviderProps> = ({
 }) => {
     const availableReactions = availableReactionsProp ?? (includeDislike ? defaultReactions : defaultReactionsWithoutDislike);
 
-    type SortOrder = 'asc' | 'desc' | 'oldest' | 'newest' | 'popular';
     const [storedSortOrder, setStoredSortOrder] = useLocalStorage<SortOrder>(
         sortOrderKey ? sortOrderKey : 'comment-section-sort',
-        sortOrderProp
+        sortOrderProp,
+        (v) => (isSortOrder(v) ? v : sortOrderProp)
     );
-    const effectiveSortOrder = (sortOrderKey ? storedSortOrder : sortOrderProp) as SortOrder;
+    const effectiveSortOrder = sortOrderKey ? storedSortOrder : sortOrderProp;
 
     const setSortOrder = useCallback(
         (order: SortOrder) => {
@@ -120,16 +123,6 @@ export const CommentSectionProvider: React.FC<CommentSectionProviderProps> = ({
         },
         [sortOrderKey, setStoredSortOrder, onSortOrderChange]
     );
-
-    // When adapter is provided, it returns Promises; we use sync callbacks only (adapter not used in sync API).
-    const resolvedOnSubmit = onSubmitComment;
-    const resolvedOnReply = onReply;
-    const resolvedOnReaction = onReaction;
-    const resolvedOnEdit = onEdit;
-    const resolvedOnDelete = onDelete;
-
-    // Adapter should also support pagination if we wanted to be complete, but keeping it simple for now as adapter interface wasn't fully defined for it in user prompt. 
-    // Assuming onLoadMore is passed as prop if not using adapter or if adapter handles it via side channels (or we should add it to adapter later).
 
     // Use the logic hook to manage state
     const {
@@ -149,11 +142,11 @@ export const CommentSectionProvider: React.FC<CommentSectionProviderProps> = ({
         enableOptimisticUpdates,
         sortOrder: effectiveSortOrder,
         generateId,
-        onSubmitComment: resolvedOnSubmit,
-        onReply: resolvedOnReply,
-        onReaction: resolvedOnReaction,
-        onEdit: resolvedOnEdit,
-        onDelete: resolvedOnDelete,
+        onSubmitComment,
+        onReply,
+        onReaction,
+        onEdit,
+        onDelete,
         onLoadMore,
         hasMore,
         isLoading,

@@ -1,12 +1,16 @@
 import React, { useState, useCallback } from 'react';
-import { Comment } from '../core/types';
+import type { Comment, CommentUser } from '../core/types';
 import { useCommentSection } from './useComments';
 import { useReplyForm } from './useReplyForm';
 import { useEditMode } from './useEditMode';
 import { useReactions } from './useReactions';
 
+/**
+ * Props passed to the render function (children) of HeadlessCommentItem.
+ */
 export interface HeadlessCommentItemChildrenProps {
     comment: Comment;
+    /** True if the current user is the comment author */
     isAuthor: boolean;
     isEditing: boolean;
     showReplies: boolean;
@@ -18,14 +22,19 @@ export interface HeadlessCommentItemChildrenProps {
     onDelete: () => void;
     onReaction: (reactionId: string) => void;
     isReactionPending: (commentId: string, reactionId: string) => boolean;
-    currentUser: any;
+    /** Current logged-in user, or null/undefined if not authenticated */
+    currentUser: CommentUser | null | undefined;
     replies: Comment[];
     depth: number;
     maxDepth: number;
 }
 
+/**
+ * Props for the headless comment item. Use with a render-prop to build fully custom comment UI.
+ */
 export interface HeadlessCommentItemProps {
     comment: Comment;
+    /** Render function receiving comment state and handlers */
     children: (props: HeadlessCommentItemChildrenProps) => React.ReactNode;
     onReply?: (commentId: string, content: string) => void;
     onReaction?: (commentId: string, reactionId: string) => void;
@@ -35,6 +44,10 @@ export interface HeadlessCommentItemProps {
     maxDepth?: number;
 }
 
+/**
+ * Headless comment item: provides comment state and handlers via render props.
+ * Must be used inside CommentSectionProvider. Use for fully custom comment UI.
+ */
 export const HeadlessCommentItem: React.FC<HeadlessCommentItemProps> = ({
     comment,
     children,

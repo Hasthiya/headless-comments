@@ -24,15 +24,17 @@ export default function DocsLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-1">
-      <aside className="hidden lg:block w-56 shrink-0 border-r border-border">
-        <nav className="sticky top-[3.5rem] py-6 pl-4 pr-2">
-          <DocNav sections={docSections} />
-        </nav>
-      </aside>
-      <main className="flex-1 min-w-0">
-        {children}
-      </main>
+    <div className="flex flex-1 justify-center w-full">
+      <div className="flex w-full max-w-6xl flex-1">
+        <aside className="hidden lg:block w-56 shrink-0 border-r border-border">
+          <nav className="sticky top-[3.5rem] py-6 pl-4 pr-2">
+            <DocNav sections={docSections} />
+          </nav>
+        </aside>
+        <main className="flex-1 min-w-0">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

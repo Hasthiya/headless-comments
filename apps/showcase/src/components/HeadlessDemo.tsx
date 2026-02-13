@@ -6,6 +6,7 @@ import {
     generateUniqueId,
     type Comment,
     type CommentUser,
+    type Reaction,
 } from '@comment-section/react';
 
 const demoUser: CommentUser = {
@@ -14,7 +15,7 @@ const demoUser: CommentUser = {
     isVerified: true,
 };
 
-const defaultReactions = [
+const defaultReactions: Reaction[] = [
     { id: 'like', label: 'Like', emoji: '👍', count: 0, isActive: false },
     { id: 'heart', label: 'Heart', emoji: '❤️', count: 0, isActive: false },
 ];

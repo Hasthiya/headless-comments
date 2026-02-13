@@ -1,6 +1,6 @@
 # @comment-section/react
 
-A highly customizable, TypeScript-ready React comment section component with reply support, reactions, and optimistic updates. The API is **sync** (no Promises required for callbacks) and **headless-first**: the default `CommentSection` uses minimal unstyled UI; use `ShadcnCommentSection` for a styled preset or supply your own UI via render props.
+A highly customizable, TypeScript-ready React comment section component with reply support, reactions, and optimistic updates. The API is **sync** (no Promises required for callbacks) and **headless-first**: the default `CommentSection` uses minimal unstyled UI; supply your own UI via render props or build a styled layer with the headless API. **Zero dependencies** (only React as peer).
 
 ![npm version](https://img.shields.io/npm/v/@comment-section/react)
 ![License](https://img.shields.io/npm/l/@comment-section/react)
@@ -13,8 +13,8 @@ A highly customizable, TypeScript-ready React comment section component with rep
 - **Reactions** – Customizable reaction system (likes, hearts, etc.)
 - **Fully Themeable** – Complete control over styling
 - **TypeScript** – Full type definitions included
-- **Accessible** – ARIA labels and keyboard navigation
-- **Zero Dependencies** – Only React as peer dependency
+- **Accessible** – Add ARIA and keyboard behavior in your UI; headless layer does not impose markup
+- **Zero dependencies** – Only React and React-DOM as peer dependencies
 - **Responsive** – Works on all screen sizes
 
 ## Installation
@@ -72,21 +72,7 @@ function App() {
 }
 ```
 
-The default `CommentSection` is headless with minimal unstyled UI (plain textarea and buttons). For a ready-made styled UI, use **ShadcnCommentSection** instead:
-
-```tsx
-import { ShadcnCommentSection, type Comment, type CommentUser } from '@comment-section/react';
-
-<ShadcnCommentSection
-  comments={comments}
-  currentUser={currentUser}
-  onSubmitComment={handleSubmit}
-  onReply={handleReply}
-  onReaction={handleReaction}
-  onEdit={handleEdit}
-  onDelete={handleDelete}
-/>
-```
+The default `CommentSection` is headless with minimal unstyled UI (plain textarea and buttons). Use `renderReplyForm` and `renderComment` to supply your own UI, or use the headless building blocks (`CommentSectionProvider`, `HeadlessCommentItem`, `HeadlessReplyForm`, hooks) to build a fully custom interface. A **Shadcn-style reference implementation** is available in this repo's showcase app (`apps/showcase/src/components/comment-ui`); you can copy or adapt it for a styled Tailwind/shadcn-friendly UI.
 
 ## Data flow and loading
 
@@ -116,11 +102,16 @@ import { ShadcnCommentSection, type Comment, type CommentUser } from '@comment-s
 | `readOnly` | `boolean` | `false` | Disable all interactions |
 | `sortOrder` | `'newest' \| 'oldest' \| 'popular'` | `'newest'` | Comment sort order |
 
-## Presets and default export
+## Entry points
 
-- **Default export** (`CommentSection`): Headless with **minimal unstyled UI** (basic textarea, buttons, simple comment rows). Use it with `renderReplyForm` and `renderComment` to supply your own UI, or as a starting point.
-- **Shadcn preset**: Import `ShadcnCommentSection` (and `ShadcnCommentItem`, `ShadcnReplyForm`, etc.) for a styled, Tailwind/shadcn-friendly UI. Named exports only.
-- **Headless building blocks**: `CommentSectionProvider`, `HeadlessReplyForm`, `HeadlessCommentItem`, and hooks for building a fully custom UI.
+- **Main entry** (`@comment-section/react`): Default `CommentSection` (minimal unstyled), headless components, hooks, types, and core utilities.
+- **Subpaths**: `@comment-section/react/headless` (provider, HeadlessCommentItem, HeadlessReplyForm, hooks); `@comment-section/react/core` (types, tree, sorting, utils); `@comment-section/react/presets/default` (minimal CommentSection only).
+- **Default export** (`CommentSection`): Headless with **minimal unstyled UI**. Use `renderReplyForm` and `renderComment` for your own UI.
+- **Headless**: `CommentSectionProvider`, `HeadlessCommentItem`, `HeadlessReplyForm`, and hooks for a fully custom UI.
+
+## Reference implementation (Shadcn-style UI)
+
+This repository includes a **showcase app** that implements a Shadcn-style comment section using the headless API and Tailwind. The implementation lives under `apps/showcase/src/components/comment-ui`. You can copy that folder into your project or adapt it to get a styled, Tailwind/shadcn-friendly UI without the package shipping any styling dependencies.
 
 ## Customization
 
@@ -260,9 +251,19 @@ import type {
 } from '@comment-section/react';
 ```
 
+## Reply form (top-level vs reply-to-comment)
+
+- **Top-level new comment**: Use `HeadlessReplyForm` with `onSubmit={submitComment}` from `useCommentSection()`, or pass `renderReplyForm` to a preset. The context provides `submitComment` for the main form.
+- **Reply to a comment**: Each comment can show an inline reply form. With headless, use `HeadlessCommentItem` and render a `HeadlessReplyForm` inside the item’s children; pass `onSubmit={(content) => replyToComment(comment.id, content)}` using `replyToComment` from context. The showcase's Shadcn-style UI does this.
+
+## Accessibility
+
+- **Reference implementation (showcase)**: The Shadcn-style UI in the repo includes ARIA labels, `aria-pressed` on reactions, `role="dialog"` for the delete confirmation, and semantic structure. Copy or adapt it for production.
+- **Headless / default minimal UI**: The library does not add ARIA or keyboard behavior to your custom markup. When building your own UI with `HeadlessCommentItem`, `HeadlessReplyForm`, or `renderComment` / `renderReplyForm`, you are responsible for: focus management (e.g. focus trap in modals, focus return after submit), keyboard navigation, and semantics (labels, roles, live regions as needed).
+
 ## Adapter
 
-`createCallbackAdapter` accepts **sync** callbacks and wraps them in `Promise.resolve` so the adapter interface (Promise-based) still works when integrating with async data layers.
+`createCallbackAdapter` (from core) accepts **sync** callbacks and wraps them in `Promise.resolve` so the adapter interface (Promise-based) still works when integrating with async data layers. Use it in your own code; the provider uses sync callbacks only.
 
 ## Examples
 
@@ -303,7 +304,7 @@ function CommentSectionWithAPI() {
 
   // Or with loading state: set isSubmitting true before fetch, false after
   return (
-    <ShadcnCommentSection
+    <CommentSection
       comments={comments}
       currentUser={currentUser}
       onSubmitComment={handleSubmit}

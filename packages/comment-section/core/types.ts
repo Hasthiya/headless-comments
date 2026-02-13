@@ -8,17 +8,17 @@
  */
 export interface CommentUser {
     /** Unique identifier for the user */
-    id: string;
+    readonly id: string;
     /** Display name of the user */
-    name: string;
+    readonly name: string;
     /** URL to the user's avatar image */
-    avatarUrl?: string;
+    readonly avatarUrl?: string;
     /** Whether the user is verified */
-    isVerified?: boolean;
+    readonly isVerified?: boolean;
     /** User role for badge display (instructor, moderator, staff) */
-    role?: 'verified' | 'instructor' | 'moderator' | 'staff';
+    readonly role?: 'verified' | 'instructor' | 'moderator' | 'staff';
     /** Additional metadata for the user */
-    metadata?: Record<string, unknown>;
+    readonly metadata?: Record<string, unknown>;
 }
 
 /**
@@ -26,15 +26,15 @@ export interface CommentUser {
  */
 export interface Reaction {
     /** Unique identifier for the reaction type (e.g., 'like', 'dislike', 'heart') */
-    id: string;
+    readonly id: string;
     /** Display label for the reaction */
-    label: string;
+    readonly label: string;
     /** Emoji or icon for the reaction */
-    emoji: string;
+    readonly emoji: string;
     /** Count of users who reacted with this type */
-    count: number;
+    readonly count: number;
     /** Whether the current user has reacted with this type */
-    isActive?: boolean;
+    readonly isActive?: boolean;
 }
 
 /**
@@ -42,31 +42,31 @@ export interface Reaction {
  */
 export interface Comment {
     /** Unique identifier for the comment */
-    id: string;
+    readonly id: string;
     /** The comment content/text */
-    content: string;
+    readonly content: string;
     /** The author of the comment */
-    author: CommentUser;
+    readonly author: CommentUser;
     /** Timestamp when the comment was created */
-    createdAt: Date | string;
+    readonly createdAt: Date | string;
     /** Timestamp when the comment was last updated */
-    updatedAt?: Date | string;
+    readonly updatedAt?: Date | string;
     /** Parent comment ID for nested replies */
-    parentId?: string;
+    readonly parentId?: string;
     /** Array of reply comments */
-    replies?: Comment[];
+    readonly replies?: Comment[];
     /** Array of reactions on the comment */
-    reactions?: Reaction[];
+    readonly reactions?: Reaction[];
     /** Whether the comment has been edited */
-    isEdited?: boolean;
+    readonly isEdited?: boolean;
     /** Whether the comment is pending (optimistic update) */
-    isPending?: boolean;
+    readonly isPending?: boolean;
     /** Whether the comment failed to submit */
-    hasError?: boolean;
+    readonly hasError?: boolean;
     /** Error message if submission failed */
-    errorMessage?: string;
+    readonly errorMessage?: string;
     /** Additional metadata for the comment */
-    metadata?: Record<string, unknown>;
+    readonly metadata?: Record<string, unknown>;
 }
 
 /**

@@ -24,25 +24,29 @@ export const flattenComments = (comments: Comment[]): Comment[] => {
     return result;
 };
 
+/** Node shape used when building the tree: replies is always an array. */
+type CommentNode = Comment & { replies: Comment[] };
+
 /**
  * Build a comment tree from a flat array
  */
 export const buildCommentTree = (comments: Comment[]): Comment[] => {
-    const commentMap = new Map<string, Comment>();
-    const rootComments: Comment[] = [];
+    const commentMap = new Map<string, CommentNode>();
+    const rootComments: CommentNode[] = [];
 
     // First pass: create map and initialize replies array
     for (const comment of comments) {
         commentMap.set(comment.id, { ...comment, replies: [] });
     }
 
-    // Second pass: build tree
+    // Second pass: build tree (every node in map has replies set above)
     for (const comment of comments) {
-        const node = commentMap.get(comment.id)!;
+        const node = commentMap.get(comment.id);
+        if (!node) continue;
         if (comment.parentId) {
             const parent = commentMap.get(comment.parentId);
             if (parent) {
-                parent.replies!.push(node);
+                parent.replies.push(node);
             } else {
                 rootComments.push(node);
             }

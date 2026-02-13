@@ -35,7 +35,10 @@ export const sortComments = (
                 const reactionsB = b.reactions?.reduce((sum, r) => sum + r.count, 0) || 0;
                 return reactionsB - reactionsA;
             });
-        default:
+        default: {
+            const exhaustive: never = order;
+            void exhaustive;
             return sorted;
+        }
     }
 };

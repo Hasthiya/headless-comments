@@ -4,8 +4,6 @@
  */
 
 import type { CommentTexts, CommentTheme, ReactionConfig } from './types';
-import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
 
 /**
  * Default text translations (English)
@@ -91,7 +89,11 @@ export const generateUniqueId = (): string => {
 };
 
 /**
- * Format a date to a relative time string
+ * Format a date to a relative time string (e.g. "5 minutes ago").
+ * @param date - Date or ISO string.
+ * @param _locale - Reserved for future locale-specific formatting.
+ * @param texts - Labels for time units (justNow, minutesAgo, etc.).
+ * @returns Localized relative time string.
  */
 export const formatRelativeTime = (
     date: Date | string,
@@ -199,7 +201,10 @@ export const themeToCSSVariables = (theme: Required<CommentTheme>): Record<strin
 
 /**
  * Truncate text to approximate max lines (by character heuristic).
- * Returns { text, isTruncated }.
+ * @param text - Input string.
+ * @param maxLines - Maximum number of lines to allow.
+ * @param charsPerLine - Approximate characters per line (default 60).
+ * @returns Object with truncated text and isTruncated flag.
  */
 export const truncateToLines = (
     text: string,
@@ -349,10 +354,3 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
         return false;
     }
 };
-
-/**
- * Optimize class names (shadcn/ui standard)
- */
-export function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs));
-}

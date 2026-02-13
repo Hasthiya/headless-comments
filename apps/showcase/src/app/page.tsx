@@ -32,8 +32,8 @@ const PRESETS = [
   },
   {
     name: 'ShadCN',
-    desc: 'Tailwind + Radix styled preset. Plug into your existing shadcn/ui design system instantly.',
-    code: `import { ShadcnCommentSection } from '@comment-section/react';
+    desc: 'Tailwind + Radix styled UI. This showcase implements it in src/components/comment-ui using the headless package.',
+    code: `import { ShadcnCommentSection } from '@/components/comment-ui';
 
 <ShadcnCommentSection
   comments={comments}
@@ -68,7 +68,8 @@ const STEPS = [
   currentUser={user}
   onSubmitComment={handleSubmit}
   showReactions
-/>`,
+/>
+{/* ShadcnCommentSection from @/components/comment-ui in this showcase */}`,
   },
 ] as const;
 

@@ -1,7 +1,11 @@
 import React, { useState, useCallback, useEffect } from 'react';
+import type { CommentUser } from '../core/types';
 import { useCommentSection } from './useComments';
 import { useAutoResize, useCharacterCount, useEnterSubmit } from './hooks';
 
+/**
+ * Props passed to the render function (children) of HeadlessReplyForm.
+ */
 export interface HeadlessReplyFormChildrenProps {
     content: string;
     setContent: (content: string) => void;
@@ -15,11 +19,17 @@ export interface HeadlessReplyFormChildrenProps {
     onCancel: () => void;
     onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
     disabled: boolean;
-    currentUser: any;
+    /** Current logged-in user, or null/undefined if not authenticated */
+    currentUser: CommentUser | null | undefined;
 }
 
+/**
+ * Props for the headless reply form. Use for new comments (submitComment) or replies (replyToComment(commentId, content)).
+ */
 export interface HeadlessReplyFormProps {
+    /** Render function receiving form state and handlers */
     children: (props: HeadlessReplyFormChildrenProps) => React.ReactNode;
+    /** Called with trimmed content on submit */
     onSubmit: (content: string) => void;
     onCancel?: () => void;
     maxCharLimit?: number;
@@ -29,6 +39,10 @@ export interface HeadlessReplyFormProps {
     submitOnEnter?: boolean;
 }
 
+/**
+ * Headless reply form: provides form state and handlers via render props.
+ * Must be used inside CommentSectionProvider. Use with submitComment for top-level or replyToComment(commentId, content) for replies.
+ */
 export const HeadlessReplyForm: React.FC<HeadlessReplyFormProps> = ({
     children,
     onSubmit,

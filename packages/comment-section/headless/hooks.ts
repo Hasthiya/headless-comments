@@ -6,14 +6,17 @@
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
+import type { RefObject, KeyboardEvent as ReactKeyboardEvent } from 'react';
 import type { CommentTexts } from '../core/types';
 import { formatRelativeTime } from '../core/utils';
 
 /**
- * Hook for textarea auto-resize
+ * Hook for textarea auto-resize.
+ * @param value - Current textarea value (triggers resize on change).
+ * @param maxHeight - Max height in pixels (default 200).
+ * @returns Ref to attach to the textarea element.
  */
-export const useAutoResize = (value: string, maxHeight: number = 200) => {
+export const useAutoResize = (value: string, maxHeight: number = 200): RefObject<HTMLTextAreaElement | null> => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     useEffect(() => {
@@ -29,9 +32,15 @@ export const useAutoResize = (value: string, maxHeight: number = 200) => {
 };
 
 /**
- * Hook for character count
+ * Hook for character count.
+ * @param value - String to count.
+ * @param maxLimit - Optional character limit (enables isOverLimit and remaining).
+ * @returns Object with count, isOverLimit, and remaining (when maxLimit set).
  */
-export const useCharacterCount = (value: string, maxLimit?: number) => {
+export const useCharacterCount = (
+    value: string,
+    maxLimit?: number
+): { count: number; isOverLimit: boolean; remaining: number | undefined } => {
     const count = value.length;
     const isOverLimit = maxLimit !== undefined ? count > maxLimit : false;
     const remaining = maxLimit !== undefined ? maxLimit - count : undefined;
@@ -44,18 +53,22 @@ export const useCharacterCount = (value: string, maxLimit?: number) => {
 };
 
 /**
- * Hook for click outside detection
+ * Hook for click outside detection.
+ * @param callback - Called when a click happens outside the ref element.
+ * @param enabled - Whether the listener is active (default true).
+ * @returns Ref to attach to the element that defines "inside".
  */
 export const useClickOutside = <T extends HTMLElement>(
     callback: () => void,
     enabled: boolean = true
-) => {
+): RefObject<T | null> => {
     const ref = useRef<T>(null);
 
     useEffect(() => {
         if (!enabled) return;
 
         const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+            // Node for contains() check (EventTarget is not assignable to Node in strict typings).
             if (ref.current && !ref.current.contains(event.target as Node)) {
                 callback();
             }
@@ -76,13 +89,17 @@ export const useClickOutside = <T extends HTMLElement>(
 /**
  * Hook for Enter/Shift+Enter submit behavior in textarea.
  * Enter (no Shift) → submit; Shift+Enter → newline.
- * Returns onKeyDown handler to attach to textarea.
+ *
+ * @param onSubmit - Called when user submits via Enter.
+ * @param disabled - When true, Enter does not submit.
+ * @param options.submitOnEnter - If false, Enter inserts newline (default true).
+ * @returns onKeyDown handler to attach to textarea.
  */
 export const useEnterSubmit = (
     onSubmit: () => void,
     disabled: boolean,
     options: { submitOnEnter?: boolean } = {}
-) => {
+): (e: ReactKeyboardEvent<HTMLTextAreaElement>) => void => {
     const { submitOnEnter = true } = options;
 
     return useCallback(
@@ -99,13 +116,17 @@ export const useEnterSubmit = (
 };
 
 /**
- * Hook for keyboard shortcuts
+ * Hook for keyboard shortcuts.
+ * @param key - Key to listen for (e.g. 'Enter', 'Escape').
+ * @param callback - Called when key + modifiers match.
+ * @param modifiers - Optional ctrl, shift, alt (all must match when specified).
+ * @returns void (registers global keydown listener).
  */
 export const useKeyboardShortcut = (
     key: string,
     callback: () => void,
     modifiers: { ctrl?: boolean; shift?: boolean; alt?: boolean } = {}
-) => {
+): void => {
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             const ctrlMatch = modifiers.ctrl ? event.ctrlKey || event.metaKey : true;
@@ -124,11 +145,19 @@ export const useKeyboardShortcut = (
 };
 
 /**
- * Hook for local storage persistence
+ * Hook for local storage persistence.
+ * Stored value is trusted (same app wrote it); parsed with JSON.parse and cast to T.
+ * For untrusted storage, pass a validate function to narrow from unknown.
+ *
+ * @param key - localStorage key
+ * @param initialValue - value when key is missing or parse fails
+ * @param validate - optional guard to validate parsed value (e.g. (v: unknown) => v as T)
+ * @returns [value, setValue]
  */
 export const useLocalStorage = <T,>(
     key: string,
-    initialValue: T
+    initialValue: T,
+    validate?: (value: unknown) => T
 ): [T, (value: T | ((prev: T) => T)) => void] => {
     const [storedValue, setStoredValue] = useState<T>(() => {
         if (typeof window === 'undefined') {
@@ -136,7 +165,10 @@ export const useLocalStorage = <T,>(
         }
         try {
             const item = window.localStorage.getItem(key);
-            return item ? JSON.parse(item) : initialValue;
+            if (!item) return initialValue;
+            const parsed: unknown = JSON.parse(item);
+            if (validate) return validate(parsed);
+            return parsed as T;
         } catch {
             return initialValue;
         }
@@ -161,7 +193,10 @@ export const useLocalStorage = <T,>(
 };
 
 /**
- * Hook for debounced value
+ * Hook for debounced value.
+ * @param value - Value to debounce.
+ * @param delay - Delay in ms before updating.
+ * @returns The debounced value (updates after delay).
  */
 export const useDebouncedValue = <T,>(value: T, delay: number): T => {
     const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -180,12 +215,16 @@ export const useDebouncedValue = <T,>(value: T, delay: number): T => {
 };
 
 /**
- * Hook for infinite scroll
+ * Hook for infinite scroll.
+ * @param callback - Called when the sentinel enters viewport.
+ * @param options.threshold - rootMargin in px (default 100).
+ * @param options.enabled - Whether observer is active (default true).
+ * @returns Ref to attach to the sentinel element.
  */
 export const useInfiniteScroll = (
     callback: () => void,
     options: { threshold?: number; enabled?: boolean } = {}
-) => {
+): RefObject<HTMLDivElement | null> => {
     const { threshold = 100, enabled = true } = options;
     const targetRef = useRef<HTMLDivElement>(null);
 
@@ -217,9 +256,14 @@ export const useInfiniteScroll = (
 };
 
 /**
- * Hook for managing focus
+ * Hook for managing focus.
+ * @returns Object with ref (attach to element), focus, and blur functions.
  */
-export const useFocus = <T extends HTMLElement>() => {
+export const useFocus = <T extends HTMLElement>(): {
+    ref: RefObject<T | null>;
+    focus: () => void;
+    blur: () => void;
+} => {
     const ref = useRef<T>(null);
 
     const focus = useCallback(() => {
@@ -235,7 +279,11 @@ export const useFocus = <T extends HTMLElement>() => {
 
 /**
  * Hook for relative time that auto-updates at interval.
- * Returns formatted relative time string (e.g. "5m ago").
+ * @param date - Date or ISO string.
+ * @param locale - Locale for formatting (currently used via texts).
+ * @param texts - Required comment texts (e.g. "minutes ago").
+ * @param intervalMs - Update interval in ms (default 60000).
+ * @returns Formatted relative time string (e.g. "5m ago").
  */
 export const useRelativeTime = (
     date: Date | string,
@@ -261,9 +309,14 @@ export const useRelativeTime = (
 };
 
 /**
- * Hook for animation state
+ * Hook for animation state.
+ * @param duration - How long isAnimating stays true after trigger (default 200ms).
+ * @returns Object with isAnimating and trigger function.
  */
-export const useAnimationState = (duration: number = 200) => {
+export const useAnimationState = (duration: number = 200): {
+    isAnimating: boolean;
+    trigger: () => void;
+} => {
     const [isAnimating, setIsAnimating] = useState(false);
 
     const trigger = useCallback(() => {

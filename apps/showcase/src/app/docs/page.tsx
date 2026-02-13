@@ -21,7 +21,7 @@ export default function DocsPage() {
           <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono">
             @comment-section/react
           </code>{' '}
-          is a highly customizable, TypeScript-ready React comment section component with reply support, reactions, and optimistic updates. The library uses a <strong>sync API</strong> for all data callbacks (no Promises required) and supports <strong>user-controlled loading</strong> via <code>isSubmittingComment</code> and <code>isSubmittingReply</code>. It is <strong>headless-first</strong>: the default <code>CommentSection</code> has minimal unstyled UI; use <code>ShadcnCommentSection</code> for a styled preset, or <code>renderReplyForm</code> and <code>renderComment</code> to supply your own UI.
+          is a highly customizable, TypeScript-ready React comment section component with reply support, reactions, and optimistic updates. The library uses a <strong>sync API</strong> for all data callbacks (no Promises required) and supports <strong>user-controlled loading</strong> via <code>isSubmittingComment</code> and <code>isSubmittingReply</code>. It is <strong>headless-first</strong>: the default <code>CommentSection</code> has minimal unstyled UI; use <code>renderReplyForm</code> and <code>renderComment</code> to supply your own UI. This showcase app implements a Shadcn-style comment section as a reference (see <code>src/components/comment-ui</code>); the package itself has zero dependencies and does not ship styled presets.
         </p>
         <ul className="list-disc pl-6 space-y-1 mb-4">
           <li><strong>Optimistic updates</strong> – Instant UI updates before server confirmation</li>
@@ -50,12 +50,13 @@ pnpm add @comment-section/react`}
 
       {/* ── Quick Start ──────────────────────────────────────────────── */}
       <DocSection id="quick-start" title="Quick Start">
-        <p className="mb-4">Use a sync handler: update your state and return the new comment. Choose between <code>CommentSection</code> (headless) or <code>ShadcnCommentSection</code> (styled).</p>
+        <p className="mb-4">Use a sync handler: update your state and return the new comment. Use <code>CommentSection</code> (headless) or build your own styled UI with the headless API. This showcase uses a local Shadcn-style component from <code>@/components/comment-ui</code>.</p>
         <CodeTabs
           tabs={[
             {
-              label: 'ShadCN Preset',
-              code: `import { ShadcnCommentSection, generateUniqueId, type Comment, type CommentUser } from '@comment-section/react';
+              label: 'Shadcn-style (showcase)',
+              code: `import { generateUniqueId, type Comment, type CommentUser } from '@comment-section/react';
+import { ShadcnCommentSection } from '@/components/comment-ui'; // or your own UI
 
 const currentUser: CommentUser = {
   id: 'user-1',
@@ -160,18 +161,18 @@ function CustomComments() {
       {/* ── API Reference ────────────────────────────────────────────── */}
       <DocSection id="api-reference" title="API Reference">
         <p className="mb-4">
-          The default preset is headless with minimal UI; the Shadcn preset provides styled components; headless building blocks (Provider, HeadlessCommentItem, HeadlessReplyForm) are available for full custom UI. The sections below summarize components, props, hooks, types, and core helpers.
+          The package provides a headless default (<code>CommentSection</code> with minimal UI) and headless building blocks (Provider, HeadlessCommentItem, HeadlessReplyForm, hooks). This showcase app implements a Shadcn-style UI in <code>src/components/comment-ui</code> as a reference. The sections below summarize components, props, hooks, types, and core helpers.
         </p>
       </DocSection>
 
       <DocSection id="api-components" title="Components">
-        <p className="mb-2 font-medium">Default preset</p>
+        <p className="mb-2 font-medium">From the package</p>
         <ul className="list-disc pl-6 mb-4 space-y-1 text-sm">
-          <li><code>CommentSection</code> – Headless default with <strong>minimal unstyled</strong> UI (plain form + comment rows). Use <code>renderReplyForm</code> and <code>renderComment</code> to supply your own UI. Also exports <code>CommentItem</code>, <code>ActionBar</code>, <code>ReplyForm</code>, <code>ReactionButton</code>, <code>Avatar</code> (Shadcn re-exports for convenience).</li>
+          <li><code>CommentSection</code> – Headless default with <strong>minimal unstyled</strong> UI (plain form + comment rows). Use <code>renderReplyForm</code> and <code>renderComment</code> to supply your own UI.</li>
         </ul>
-        <p className="mb-2 font-medium">Shadcn preset</p>
+        <p className="mb-2 font-medium">Shadcn-style UI (showcase only)</p>
         <ul className="list-disc pl-6 mb-4 space-y-1 text-sm">
-          <li><code>ShadcnCommentSection</code>, <code>ShadcnCommentItem</code>, <code>ShadcnActionBar</code>, <code>ShadcnReplyForm</code>, <code>ShadcnReactionButton</code>, <code>ShadcnAvatar</code> – styled, Tailwind/shadcn-friendly.</li>
+          <li><code>ShadcnCommentSection</code>, <code>ShadcnCommentItem</code>, <code>ShadcnActionBar</code>, <code>ShadcnReplyForm</code>, <code>ShadcnReactionButton</code>, <code>ShadcnAvatar</code> – implemented in this repo under <code>apps/showcase/src/components/comment-ui</code>. Copy or adapt that folder to use a styled Tailwind/shadcn-friendly UI in your app.</li>
         </ul>
         <p className="mb-2 font-medium">Headless (build your own UI)</p>
         <ul className="list-disc pl-6 space-y-1 text-sm">
@@ -268,8 +269,8 @@ function CustomComments() {
 
       <DocSection id="presets" title="Presets">
         <ul className="list-disc pl-6 space-y-2">
-          <li><strong>Default preset</strong> – <code>CommentSection</code> is the <strong>headless default</strong> with minimal unstyled UI. Use it with <code>renderReplyForm</code> and <code>renderComment</code> for your own UI, or use Shadcn for a styled preset.</li>
-          <li><strong>Shadcn preset</strong> – <code>ShadcnCommentSection</code>, <code>ShadcnCommentItem</code>, <code>ShadcnActionBar</code>, <code>ShadcnReplyForm</code>, <code>ShadcnReactionButton</code>, <code>ShadcnAvatar</code>. Styled, Tailwind/shadcn-friendly; import <code>ShadcnCommentSection</code> when you want the pre-built look.</li>
+          <li><strong>Default preset</strong> – <code>CommentSection</code> is the <strong>headless default</strong> with minimal unstyled UI. Use it with <code>renderReplyForm</code> and <code>renderComment</code> for your own UI.</li>
+          <li><strong>Shadcn-style reference</strong> – This showcase app implements a Shadcn-style comment section in <code>src/components/comment-ui</code> using the headless API. Copy or adapt that implementation for a styled Tailwind/shadcn-friendly UI in your project.</li>
           <li><strong>Headless</strong> – Use <code>CommentSectionProvider</code>, <code>HeadlessCommentItem</code>, <code>HeadlessReplyForm</code>, and hooks to build a fully custom UI.</li>
         </ul>
       </DocSection>

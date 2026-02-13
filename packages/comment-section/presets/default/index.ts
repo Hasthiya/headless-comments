@@ -1,22 +1,9 @@
 /**
  * Default preset — headless CommentSection with minimal unstyled UI.
- * Use renderReplyForm / renderComment for your own UI, or import ShadcnCommentSection for styled UI.
+ * Use renderReplyForm / renderComment for your own UI.
+ * For a styled UI, use ShadcnCommentSection from the main package or from '@comment-section/react/presets/shadcn'.
  * @module @comment-section/presets/default
  */
 
 export { DefaultCommentSection as CommentSection, DefaultCommentSection } from './DefaultCommentSection';
-export {
-  ShadcnCommentSection,
-  ShadcnCommentItem as CommentItem,
-  ShadcnActionBar as ActionBar,
-  ShadcnReplyForm as ReplyForm,
-  ShadcnReactionButton as ReactionButton,
-  ShadcnAvatar as Avatar,
-  ShadcnCommentItem,
-  ShadcnActionBar,
-  ShadcnReplyForm,
-  ShadcnReactionButton,
-  ShadcnAvatar,
-} from '../shadcn';
-
 export { DefaultCommentSection as default } from './DefaultCommentSection';

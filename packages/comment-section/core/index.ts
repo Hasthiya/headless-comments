@@ -37,6 +37,7 @@ export {
     mergeReactions,
     themeToCSSVariables,
     truncateText,
+    truncateToLines,
     escapeHtml,
     parseMentions,
     debounce,

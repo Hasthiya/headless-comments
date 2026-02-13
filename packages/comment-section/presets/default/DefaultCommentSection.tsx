@@ -7,7 +7,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import type { CommentSectionProps } from '../../headless/types';
+import type { CommentSectionProps, CommentItemProps } from '../../headless/types';
 import type { Comment } from '../../core/types';
 import { CommentSectionProvider } from '../../headless/CommentProvider';
 import { useComments } from '../../headless/useComments';
@@ -149,8 +149,8 @@ const DefaultCommentSectionInternal: React.FC<
       {comments.length === 0 && (renderEmpty ? renderEmpty() : <p>No comments yet. Be the first to comment.</p>)}
       {comments.length > 0 &&
         (renderComment
-          ? comments.map((comment) =>
-              renderComment(comment, {
+          ? comments.map((comment) => {
+              const itemProps: CommentItemProps = {
                 comment,
                 currentUser: currentUser ?? null,
                 onReply: replyToComment,
@@ -159,9 +159,17 @@ const DefaultCommentSectionInternal: React.FC<
                 onDelete: deleteComment,
                 maxDepth,
                 depth: 0,
-                ...rest,
-              } as any)
-            )
+                readOnly,
+                theme: rest.theme,
+                locale: rest.locale,
+                showReactions: rest.showReactions,
+                showMoreOptions: rest.showMoreOptions,
+                availableReactions: rest.availableReactions,
+                showVerifiedBadge: rest.showVerifiedBadge,
+                maxCommentLines: rest.maxCommentLines,
+              };
+              return renderComment(comment, itemProps);
+            })
           : comments.map((comment) => (
               <MinimalCommentItem
                 key={comment.id}
@@ -206,6 +214,7 @@ export const DefaultCommentSection: React.FC<CommentSectionProps> = (props) => {
       onEdit={props.onEdit}
       onDelete={props.onDelete}
     >
+      {/* mergeTheme returns Required<CommentTheme>; CommentThemeRequired is the same shape (named alias). */}
       <DefaultCommentSectionInternal {...rest} internalTheme={mergedTheme as CommentThemeRequired} />
     </CommentSectionProvider>
   );

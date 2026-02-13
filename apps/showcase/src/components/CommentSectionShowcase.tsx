@@ -1,12 +1,8 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import {
-  ShadcnCommentSection,
-  generateUniqueId,
-  type Comment,
-  type CommentUser,
-} from '@comment-section/react';
+import { generateUniqueId, type Comment, type CommentUser } from '@comment-section/react';
+import { ShadcnCommentSection } from '@/components/comment-ui';
 import { themeAwareDemoTheme } from '@/lib/demo-theme';
 
 
@@ -88,7 +84,7 @@ export function CommentSectionShowcase() {
         createdAt: new Date(),
         reactions: [
           { id: 'like', label: 'Like', emoji: '👍', count: 0, isActive: false },
-          { id: 'heart', label: 'Heart', emoji: '❤️', count: 0, isActive: false },
+          { id: 'dislike', label: 'Dislike', emoji: '👎', count: 0, isActive: false },
         ],
       };
       setComments((prev) => [newComment, ...prev]);
@@ -106,6 +102,7 @@ export function CommentSectionShowcase() {
         parentId: commentId,
         reactions: [
           { id: 'like', label: 'Like', emoji: '👍', count: 0, isActive: false },
+          { id: 'dislike', label: 'Dislike', emoji: '👎', count: 0, isActive: false },
         ],
       };
       setComments((prev) =>
@@ -132,44 +129,41 @@ export function CommentSectionShowcase() {
   );
 
   const handleReaction = useCallback((commentId: string, reactionId: string) => {
-    setComments((prev) =>
-      prev.map((c) => {
-        if (c.id === commentId) {
-          const reactions = (c.reactions ?? []).map((r) =>
-            r.id === reactionId
-              ? {
-                  ...r,
-                  count: r.count + (r.isActive ? -1 : 1),
-                  isActive: !r.isActive,
-                }
-              : r
-          );
-          return { ...c, reactions };
-        }
-        if (c.replies) {
-          return {
-            ...c,
-            replies: c.replies.map((r) =>
-              r.id === commentId
-                ? {
-                    ...r,
-                    reactions: (r.reactions ?? []).map((re) =>
-                      re.id === reactionId
-                        ? {
-                            ...re,
-                            count: re.count + (re.isActive ? -1 : 1),
-                            isActive: !re.isActive,
-                          }
-                        : re
-                    ),
-                  }
-                : r
-            ),
-          };
-        }
-        return c;
-      })
-    );
+    const updateReactions = (reactions: Comment['reactions']) => {
+      const list = reactions ?? [];
+      const existing = list.find((r) => r.id === reactionId);
+      if (existing) {
+        return list.map((r) =>
+          r.id === reactionId
+            ? {
+                ...r,
+                count: r.count + (r.isActive ? -1 : 1),
+                isActive: !r.isActive,
+              }
+            : r
+        );
+      }
+      return [
+        ...list,
+        {
+          id: reactionId,
+          label: reactionId === 'dislike' ? 'Dislike' : reactionId,
+          emoji: reactionId === 'dislike' ? '👎' : '👍',
+          count: 1,
+          isActive: true,
+        },
+      ];
+    };
+    const updateComment = (c: Comment): Comment => {
+      if (c.id === commentId) {
+        return { ...c, reactions: updateReactions(c.reactions) };
+      }
+      if (c.replies?.length) {
+        return { ...c, replies: c.replies.map(updateComment) };
+      }
+      return c;
+    };
+    setComments((prev) => prev.map(updateComment));
   }, []);
 
   const handleEdit = useCallback(
@@ -221,6 +215,7 @@ export function CommentSectionShowcase() {
         showMoreOptions
         inputPlaceholder="Add a comment..."
         enableOptimisticUpdates
+        includeDislike
       />
     </div>
   );
