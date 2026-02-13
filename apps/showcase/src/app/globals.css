@@ -216,3 +216,11 @@ body::before {
   background-size: 200% 100%;
   animation: shimmer 3s linear infinite;
 }
+
+/* Docs code blocks: no border or outer ring */
+.docs-code-block,
+.docs-code-block pre,
+.docs-code-block code {
+  border: none !important;
+  box-shadow: none !important;
+}

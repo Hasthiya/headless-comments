@@ -6,6 +6,27 @@ A highly customizable, TypeScript-ready React comment section component with rep
 ![License](https://img.shields.io/npm/l/@comment-section/react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-ready-blue)
 
+## Table of contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start — Styled Preset](#quick-start--styled-preset-recommended)
+- [Quick Start — Headless](#quick-start--headless-bring-your-own-ui)
+- [Choosing an approach](#choosing-an-approach)
+- [Data flow and loading](#data-flow-and-loading)
+- [Props](#props)
+- [Entry points](#entry-points)
+- [Styled preset: CSS variables](#styled-preset-css-variables)
+- [StyledCommentSection props](#styledcommentsection-props)
+- [Shadcn / Tailwind](#shadcn--tailwind-copy-paste-approach)
+- [Customization](#customization)
+- [Hooks](#hooks)
+- [TypeScript Types](#typescript-types)
+- [Examples](#examples)
+- [Troubleshooting / FAQ](#troubleshooting--faq)
+- [Accessibility](#accessibility)
+- [Browser Support](#browser-support)
+
 ## Features
 
 - **Optimistic Updates** – Instant UI updates before server confirmation
@@ -27,13 +48,14 @@ yarn add @comment-section/react
 pnpm add @comment-section/react
 ```
 
-## Quick Start
+## Quick Start — Styled Preset (recommended)
 
-Callbacks are **synchronous**: update your state and return the new comment. The library clears the form and closes the reply UI after calling your handler.
+Get a polished, fully styled comment section with **zero extra dependencies**. Just import the component + its CSS file:
 
 ```tsx
+import '@comment-section/react/presets/styled/styles.css';
 import {
-  CommentSection,
+  StyledCommentSection,
   generateUniqueId,
   type Comment,
   type CommentUser,
@@ -63,7 +85,7 @@ function App() {
   };
 
   return (
-    <CommentSection
+    <StyledCommentSection
       comments={comments}
       currentUser={currentUser}
       onSubmitComment={handleSubmit}
@@ -72,12 +94,43 @@ function App() {
 }
 ```
 
-The default `CommentSection` is headless with minimal unstyled UI (plain textarea and buttons). Use `renderReplyForm` and `renderComment` to supply your own UI, or use the headless building blocks (`CommentSectionProvider`, `HeadlessCommentItem`, `HeadlessReplyForm`, hooks) to build a fully custom interface. A **Shadcn-style reference implementation** is available in this repo's showcase app (`apps/showcase/src/components/comment-ui`); you can copy or adapt it for a styled Tailwind/shadcn-friendly UI.
+The styled preset includes avatars, reactions, nested replies, sort bar, loading skeletons, delete confirmation, and more — all themed via CSS variables. Override any `--cs-*` variable to customize:
+
+```css
+:root {
+  --cs-primary-color: #8b5cf6;
+  --cs-bg-color: #0f172a;
+  --cs-text-color: #f8fafc;
+  --cs-border-color: #334155;
+}
+```
+
+## Quick Start — Headless (bring your own UI)
+
+For full control, use the headless `CommentSection` (minimal unstyled UI) and supply your own components via `renderReplyForm` and `renderComment`. Or use the headless building blocks (`CommentSectionProvider`, `HeadlessCommentItem`, `HeadlessReplyForm`, hooks) to build a fully custom interface.
+
+```tsx
+import { CommentSection } from '@comment-section/react';
+
+<CommentSection
+  comments={comments}
+  currentUser={currentUser}
+  onSubmitComment={handleSubmit}
+/>
+```
+
+Callbacks are **synchronous**: update your state and return the new comment. The library clears the form and closes the reply UI after calling your handler.
+
+## Choosing an approach
+
+- **Zero config, no Tailwind?** Use the **Styled preset**: import `@comment-section/react/presets/styled/styles.css` and `<StyledCommentSection />`. Theme via CSS variables (`--cs-*`).
+- **Using Tailwind / shadcn/ui?** Copy the **Shadcn-style** comment UI from `apps/showcase/src/components/comment-ui/` into your project and use `<ShadcnCommentSection />`.
+- **Full control / custom design?** Use the **headless** `CommentSection` with `renderReplyForm` and `renderComment`, or build with `CommentSectionProvider`, `HeadlessCommentItem`, `HeadlessReplyForm`, and hooks.
 
 ## Data flow and loading
 
 - **Sync callbacks**: All data callbacks (`onSubmitComment`, `onReply`, `onEdit`, `onDelete`, `onReaction`) are synchronous. You update your own state (or trigger an API call in a fire-and-forget way); the library then clears the form and closes the reply UI.
-- **User-controlled loading**: For async work (e.g. calling an API), set `isSubmittingComment` or `isSubmittingReply` to `true` before the request and back to `false` when done. The preset uses these to disable the submit button and show "Submitting…".
+- **User-controlled loading**: For async work (e.g. calling an API), set `isSubmittingComment` or `isSubmittingReply` to `true` before the request and back to `false` when done. The preset uses these to disable the submit button and show "Submitting…". Example: `<StyledCommentSection isSubmittingComment={isSubmitting} onSubmitComment={handleSubmit} ... />` with `const [isSubmitting, setIsSubmitting] = useState(false);` and toggling it in your handler.
 
 ## Props
 
@@ -104,14 +157,106 @@ The default `CommentSection` is headless with minimal unstyled UI (plain textare
 
 ## Entry points
 
-- **Main entry** (`@comment-section/react`): Default `CommentSection` (minimal unstyled), headless components, hooks, types, and core utilities.
-- **Subpaths**: `@comment-section/react/headless` (provider, HeadlessCommentItem, HeadlessReplyForm, hooks); `@comment-section/react/core` (types, tree, sorting, utils); `@comment-section/react/presets/default` (minimal CommentSection only).
-- **Default export** (`CommentSection`): Headless with **minimal unstyled UI**. Use `renderReplyForm` and `renderComment` for your own UI.
-- **Headless**: `CommentSectionProvider`, `HeadlessCommentItem`, `HeadlessReplyForm`, and hooks for a fully custom UI.
+| Import path | What you get |
+|---|---|
+| `@comment-section/react` | Everything: `StyledCommentSection`, `CommentSection` (default headless), headless components, hooks, types, core utilities |
+| `@comment-section/react/presets/styled` | `StyledCommentSection` + styled sub-components only |
+| `@comment-section/react/presets/styled/styles.css` | CSS file for the styled preset |
+| `@comment-section/react/presets/default` | `CommentSection` (minimal unstyled) only |
+| `@comment-section/react/headless` | Provider, `HeadlessCommentItem`, `HeadlessReplyForm`, hooks |
+| `@comment-section/react/core` | Types, tree, sorting, utilities (framework-agnostic) |
 
-## Reference implementation (Shadcn-style UI)
+## Styled preset: CSS variables
 
-This repository includes a **showcase app** that implements a Shadcn-style comment section using the headless API and Tailwind. The implementation lives under `apps/showcase/src/components/comment-ui`. You can copy that folder into your project or adapt it to get a styled, Tailwind/shadcn-friendly UI without the package shipping any styling dependencies.
+Override these CSS custom properties (e.g. in `:root` or a wrapper) to theme the Styled preset:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `--cs-primary-color` | `#f97316` | Primary accent (buttons, links, focus) |
+| `--cs-secondary-color` | `#6b7280` | Muted/secondary elements (e.g. avatar fallback) |
+| `--cs-bg-color` | `#ffffff` | Background |
+| `--cs-hover-bg-color` | `#f9fafb` | Hover background |
+| `--cs-text-color` | `#1f2937` | Main text |
+| `--cs-secondary-text-color` | `#6b7280` | Secondary text (timestamps, labels) |
+| `--cs-border-color` | `#e5e7eb` | Borders |
+| `--cs-border-radius` | `8px` | Border radius for inputs, buttons, cards |
+| `--cs-font-family` | system stack | Font family |
+| `--cs-font-size` | `14px` | Base font size |
+| `--cs-avatar-size` | `36px` | Avatar width/height |
+| `--cs-comment-spacing` | `16px` | Vertical spacing between comments |
+| `--cs-animation-duration` | `200ms` | Transition duration |
+| `--cs-destructive-color` | `#dc2626` | Delete/danger actions |
+| `--cs-success-color` | `#16a34a` | Success state |
+
+For dark mode, add the class `cs-root--dark` to an ancestor of the comment section, or set `data-cs-theme="dark"` on the wrapper (see [Troubleshooting / FAQ](#troubleshooting--faq)).
+
+## StyledCommentSection props
+
+`StyledCommentSection` accepts all [CommentSection Props](#commentsection-props) plus these optional display props:
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `showSortBar` | `boolean` | `true` | Show sort bar (newest / oldest / top) |
+| `showReactions` | `boolean` | `true` | Show reaction buttons on comments |
+| `showMoreOptions` | `boolean` | `true` | Show more-options menu (reply, edit, delete, share, report) |
+| `showVerifiedBadge` | `boolean` | `true` | Show verified badge next to author name |
+| `maxCommentLines` | `number` | - | Max lines before truncating comment body (undefined = no truncation) |
+| `inputPlaceholder` | `string` | - | Placeholder for the new-comment textarea |
+| `maxCharLimit` | `number` | - | Max characters in comment/reply input |
+| `showCharCount` | `boolean` | `false` | Show character count when `maxCharLimit` is set |
+| `autoFocus` | `boolean` | `false` | Auto-focus the new-comment textarea on mount |
+| `maxDepth` | `number` | `3` | Maximum reply nesting depth |
+
+## Shadcn / Tailwind (copy-paste approach)
+
+If you use **Tailwind CSS** and **shadcn/ui**, this repository includes a complete Shadcn-style comment section that you can copy into your project. The implementation lives under `apps/showcase/src/components/comment-ui/`.
+
+### Steps
+
+1. **Install peer dependencies** (if not already installed):
+
+   ```bash
+   pnpm add @comment-section/react lucide-react
+   ```
+
+2. **Add required shadcn/ui components** (if not already added):
+
+   ```bash
+   npx shadcn@latest add avatar button textarea skeleton dropdown-menu alert-dialog
+   ```
+
+3. **Copy the comment-ui folder** into your project:
+
+   ```bash
+   cp -r apps/showcase/src/components/comment-ui/ src/components/comment-ui/
+   ```
+
+4. **Update import aliases** — the copied files use `@/components/ui/*` and `@/lib/utils` for shadcn. Adjust these if your project uses different aliases.
+
+5. **Use it**:
+
+   ```tsx
+   import { ShadcnCommentSection } from '@/components/comment-ui';
+
+   <ShadcnCommentSection
+     comments={comments}
+     currentUser={currentUser}
+     onSubmitComment={handleSubmit}
+   />
+   ```
+
+### Files included
+
+| File | Component |
+|------|----------|
+| `ShadcnCommentSection.tsx` | Main wrapper (provider + list) |
+| `ShadcnCommentItem.tsx` | Individual comment with replies |
+| `ShadcnActionBar.tsx` | Reactions, reply, edit/delete, report |
+| `ShadcnReplyForm.tsx` | Comment/reply form |
+| `ShadcnReactionButton.tsx` | Reaction pill button |
+| `ShadcnAvatar.tsx` | User avatar with fallback |
+| `ShadcnCommentSkeleton.tsx` | Loading skeleton |
+| `index.ts` | Barrel exports |
 
 ## Customization
 
@@ -250,6 +395,13 @@ import type {
   RenderReplyFormProps,
 } from '@comment-section/react';
 ```
+
+## Troubleshooting / FAQ
+
+- **CSS not applying for Styled preset?** Ensure you import the stylesheet: `import '@comment-section/react/presets/styled/styles.css';` (in your root layout or the page that renders `StyledCommentSection`).
+- **Comments not updating after submit?** Callbacks are sync: your handler must update your state (e.g. `setComments`) and **return** the new comment. The library then clears the form and closes the reply UI.
+- **Next.js App Router?** Import the Styled preset CSS in your root layout (`app/layout.tsx`) or in the page/layout that uses the component so it’s included in the bundle.
+- **Dark mode (Styled preset)?** Add the class `cs-root--dark` to a parent of the comment section, or set `data-cs-theme="dark"` on the wrapper. The stylesheet also respects the `.dark` class on an ancestor (e.g. from next-themes with `attribute="class"`), so the Styled preset can follow your app’s theme automatically.
 
 ## Reply form (top-level vs reply-to-comment)
 

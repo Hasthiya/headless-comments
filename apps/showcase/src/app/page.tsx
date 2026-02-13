@@ -30,6 +30,18 @@ const PRESETS = [
 />`,
   },
   {
+    name: 'Styled',
+    desc: 'CSS-only preset from the package. Zero Tailwind/Radix — import the stylesheet and theme via --cs-* variables.',
+    code: `import '@comment-section/react/presets/styled/styles.css';
+import { StyledCommentSection } from '@comment-section/react';
+
+<StyledCommentSection
+  comments={comments}
+  currentUser={user}
+  onSubmitComment={handleSubmit}
+/>`,
+  },
+  {
     name: 'ShadCN',
     desc: 'Tailwind + Radix styled UI. This showcase implements it in src/components/comment-ui using the headless package.',
     code: `import { ShadcnCommentSection } from '@/components/comment-ui';

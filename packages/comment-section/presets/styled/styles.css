@@ -1,0 +1,909 @@
+/**
+ * @comment-section/react — Styled Preset
+ * A polished, ready-to-use comment section with zero external dependencies.
+ * All styling uses CSS custom properties for easy theming.
+ *
+ * Usage:
+ *   import '@comment-section/react/presets/styled/styles.css';
+ *   import { StyledCommentSection } from '@comment-section/react/presets/styled';
+ */
+
+/* ── CSS Variables (override these to theme) ──────────────────────────── */
+:root {
+    --cs-primary-color: #f97316;
+    --cs-secondary-color: #6b7280;
+    --cs-bg-color: #ffffff;
+    --cs-hover-bg-color: #f9fafb;
+    --cs-text-color: #1f2937;
+    --cs-secondary-text-color: #6b7280;
+    --cs-border-color: #e5e7eb;
+    --cs-border-radius: 8px;
+    --cs-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+        Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+    --cs-font-size: 14px;
+    --cs-avatar-size: 36px;
+    --cs-comment-spacing: 16px;
+    --cs-animation-duration: 200ms;
+    --cs-destructive-color: #dc2626;
+    --cs-success-color: #16a34a;
+}
+
+/* ── Dark mode: add .cs-root--dark to an ancestor, data-cs-theme="dark" on wrapper, or use .dark (e.g. next-themes) ── */
+.cs-root--dark .cs-root,
+[data-cs-theme="dark"] .cs-root,
+.dark .cs-root {
+    --cs-primary-color: #fb923c;
+    --cs-secondary-color: #9ca3af;
+    --cs-bg-color: #1f2937;
+    --cs-hover-bg-color: #374151;
+    --cs-text-color: #f9fafb;
+    --cs-secondary-text-color: #9ca3af;
+    --cs-border-color: #374151;
+    --cs-destructive-color: #f87171;
+    --cs-success-color: #4ade80;
+}
+
+/* ── Base ──────────────────────────────────────────────────────────────── */
+.cs-root {
+    font-family: var(--cs-font-family);
+    font-size: var(--cs-font-size);
+    color: var(--cs-text-color);
+    line-height: 1.5;
+    position: relative;
+}
+
+.cs-root *,
+.cs-root *::before,
+.cs-root *::after {
+    box-sizing: border-box;
+}
+
+/* ── Avatar ────────────────────────────────────────────────────────────── */
+.cs-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    background-color: var(--cs-secondary-color);
+    color: #fff;
+    font-weight: 600;
+    user-select: none;
+}
+
+.cs-avatar--sm {
+    width: 28px;
+    height: 28px;
+    font-size: 10px;
+}
+
+.cs-avatar--md {
+    width: var(--cs-avatar-size);
+    height: var(--cs-avatar-size);
+    font-size: 12px;
+}
+
+.cs-avatar--lg {
+    width: 48px;
+    height: 48px;
+    font-size: 16px;
+}
+
+.cs-avatar__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* ── Reply Form ───────────────────────────────────────────────────────── */
+.cs-reply-form {
+    display: flex;
+    gap: 12px;
+    padding: 12px 0;
+}
+
+.cs-reply-form__body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.cs-reply-form__replying-to {
+    font-size: 12px;
+    color: var(--cs-secondary-text-color);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.cs-reply-form__replying-to-name {
+    color: var(--cs-primary-color);
+    font-weight: 500;
+}
+
+.cs-reply-form__textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 10px 12px;
+    border: 1px solid var(--cs-border-color);
+    border-radius: var(--cs-border-radius);
+    background: var(--cs-bg-color);
+    color: var(--cs-text-color);
+    font-family: inherit;
+    font-size: inherit;
+    line-height: 1.5;
+    resize: vertical;
+    transition: border-color var(--cs-animation-duration) ease,
+        box-shadow var(--cs-animation-duration) ease;
+    outline: none;
+}
+
+.cs-reply-form__textarea:focus {
+    border-color: var(--cs-primary-color);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--cs-primary-color) 15%, transparent);
+}
+
+.cs-reply-form__textarea:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.cs-reply-form__textarea--error {
+    border-color: var(--cs-destructive-color);
+}
+
+.cs-reply-form__textarea--error:focus {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--cs-destructive-color) 15%, transparent);
+}
+
+.cs-reply-form__error {
+    font-size: 12px;
+    color: var(--cs-destructive-color);
+}
+
+.cs-reply-form__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.cs-reply-form__char-count {
+    font-size: 12px;
+    color: var(--cs-secondary-text-color);
+}
+
+.cs-reply-form__char-count--over {
+    color: var(--cs-destructive-color);
+}
+
+.cs-reply-form__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
+
+/* ── Buttons ──────────────────────────────────────────────────────────── */
+.cs-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border: none;
+    border-radius: var(--cs-border-radius);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1;
+    cursor: pointer;
+    transition: all var(--cs-animation-duration) ease;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.cs-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.cs-btn--primary {
+    background-color: var(--cs-primary-color);
+    color: #fff;
+}
+
+.cs-btn--primary:hover:not(:disabled) {
+    filter: brightness(0.9);
+}
+
+.cs-btn--outline {
+    background: transparent;
+    border: 1px solid var(--cs-border-color);
+    color: var(--cs-text-color);
+}
+
+.cs-btn--outline:hover:not(:disabled) {
+    background: var(--cs-hover-bg-color);
+}
+
+.cs-btn--ghost {
+    background: transparent;
+    color: var(--cs-secondary-text-color);
+    padding: 4px 8px;
+    border-radius: var(--cs-border-radius);
+}
+
+.cs-btn--ghost:hover:not(:disabled) {
+    background: var(--cs-hover-bg-color);
+    color: var(--cs-text-color);
+}
+
+.cs-btn--destructive {
+    background-color: var(--cs-destructive-color);
+    color: #fff;
+}
+
+.cs-btn--destructive:hover:not(:disabled) {
+    filter: brightness(0.9);
+}
+
+.cs-btn--sm {
+    padding: 3px 8px;
+    font-size: 12px;
+}
+
+.cs-btn--icon {
+    padding: 4px;
+    width: 28px;
+    height: 28px;
+}
+
+/* ── Spinner ──────────────────────────────────────────────────────────── */
+@keyframes cs-spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.cs-spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: cs-spin 0.6s linear infinite;
+}
+
+/* ── Comment Item ─────────────────────────────────────────────────────── */
+.cs-comment {
+    display: flex;
+    gap: 12px;
+    padding: var(--cs-comment-spacing) 0;
+    border-bottom: 1px solid var(--cs-border-color);
+    animation: cs-fade-in var(--cs-animation-duration) ease;
+}
+
+.cs-comment:last-child {
+    border-bottom: none;
+}
+
+@keyframes cs-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.cs-comment--pending {
+    opacity: 0.6;
+}
+
+.cs-comment__body {
+    flex: 1;
+    min-width: 0;
+}
+
+.cs-comment__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+}
+
+.cs-comment__author {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--cs-text-color);
+}
+
+.cs-comment__badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 6px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.cs-comment__badge--verified {
+    background: color-mix(in srgb, var(--cs-primary-color) 12%, transparent);
+    color: var(--cs-primary-color);
+}
+
+.cs-comment__badge--instructor {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.cs-comment__badge--moderator {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.cs-comment__badge--staff {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.cs-comment__time {
+    font-size: 12px;
+    color: var(--cs-secondary-text-color);
+}
+
+.cs-comment__edited {
+    font-size: 11px;
+    color: var(--cs-secondary-text-color);
+    font-style: italic;
+}
+
+.cs-comment__content {
+    line-height: 1.6;
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+.cs-comment__read-more {
+    display: inline;
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--cs-primary-color);
+    cursor: pointer;
+    font-size: inherit;
+    font-weight: 500;
+    margin-left: 4px;
+}
+
+.cs-comment__read-more:hover {
+    text-decoration: underline;
+}
+
+/* ── Edit form (inline) ───────────────────────────────────────────────── */
+.cs-edit-form {
+    margin-top: 8px;
+}
+
+.cs-edit-form__textarea {
+    width: 100%;
+    min-height: 60px;
+    padding: 8px 10px;
+    border: 1px solid var(--cs-primary-color);
+    border-radius: var(--cs-border-radius);
+    background: var(--cs-bg-color);
+    color: var(--cs-text-color);
+    font-family: inherit;
+    font-size: inherit;
+    line-height: 1.5;
+    resize: vertical;
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--cs-primary-color) 10%, transparent);
+}
+
+.cs-edit-form__actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+/* ── Action Bar ───────────────────────────────────────────────────────── */
+.cs-action-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+}
+
+/* ── Reaction Button ──────────────────────────────────────────────────── */
+.cs-reaction {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--cs-secondary-text-color);
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all var(--cs-animation-duration) ease;
+    user-select: none;
+    line-height: 1;
+}
+
+.cs-reaction:hover:not(:disabled) {
+    background: var(--cs-hover-bg-color);
+    color: var(--cs-text-color);
+}
+
+.cs-reaction--active {
+    background: color-mix(in srgb, var(--cs-primary-color) 10%, transparent);
+    color: var(--cs-primary-color);
+    border-color: color-mix(in srgb, var(--cs-primary-color) 25%, transparent);
+}
+
+.cs-reaction--active:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--cs-primary-color) 18%, transparent);
+}
+
+.cs-reaction:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.cs-reaction__emoji {
+    font-size: 1.1em;
+    line-height: 1;
+}
+
+.cs-reaction__count {
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Reaction Picker (single smiley → popover with reactions + count) ───── */
+.cs-reaction-picker {
+    position: relative;
+    display: inline-flex;
+}
+
+.cs-reaction-trigger {
+    padding: 4px;
+}
+
+.cs-reaction-trigger__emoji {
+    font-size: 1.1em;
+    line-height: 1;
+}
+
+.cs-reaction-picker__popover {
+    position: absolute;
+    left: 0;
+    bottom: calc(100% + 6px);
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 120px;
+    padding: 6px;
+    background: var(--cs-bg-color);
+    border: 1px solid var(--cs-border-color);
+    border-radius: var(--cs-border-radius);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.cs-reaction-picker__item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 6px 10px;
+    text-align: left;
+}
+
+.cs-reaction-picker__item .cs-reaction__count {
+    margin-left: auto;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Replies toggle ───────────────────────────────────────────────────── */
+.cs-replies-toggle {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+    padding: 0;
+    background: none;
+    border: none;
+    color: var(--cs-primary-color);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.cs-replies-toggle:hover {
+    text-decoration: underline;
+}
+
+.cs-replies-toggle__icon {
+    display: inline-flex;
+    transition: transform var(--cs-animation-duration) ease;
+}
+
+.cs-replies-toggle__icon--expanded {
+    transform: rotate(180deg);
+}
+
+/* ── Replies container ────────────────────────────────────────────────── */
+.cs-replies {
+    margin-top: 4px;
+    padding-left: 16px;
+    border-left: 2px solid var(--cs-border-color);
+}
+
+/* ── Delete confirmation ──────────────────────────────────────────────── */
+.cs-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+    animation: cs-fade-in var(--cs-animation-duration) ease;
+}
+
+.cs-dialog {
+    background: var(--cs-bg-color);
+    border-radius: calc(var(--cs-border-radius) + 4px);
+    padding: 24px;
+    max-width: 400px;
+    width: calc(100% - 32px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    animation: cs-dialog-in var(--cs-animation-duration) ease;
+}
+
+@keyframes cs-dialog-in {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.cs-dialog__title {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 8px;
+    color: var(--cs-text-color);
+}
+
+.cs-dialog__description {
+    font-size: 13px;
+    color: var(--cs-secondary-text-color);
+    margin: 0 0 20px;
+}
+
+.cs-dialog__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+/* ── Dropdown Menu ────────────────────────────────────────────────────── */
+.cs-dropdown {
+    position: relative;
+    display: inline-flex;
+}
+
+.cs-dropdown__menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 4px);
+    z-index: 50;
+    min-width: 160px;
+    background: var(--cs-bg-color);
+    border: 1px solid var(--cs-border-color);
+    border-radius: var(--cs-border-radius);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    padding: 4px;
+    animation: cs-fade-in calc(var(--cs-animation-duration) / 2) ease;
+}
+
+.cs-dropdown__item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 10px;
+    border: none;
+    border-radius: calc(var(--cs-border-radius) - 2px);
+    background: transparent;
+    color: var(--cs-text-color);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    text-align: left;
+    transition: background var(--cs-animation-duration) ease;
+}
+
+.cs-dropdown__item:hover {
+    background: var(--cs-hover-bg-color);
+}
+
+.cs-dropdown__item--destructive {
+    color: var(--cs-destructive-color);
+}
+
+.cs-dropdown__item--destructive:hover {
+    background: color-mix(in srgb, var(--cs-destructive-color) 8%, transparent);
+}
+
+.cs-dropdown__separator {
+    height: 1px;
+    margin: 4px 0;
+    background: var(--cs-border-color);
+}
+
+/* ── Report sub-menu ──────────────────────────────────────────────────── */
+.cs-dropdown__sub {
+    position: relative;
+}
+
+.cs-dropdown__sub-trigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 10px;
+    border: none;
+    border-radius: calc(var(--cs-border-radius) - 2px);
+    background: transparent;
+    color: var(--cs-text-color);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    text-align: left;
+    transition: background var(--cs-animation-duration) ease;
+}
+
+.cs-dropdown__sub-trigger:hover {
+    background: var(--cs-hover-bg-color);
+}
+
+.cs-dropdown__sub-trigger::after {
+    content: '›';
+    margin-left: auto;
+    font-size: 16px;
+    color: var(--cs-secondary-text-color);
+}
+
+.cs-dropdown__sub-menu {
+    position: absolute;
+    left: calc(100% + 4px);
+    top: 0;
+    z-index: 51;
+    min-width: 140px;
+    background: var(--cs-bg-color);
+    border: 1px solid var(--cs-border-color);
+    border-radius: var(--cs-border-radius);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    padding: 4px;
+    animation: cs-fade-in calc(var(--cs-animation-duration) / 2) ease;
+}
+
+/* ── Skeleton / Loading ───────────────────────────────────────────────── */
+@keyframes cs-shimmer {
+    0% {
+        background-position: -200px 0;
+    }
+
+    100% {
+        background-position: calc(200px + 100%) 0;
+    }
+}
+
+.cs-skeleton {
+    background: linear-gradient(90deg,
+            var(--cs-hover-bg-color) 25%,
+            var(--cs-border-color) 37%,
+            var(--cs-hover-bg-color) 63%);
+    background-size: 200px 100%;
+    animation: cs-shimmer 1.5s ease infinite;
+    border-radius: var(--cs-border-radius);
+}
+
+.cs-skeleton--circle {
+    border-radius: 50%;
+}
+
+.cs-skeleton-comment {
+    display: flex;
+    gap: 12px;
+    padding: var(--cs-comment-spacing) 0;
+}
+
+.cs-skeleton-comment__avatar {
+    width: var(--cs-avatar-size);
+    height: var(--cs-avatar-size);
+}
+
+.cs-skeleton-comment__body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.cs-skeleton-comment__name {
+    height: 12px;
+    width: 96px;
+}
+
+.cs-skeleton-comment__line {
+    height: 12px;
+}
+
+.cs-skeleton-comment__line--full {
+    width: 100%;
+}
+
+.cs-skeleton-comment__line--medium {
+    width: 80%;
+}
+
+.cs-skeleton-comment__line--short {
+    width: 64px;
+}
+
+/* ── Empty State ──────────────────────────────────────────────────────── */
+.cs-empty {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--cs-secondary-text-color);
+}
+
+.cs-empty__icon {
+    font-size: 32px;
+    margin-bottom: 8px;
+    opacity: 0.5;
+}
+
+.cs-empty__text {
+    margin: 0;
+    font-size: 14px;
+}
+
+/* ── Sort Bar ─────────────────────────────────────────────────────────── */
+.cs-sort-bar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--cs-border-color);
+    margin-bottom: 4px;
+}
+
+.cs-sort-bar__label {
+    font-size: 12px;
+    color: var(--cs-secondary-text-color);
+    margin-right: 4px;
+}
+
+.cs-sort-btn {
+    padding: 3px 10px;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--cs-secondary-text-color);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--cs-animation-duration) ease;
+}
+
+.cs-sort-btn:hover {
+    background: var(--cs-hover-bg-color);
+    color: var(--cs-text-color);
+}
+
+.cs-sort-btn--active {
+    background: color-mix(in srgb, var(--cs-primary-color) 12%, transparent);
+    color: var(--cs-primary-color);
+}
+
+/* ── Toast ────────────────────────────────────────────────────────────── */
+.cs-toast {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    padding: 8px 16px;
+    background: var(--cs-primary-color);
+    color: #fff;
+    border-radius: var(--cs-border-radius);
+    font-size: 13px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    animation: cs-toast-in var(--cs-animation-duration) ease;
+}
+
+@keyframes cs-toast-in {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* ── SVG Icons (inline) ───────────────────────────────────────────────── */
+.cs-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+.cs-icon svg {
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* ── Header ───────────────────────────────────────────────────────────── */
+.cs-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    margin-bottom: 4px;
+}
+
+.cs-header__title {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--cs-text-color);
+}
+
+.cs-header__count {
+    font-size: 14px;
+    color: var(--cs-secondary-text-color);
+    font-weight: 400;
+}

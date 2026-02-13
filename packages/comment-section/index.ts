@@ -96,5 +96,9 @@ export type { HeadlessReplyFormProps, HeadlessReplyFormChildrenProps } from './h
 // ─── Default Preset (minimal unstyled) ─────────────────────────────────────
 export { CommentSection, CommentSection as DefaultCommentSection } from './presets/default';
 
+// ─── Styled Preset (polished CSS-only UI) ──────────────────────────────────
+export { StyledCommentSection } from './presets/styled';
+export type { StyledCommentSectionProps } from './presets/styled';
+
 // Default export for backwards compatibility
 export { CommentSection as default } from './presets/default';

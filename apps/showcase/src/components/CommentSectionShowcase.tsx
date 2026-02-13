@@ -1,9 +1,18 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import { generateUniqueId, type Comment, type CommentUser } from '@comment-section/react';
+import {
+  CommentSection,
+  StyledCommentSection,
+  generateUniqueId,
+  type Comment,
+  type CommentUser,
+} from '@comment-section/react';
+import '@comment-section/react/presets/styled/styles.css';
 import { ShadcnCommentSection } from '@/components/comment-ui';
 import { themeAwareDemoTheme } from '@/lib/demo-theme';
+
+type Preset = 'default' | 'shadcn' | 'styled';
 
 
 const currentUser: CommentUser = {
@@ -72,7 +81,14 @@ const sampleComments: Comment[] = [
   },
 ];
 
+const PRESET_OPTIONS: { value: Preset; label: string }[] = [
+  { value: 'styled', label: 'Styled' },
+  { value: 'shadcn', label: 'Shadcn' },
+  { value: 'default', label: 'Vanilla' },
+];
+
 export function CommentSectionShowcase() {
+  const [preset, setPreset] = useState<Preset>('styled');
   const [comments, setComments] = useState<Comment[]>(() => sampleComments);
 
   const handleSubmitComment = useCallback(
@@ -264,23 +280,60 @@ export function CommentSectionShowcase() {
     setComments((prev) => remove(prev));
   }, []);
 
+  const commonProps = {
+    comments,
+    currentUser,
+    onSubmitComment: handleSubmitComment,
+    onReply: handleReply,
+    onReaction: handleReaction,
+    onEdit: handleEdit,
+    onDelete: handleDelete,
+    theme: themeAwareDemoTheme,
+    showReactions: true,
+    showMoreOptions: true,
+    inputPlaceholder: 'Add a comment...',
+    enableOptimisticUpdates: true,
+  };
+
   return (
     <div className="space-y-4">
-      <ShadcnCommentSection
-        comments={comments}
-        currentUser={currentUser}
-        onSubmitComment={handleSubmitComment}
-        onReply={handleReply}
-        onReaction={handleReaction}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        theme={themeAwareDemoTheme}
-        showReactions
-        showMoreOptions
-        inputPlaceholder="Add a comment..."
-        enableOptimisticUpdates
-        includeDislike
-      />
+      <div
+        className="flex flex-wrap gap-1 p-1 rounded-lg border border-border bg-muted/30 mb-4"
+        role="tablist"
+        aria-label="Comment preset"
+      >
+        {PRESET_OPTIONS.map(({ value, label }) => (
+          <button
+            key={value}
+            type="button"
+            role="tab"
+            aria-selected={preset === value}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              preset === value
+                ? 'bg-background text-foreground shadow-sm border border-border'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+            onClick={() => setPreset(value)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {preset === 'default' && (
+        <CommentSection {...commonProps} includeDislike />
+      )}
+
+      {preset === 'shadcn' && (
+        <ShadcnCommentSection
+          {...commonProps}
+          includeDislike
+        />
+      )}
+
+      {preset === 'styled' && (
+        <StyledCommentSection {...commonProps} includeDislike showSortBar={false} />
+      )}
     </div>
   );
 }

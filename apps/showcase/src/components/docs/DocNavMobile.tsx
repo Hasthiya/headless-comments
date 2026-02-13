@@ -1,12 +1,15 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { List } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface Section {
   id: string;
   label: string;
+  href?: string;
 }
 
 interface DocNavMobileProps {
@@ -14,6 +17,8 @@ interface DocNavMobileProps {
 }
 
 export function DocNavMobile({ sections }: DocNavMobileProps) {
+  const pathname = usePathname();
+  const isMainDocs = pathname === '/docs';
   const [open, setOpen] = useState(false);
 
   const close = useCallback(() => setOpen(false), []);
@@ -78,17 +83,20 @@ export function DocNavMobile({ sections }: DocNavMobileProps) {
           </div>
           <nav className="flex-1 overflow-auto py-4" aria-label="Page sections">
             <ul className="space-y-0">
-              {sections.map(({ id, label }) => (
-                <li key={id}>
-                  <a
-                    href={`#${id}`}
-                    className="min-h-[44px] px-6 flex items-center text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
-                    onClick={close}
-                  >
-                    {label}
-                  </a>
-                </li>
-              ))}
+              {sections.map(({ id, label, href }) => {
+                const linkHref = href ?? (isMainDocs ? `#${id}` : `/docs#${id}`);
+                return (
+                  <li key={id}>
+                    <Link
+                      href={linkHref}
+                      className="min-h-[44px] px-6 flex items-center text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+                      onClick={close}
+                    >
+                      {label}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </nav>
         </div>

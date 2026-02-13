@@ -2,21 +2,14 @@ import { DocNav } from '@/components/docs/DocNav';
 import { DocNavMobile } from '@/components/docs/DocNavMobile';
 
 const docSections = [
-  { id: 'overview', label: 'Overview' },
   { id: 'installation', label: 'Installation' },
-  { id: 'quick-start', label: 'Quick Start' },
-  { id: 'demo-headless', label: '▸ Demo: Headless' },
-  { id: 'demo-shadcn', label: '▸ Demo: ShadCN' },
-  { id: 'api-reference', label: 'API Reference' },
-  { id: 'api-components', label: 'Components' },
-  { id: 'api-props', label: 'Props' },
-  { id: 'api-hooks', label: 'Hooks' },
-  { id: 'api-types', label: 'Types' },
-  { id: 'api-core', label: 'Core Utilities' },
-  { id: 'presets', label: 'Presets' },
-  { id: 'customization', label: 'Customization' },
+  { id: 'basic-example', label: 'Basic Example' },
+  { id: 'styling', label: 'Styling' },
   { id: 'examples', label: 'Examples' },
-  { id: 'live-demo', label: 'Live Demo' },
+  { id: 'components', label: 'Components' },
+  { id: 'component-api', label: 'Component API' },
+  { id: 'styled-example', label: 'Styled Example' },
+  { id: 'styled-components', label: 'Styled Components', href: '/docs/styled-components' },
 ];
 
 export default function DocsLayout({

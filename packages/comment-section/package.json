@@ -25,10 +25,17 @@
       "import": "./dist/presets/default.mjs",
       "require": "./dist/presets/default.js",
       "types": "./dist/presets/default.d.ts"
-    }
+    },
+    "./presets/styled": {
+      "import": "./dist/presets/styled.mjs",
+      "require": "./dist/presets/styled.js",
+      "types": "./dist/presets/styled.d.ts"
+    },
+    "./presets/styled/styles.css": "./presets/styled/styles.css"
   },
   "files": [
     "dist",
+    "presets/styled/styles.css",
     "README.md",
     "LICENSE"
   ],

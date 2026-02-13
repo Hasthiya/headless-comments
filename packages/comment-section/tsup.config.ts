@@ -6,6 +6,7 @@ export default defineConfig({
     core: 'core/index.ts',
     headless: 'headless/index.ts',
     'presets/default': 'presets/default/index.ts',
+    'presets/styled': 'presets/styled/index.ts',
   },
   format: ['cjs', 'esm'],
   dts: true,

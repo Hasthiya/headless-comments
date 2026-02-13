@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
-import { codeToHtml } from 'shiki';
+import ShikiHighlighter from 'react-shiki';
 
 interface CodeBlockProps {
   code: string;
@@ -11,47 +11,77 @@ interface CodeBlockProps {
   embedded?: boolean;
 }
 
+function CopyButton({ code }: { code: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // ignore
+    }
+  }, [code]);
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="absolute top-2 right-2 px-2 py-1.5 rounded text-xs font-medium bg-background/80 text-muted-foreground hover:text-foreground border border-border/50 hover:border-border transition-colors"
+      aria-label={copied ? 'Copied' : 'Copy code'}
+    >
+      {copied ? 'Copied' : 'Copy'}
+    </button>
+  );
+}
+
 export function CodeBlock({ code, lang = 'tsx', embedded }: CodeBlockProps) {
   const { resolvedTheme } = useTheme();
-  const [html, setHtml] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  useEffect(() => {
-    if (!mounted) return;
-
-    const theme = resolvedTheme === 'dark' ? 'github-dark' : 'github-light';
-
-    codeToHtml(code, {
-      lang,
-      theme,
-    })
-      .then(setHtml)
-      .catch(() => setHtml(null));
-  }, [code, lang, resolvedTheme, mounted]);
-
+  const theme = resolvedTheme === 'dark' ? 'github-dark' : 'github-light';
+  const baseCodeClass =
+    'min-w-0 bg-muted/50 text-sm border-0 shadow-none [&_pre]:m-0 [&_pre]:bg-transparent [&_pre]:p-4 [&_pre]:font-mono [&_pre]:leading-relaxed [&_pre]:border-0 [&_pre]:shadow-none [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_*]:border-0';
   const containerClass = embedded
-    ? 'overflow-x-auto bg-muted/50 p-4 text-sm [&_pre]:m-0 [&_pre]:bg-transparent [&_pre]:p-0 [&_pre]:font-mono [&_pre]:leading-relaxed'
-    : 'overflow-x-auto rounded-lg border border-border bg-muted/50 p-4 text-sm [&_pre]:m-0 [&_pre]:bg-transparent [&_pre]:p-0 [&_pre]:font-mono [&_pre]:leading-relaxed';
+    ? baseCodeClass
+    : `relative rounded-lg border-0 shadow-none ${baseCodeClass}`;
 
-  if (!mounted || !html) {
+  const placeholderClass = embedded
+    ? 'min-w-0 bg-muted/50 text-sm font-mono text-muted-foreground border-0 shadow-none py-4 px-4 whitespace-pre-wrap break-words'
+    : 'relative min-w-0 rounded-lg bg-muted/50 text-sm font-mono text-muted-foreground border-0 shadow-none py-4 px-4 whitespace-pre-wrap break-words';
+
+  const wrapperClass = embedded ? undefined : 'relative [&_.docs-code-block]:border-0 [&_.docs-code-block]:shadow-none';
+
+  if (!mounted) {
     return (
-      <pre
-        className={embedded ? 'overflow-x-auto bg-muted/50 p-4 text-sm font-mono text-muted-foreground' : 'overflow-x-auto rounded-lg border border-border bg-muted/50 p-4 text-sm font-mono text-muted-foreground'}
-        data-lang={lang}
-      >
-        <code>{code}</code>
-      </pre>
+      <div className={wrapperClass}>
+        {!embedded && <CopyButton code={code} />}
+        <pre className={`docs-code-block ${placeholderClass}`} data-lang={lang}>
+          <code>{code}</code>
+        </pre>
+      </div>
     );
   }
 
   return (
-    <div
-      className={containerClass}
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
+    <div className={wrapperClass}>
+      {!embedded && <CopyButton code={code} />}
+      <div className={`docs-code-block ${containerClass}`}>
+        <ShikiHighlighter
+          language={lang}
+          theme={theme}
+          showLanguage={false}
+          addDefaultStyles={false}
+          className="!p-0 !bg-transparent !border-0 !ring-0 !outline-none min-h-0 [&_pre]:!border-0 [&_pre]:!whitespace-pre-wrap [&_pre]:!break-words"
+        >
+          {code}
+        </ShikiHighlighter>
+      </div>
+    </div>
   );
 }
