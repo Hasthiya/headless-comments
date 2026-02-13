@@ -1,5 +1,5 @@
 {
-  "name": "@headless-comments/react",
+  "name": "@hasthiya_/headless-comments-react",
   "version": "1.0.0",
   "description": "A highly customizable React comment section component with reply, reaction support, and optimistic updates. TypeScript-ready and fully themeable.",
   "main": "./dist/index.js",
@@ -63,16 +63,16 @@
     "themeable",
     "customizable"
   ],
-  "author": "",
+  "author": "Hasthiya (https://github.com/Hasthiya)",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/comment-section.git"
+    "url": "https://github.com/Hasthiya/headless-comments.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/comment-section/issues"
+    "url": "https://github.com/Hasthiya/headless-comments/issues"
   },
-  "homepage": "https://github.com/yourusername/comment-section#readme",
+  "homepage": "https://github.com/Hasthiya/headless-comments#readme",
   "peerDependencies": {
     "react": ">=19.0.0",
     "react-dom": ">=19.0.0"
