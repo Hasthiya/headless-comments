@@ -106,7 +106,7 @@ export { useCommentReaction } from './headless/useCommentReaction';
 export type { UseCommentReactionOptions, UseCommentReactionReturn } from './headless/useCommentReaction';
 
 export { useComment } from './headless/useComment';
-export type { UseCommentOptions, UseCommentReturn } from './headless/useComment';
+export type { UseCommentOptions, UseCommentReturn, UseCommentEditReturn } from './headless/useComment';
 
 // Optimistic updates
 export { useOptimisticUpdates } from './headless/useOptimisticUpdates';
@@ -131,6 +131,10 @@ export { HeadlessCommentItem } from './headless/CommentItem';
 export type { HeadlessCommentItemProps, HeadlessCommentItemChildrenProps } from './headless/CommentItem';
 export { HeadlessReplyForm } from './headless/ReplyForm';
 export type { HeadlessReplyFormProps, HeadlessReplyFormChildrenProps } from './headless/ReplyForm';
+export { CommentSkeleton } from './headless/CommentSkeleton';
+export type { CommentSkeletonProps } from './headless/CommentSkeleton';
+export { CommentSectionErrorBoundary } from './headless/CommentSectionErrorBoundary';
+export type { CommentSectionErrorBoundaryProps } from './headless/CommentSectionErrorBoundary';
 
 // ─── Default Preset (minimal unstyled) ─────────────────────────────────────
 export { CommentSection, CommentSection as DefaultCommentSection } from './presets/default';

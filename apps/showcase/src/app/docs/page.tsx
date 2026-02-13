@@ -147,7 +147,7 @@ function App() {
             <p className="text-sm text-muted-foreground mt-1">
               React hooks and unstyled components. <code>useCommentTree</code> for standalone state, composable hooks (<code>useEditComment</code>, <code>useReplyTo</code>, <code>useCommentReaction</code>) for per-comment logic, and <code>CommentSectionProvider</code> for context distribution.
             </p>
-            <p className="text-xs text-muted-foreground mt-2 font-mono">import {'{ useCommentTree, useEditComment }'} from &apos;@hasthiya_/headless-comments-react/headless&apos;</p>
+            <p className="text-xs text-muted-foreground mt-2 font-mono">import {'{ useCommentTree, useEditComment }'} from &apos;@hasthiya_/headless-comments-react&apos; (or /headless)</p>
           </div>
           <div className="rounded-md border border-border p-4">
             <p className="font-medium">Presets (UI)</p>
@@ -402,25 +402,31 @@ function ReactionBar({ commentId }: { commentId: string }) {
 
           <div>
             <p className="font-medium mb-2">useComment(comment, options?)</p>
-            <p className="text-sm text-muted-foreground mb-2">All-in-one hook that composes <code>useEditComment</code>, <code>useReplyTo</code>, and <code>useCommentReaction</code> for a single comment.</p>
+            <p className="text-sm text-muted-foreground mb-2">All-in-one hook that composes <code>useEditComment</code>, <code>useReplyTo</code>, and <code>useCommentReaction</code> for a single comment. When used via <code>useComment</code>, <code>edit.startEditing()</code> can be called with no arguments — it pre-fills with the comment&apos;s current content. Options: <code>onEdit</code>, <code>onReply</code>, <code>onReaction</code>, <code>onDelete</code>, <code>currentUser</code> (all optional; fall back to Provider). Returns <code>isPendingDelete</code> when the delete handler returns a Promise.</p>
             <CodeBlock
               code={`import { useComment } from '@hasthiya_/headless-comments-react';
 
 function MyComment({ comment }) {
   const {
     isAuthor,
-    edit,        // UseEditCommentReturn
-    reply,       // UseReplyToReturn
-    reaction,    // UseCommentReactionReturn
+    edit,
+    reply,
+    reaction,
     showReplies,
     toggleReplies,
     deleteComment,
+    isPendingDelete,
   } = useComment(comment);
 
   return (
     <div>
       <p>{comment.content}</p>
-      {isAuthor && <button onClick={() => edit.startEditing(comment.content)}>Edit</button>}
+      {isAuthor && <button onClick={() => edit.startEditing()}>Edit</button>}
+      {isAuthor && (
+        <button onClick={() => confirm('Delete?') && deleteComment()} disabled={isPendingDelete}>
+          {isPendingDelete ? 'Deleting…' : 'Delete'}
+        </button>
+      )}
       <button onClick={reply.openReply}>Reply</button>
       <button onClick={toggleReplies}>
         {showReplies ? 'Hide' : 'Show'} Replies
@@ -450,12 +456,14 @@ function SortableList({ comments }) {
       <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
         <option value="newest">Newest</option>
         <option value="oldest">Oldest</option>
+        <option value="top">Top</option>
         <option value="popular">Popular</option>
       </select>
       {sortedComments.map((c) => <Comment key={c.id} comment={c} />)}
     </div>
   );
-}`}
+}
+// sortOrder: 'newest' | 'oldest' | 'top' | 'popular' (top and popular are equivalent)`}
               lang="tsx"
             />
           </div>
@@ -464,7 +472,7 @@ function SortableList({ comments }) {
 
       {/* ── Adapters ─────────────────────────────────────────────────────── */}
       <DocSection id="adapters" title="Adapters">
-        <p>Adapters connect <code>useCommentTree</code> to data sources. The adapter interface is simple: implement <code>getComments</code>, <code>createComment</code>, <code>updateComment</code>, <code>deleteComment</code>, and <code>toggleReaction</code>. Optional <code>subscribe</code> for realtime and <code>dispose</code> for cleanup.</p>
+        <p>Adapters connect <code>useCommentTree</code> to data sources. Implement only the methods you need: <strong>read-only adapters</strong> need only <code>getComments</code>; mutation methods (<code>createComment</code>, <code>updateComment</code>, <code>deleteComment</code>, <code>toggleReaction</code>) are optional and default to local-only updates when omitted. Optional <code>subscribe</code> for realtime and <code>dispose</code> for cleanup.</p>
 
         <div className="space-y-10 mt-6">
           <div>
@@ -570,15 +578,31 @@ const myAdapter: CommentAdapter = {
             </thead>
             <tbody className="[&_tr]:border-b [&_tr]:border-border/50">
               <tr><td className="py-2 pr-4 font-mono text-xs">getComments</td><td className="py-2 pr-4 text-muted-foreground">{'(options?) => Promise<Comment[] | PaginatedResponse>'}</td><td className="py-2">Optional</td></tr>
-              <tr><td className="py-2 pr-4 font-mono text-xs">createComment</td><td className="py-2 pr-4 text-muted-foreground">{'(content, parentId?) => Promise<Comment>'}</td><td className="py-2">Yes</td></tr>
-              <tr><td className="py-2 pr-4 font-mono text-xs">updateComment</td><td className="py-2 pr-4 text-muted-foreground">{'(id, content) => Promise<Comment>'}</td><td className="py-2">Yes</td></tr>
-              <tr><td className="py-2 pr-4 font-mono text-xs">deleteComment</td><td className="py-2 pr-4 text-muted-foreground">{'(id) => Promise<void>'}</td><td className="py-2">Yes</td></tr>
-              <tr><td className="py-2 pr-4 font-mono text-xs">toggleReaction</td><td className="py-2 pr-4 text-muted-foreground">{'(commentId, reactionId) => Promise<void>'}</td><td className="py-2">Yes</td></tr>
+              <tr><td className="py-2 pr-4 font-mono text-xs">createComment</td><td className="py-2 pr-4 text-muted-foreground">{'(content, parentId?) => Promise<Comment>'}</td><td className="py-2">Optional</td></tr>
+              <tr><td className="py-2 pr-4 font-mono text-xs">updateComment</td><td className="py-2 pr-4 text-muted-foreground">{'(id, content) => Promise<Comment>'}</td><td className="py-2">Optional</td></tr>
+              <tr><td className="py-2 pr-4 font-mono text-xs">deleteComment</td><td className="py-2 pr-4 text-muted-foreground">{'(id) => Promise<void>'}</td><td className="py-2">Optional</td></tr>
+              <tr><td className="py-2 pr-4 font-mono text-xs">toggleReaction</td><td className="py-2 pr-4 text-muted-foreground">{'(commentId, reactionId) => Promise<void>'}</td><td className="py-2">Optional</td></tr>
               <tr><td className="py-2 pr-4 font-mono text-xs">subscribe</td><td className="py-2 pr-4 text-muted-foreground">{'(listener) => () => void'}</td><td className="py-2">Optional</td></tr>
               <tr><td className="py-2 pr-4 font-mono text-xs">dispose</td><td className="py-2 pr-4 text-muted-foreground">{'() => void'}</td><td className="py-2">Optional</td></tr>
             </tbody>
           </table>
         </div>
+
+        <p className="font-medium mt-6 mb-2">Loading and error handling</p>
+        <p className="text-sm text-muted-foreground mb-2">When using an adapter, <code>tree.isLoading</code> is true while initial comments load. Use <code>CommentSkeleton</code> when <code>tree.isLoading &amp;&amp; tree.comments.length === 0</code>. Wrap the section in <code>CommentSectionErrorBoundary</code> to catch errors and optionally render a <code>fallback(error, reset)</code>.</p>
+        <CodeBlock
+          code={`import { useCommentTree, CommentSkeleton, CommentSectionErrorBoundary } from '@hasthiya_/headless-comments-react';
+
+const tree = useCommentTree({ currentUser, adapter });
+
+<CommentSectionErrorBoundary fallback={(err, reset) => (
+  <div><p>Error: \{err.message\}</p><button onClick={reset}>Try again</button></div>
+)}>
+  {tree.isLoading && tree.comments.length === 0 && <CommentSkeleton count={3} />}
+  {!tree.isLoading && tree.comments.length > 0 && <YourCommentList tree={tree} />}
+</CommentSectionErrorBoundary>`}
+          lang="tsx"
+        />
       </DocSection>
 
       {/* ── Core Utilities ───────────────────────────────────────────────── */}
@@ -642,9 +666,9 @@ const replyCount = countReplies(comment);`}
   searchComments,
 } from '@hasthiya_/headless-comments-react';
 
-// Sort by newest, oldest, or popular
+// Sort by newest, oldest, popular, or top (top and popular are equivalent)
 const sorted = sortComments(comments, 'newest');
-const popular = sortComments(comments, 'popular'); // sorts by net positive reactions
+const top = sortComments(comments, 'top'); // or 'popular' — net positive reactions first
 
 // Sort recursively (sorts replies too)
 const deepSorted = sortComments(comments, 'newest', { recursive: true });
@@ -679,7 +703,7 @@ const results = searchComments(comments, 'react hooks');`}
               <tr><td className="py-2 pr-4 font-mono text-xs">flattenComments</td><td className="py-2 pr-4 text-muted-foreground">(tree) =&gt; Comment[]</td><td className="py-2">Flatten to array</td></tr>
               <tr><td className="py-2 pr-4 font-mono text-xs">buildCommentTree</td><td className="py-2 pr-4 text-muted-foreground">(flat) =&gt; Comment[]</td><td className="py-2">Build nested tree from flat list</td></tr>
               <tr><td className="py-2 pr-4 font-mono text-xs">countReplies</td><td className="py-2 pr-4 text-muted-foreground">(comment) =&gt; number</td><td className="py-2">Count replies recursively</td></tr>
-              <tr><td className="py-2 pr-4 font-mono text-xs">sortComments</td><td className="py-2 pr-4 text-muted-foreground">(comments, order, options?) =&gt; Comment[]</td><td className="py-2">Sort by newest/oldest/popular</td></tr>
+              <tr><td className="py-2 pr-4 font-mono text-xs">sortComments</td><td className="py-2 pr-4 text-muted-foreground">(comments, order, options?) =&gt; Comment[]</td><td className="py-2">Sort by newest, oldest, popular or top</td></tr>
               <tr><td className="py-2 pr-4 font-mono text-xs">filterComments</td><td className="py-2 pr-4 text-muted-foreground">(comments, predicate) =&gt; Comment[]</td><td className="py-2">Filter comments</td></tr>
               <tr><td className="py-2 pr-4 font-mono text-xs">searchComments</td><td className="py-2 pr-4 text-muted-foreground">(comments, query) =&gt; Comment[]</td><td className="py-2">Search by content</td></tr>
               <tr><td className="py-2 pr-4 font-mono text-xs">generateUniqueId</td><td className="py-2 pr-4 text-muted-foreground">() =&gt; string</td><td className="py-2">Unique ID for comments</td></tr>
@@ -796,7 +820,7 @@ const tree = useCommentTree({ initialComments, currentUser });
               <tr><td className="py-2 pr-4 font-mono text-xs">theme</td><td className="py-2 pr-4 text-muted-foreground">CommentTheme</td><td className="py-2 pr-4">&mdash;</td><td className="py-2">Colors, radius, font size, etc.</td></tr>
               <tr><td className="py-2 pr-4 font-mono text-xs">texts</td><td className="py-2 pr-4 text-muted-foreground">CommentTexts</td><td className="py-2 pr-4">&mdash;</td><td className="py-2">Labels and placeholders</td></tr>
               <tr><td className="py-2 pr-4 font-mono text-xs">maxDepth</td><td className="py-2 pr-4 text-muted-foreground">number</td><td className="py-2 pr-4">3</td><td className="py-2">Max reply nesting depth</td></tr>
-              <tr><td className="py-2 pr-4 font-mono text-xs">sortOrder</td><td className="py-2 pr-4 text-muted-foreground">&apos;newest&apos; | &apos;oldest&apos; | &apos;popular&apos;</td><td className="py-2 pr-4">newest</td><td className="py-2">Sort order</td></tr>
+              <tr><td className="py-2 pr-4 font-mono text-xs">sortOrder</td><td className="py-2 pr-4 text-muted-foreground">&apos;newest&apos; | &apos;oldest&apos; | &apos;popular&apos; | &apos;top&apos;</td><td className="py-2 pr-4">newest</td><td className="py-2">Sort order (top and popular are equivalent)</td></tr>
               <tr><td className="py-2 pr-4 font-mono text-xs">readOnly</td><td className="py-2 pr-4 text-muted-foreground">boolean</td><td className="py-2 pr-4">false</td><td className="py-2">Disable all interactions</td></tr>
               <tr><td className="py-2 pr-4 font-mono text-xs">inputPlaceholder</td><td className="py-2 pr-4 text-muted-foreground">string</td><td className="py-2 pr-4">&mdash;</td><td className="py-2">Placeholder for comment input</td></tr>
               <tr><td className="py-2 pr-4 font-mono text-xs">maxCharLimit</td><td className="py-2 pr-4 text-muted-foreground">number</td><td className="py-2 pr-4">&mdash;</td><td className="py-2">Max characters per comment</td></tr>
@@ -832,6 +856,8 @@ const tree = useCommentTree({ initialComments, currentUser });
           <li><code>CommentSectionProvider</code> &mdash; Context provider for distributing tree state to children.</li>
           <li><code>HeadlessCommentItem</code> &mdash; Unstyled comment with render-prop children.</li>
           <li><code>HeadlessReplyForm</code> &mdash; Unstyled reply form with render-prop children.</li>
+          <li><code>CommentSkeleton</code> &mdash; Unstyled loading skeleton; use when <code>tree.isLoading &amp;&amp; comments.length === 0</code>.</li>
+          <li><code>CommentSectionErrorBoundary</code> &mdash; Error boundary for the comment subtree; optional <code>fallback(error, reset)</code>.</li>
         </ul>
       </DocSection>
 
@@ -869,10 +895,10 @@ const tree = useCommentTree<{ score: number; flair: string }>({
               <tr><td className="py-2 pr-4 font-mono text-xs">CommentUser</td><td className="py-2 pr-4">id, name, avatarUrl?, isVerified?, role?</td><td className="py-2">User (author)</td></tr>
               <tr><td className="py-2 pr-4 font-mono text-xs">Reaction</td><td className="py-2 pr-4">id, label, emoji, count, isActive</td><td className="py-2">Reaction instance on a comment</td></tr>
               <tr><td className="py-2 pr-4 font-mono text-xs">ReactionConfig</td><td className="py-2 pr-4">id, label, emoji, activeColor?, inactiveColor?</td><td className="py-2">Reaction type configuration</td></tr>
-              <tr><td className="py-2 pr-4 font-mono text-xs">{'CommentAdapter<T>'}</td><td className="py-2 pr-4">getComments, createComment, updateComment, deleteComment, toggleReaction, subscribe?, dispose?</td><td className="py-2">Adapter interface for data persistence</td></tr>
+              <tr><td className="py-2 pr-4 font-mono text-xs">{'CommentAdapter<T>'}</td><td className="py-2 pr-4">getComments?, createComment?, updateComment?, deleteComment?, toggleReaction?, subscribe?, dispose?</td><td className="py-2">Adapter interface; only implement methods you need (read-only: getComments only)</td></tr>
               <tr><td className="py-2 pr-4 font-mono text-xs">CommentTheme</td><td className="py-2 pr-4">primaryColor, backgroundColor, textColor, borderColor, borderRadius, fontSize</td><td className="py-2">Theme configuration</td></tr>
               <tr><td className="py-2 pr-4 font-mono text-xs">CommentTexts</td><td className="py-2 pr-4">reply, edit, delete, cancel, submit, noComments, loading</td><td className="py-2">Labels and placeholders</td></tr>
-              <tr><td className="py-2 pr-4 font-mono text-xs">SortOrder</td><td className="py-2 pr-4">&apos;newest&apos; | &apos;oldest&apos; | &apos;popular&apos;</td><td className="py-2">Sort order enum</td></tr>
+              <tr><td className="py-2 pr-4 font-mono text-xs">SortOrder</td><td className="py-2 pr-4">&apos;newest&apos; | &apos;oldest&apos; | &apos;popular&apos; | &apos;top&apos;</td><td className="py-2">Sort order (popular and top are equivalent)</td></tr>
             </tbody>
           </table>
         </div>

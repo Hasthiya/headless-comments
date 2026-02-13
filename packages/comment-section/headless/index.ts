@@ -32,7 +32,7 @@ export { useCommentReaction } from './useCommentReaction';
 export type { UseCommentReactionOptions, UseCommentReactionReturn } from './useCommentReaction';
 
 export { useComment } from './useComment';
-export type { UseCommentOptions, UseCommentReturn } from './useComment';
+export type { UseCommentOptions, UseCommentReturn, UseCommentEditReturn } from './useComment';
 
 // ─── Optimistic updates ─────────────────────────────────────────────────────
 export { useOptimisticUpdates } from './useOptimisticUpdates';
@@ -43,6 +43,12 @@ export type { HeadlessCommentItemProps, HeadlessCommentItemChildrenProps } from 
 
 export { HeadlessReplyForm } from './ReplyForm';
 export type { HeadlessReplyFormProps, HeadlessReplyFormChildrenProps } from './ReplyForm';
+
+export { CommentSkeleton } from './CommentSkeleton';
+export type { CommentSkeletonProps } from './CommentSkeleton';
+
+export { CommentSectionErrorBoundary } from './CommentSectionErrorBoundary';
+export type { CommentSectionErrorBoundaryProps } from './CommentSectionErrorBoundary';
 
 // ─── Utility hooks ──────────────────────────────────────────────────────────
 export {

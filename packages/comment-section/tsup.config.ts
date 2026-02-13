@@ -45,7 +45,9 @@ export default defineConfig({
   },
   format: ['cjs', 'esm'],
   dts: true,
-  splitting: true,
+  // Disable splitting so root entry (.) bundles all code; fixes Vite resolution when
+  // importing from '@hasthiya_/headless-comments-react' instead of /headless.
+  splitting: false,
   sourcemap: true,
   clean: true,
   treeshake: true,

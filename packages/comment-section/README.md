@@ -150,6 +150,97 @@ The library is organized into three independent layers:
 
 Each layer can be used independently or combined.
 
+### Headless: complete custom comment component
+
+End-to-end example: a minimal custom comment thread using only headless hooks (no preset). Uses `useCommentTree` for state and `HeadlessCommentItem` + `useComment` for each comment (list, reply form, edit/delete/reaction).
+
+```tsx
+import {
+  useCommentTree,
+  CommentSectionProvider,
+  HeadlessCommentItem,
+  HeadlessReplyForm,
+  type CommentUser,
+} from '@hasthiya_/headless-comments-react';
+
+const currentUser: CommentUser = {
+  id: 'me',
+  name: 'Me',
+  avatarUrl: 'https://example.com/me.jpg',
+};
+
+function CustomCommentThread() {
+  const tree = useCommentTree({ initialComments: [], currentUser });
+
+  return (
+    <CommentSectionProvider tree={tree} currentUser={currentUser}>
+      <HeadlessReplyForm onSubmit={(content) => tree.addComment(content)}>
+        {({ content, setContent, onSubmit }) => (
+          <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }}>
+            <textarea value={content} onChange={(e) => setContent(e.target.value)} placeholder="Add a comment…" />
+            <button type="submit">Post</button>
+          </form>
+        )}
+      </HeadlessReplyForm>
+
+      {tree.comments.map((comment) => (
+        <HeadlessCommentItem key={comment.id} comment={comment}>
+          {({ comment: c, isAuthor, edit, reply, reaction, deleteComment, toggleReplies, showReplies }) => (
+            <div style={{ marginLeft: 16 }}>
+              <p>{c.content}</p>
+              <span>{c.author.name}</span>
+              {isAuthor && (
+                <>
+                  <button type="button" onClick={() => edit.startEditing()}>Edit</button>
+                  {edit.isEditing ? (
+                    <>
+                      <input value={edit.editContent} onChange={(e) => edit.setEditContent(e.target.value)} />
+                      <button type="button" onClick={edit.submitEdit}>Save</button>
+                      <button type="button" onClick={edit.cancelEdit}>Cancel</button>
+                    </>
+                  ) : null}
+                  <button type="button" onClick={() => deleteComment()}>Delete</button>
+                </>
+              )}
+              <button type="button" onClick={() => reply.openReply()}>Reply</button>
+              {reply.isReplying && (
+                <form onSubmit={(e) => { e.preventDefault(); reply.submitReply(); }}>
+                  <textarea value={reply.replyContent} onChange={(e) => reply.setReplyContent(e.target.value)} />
+                  <button type="submit">Reply</button>
+                  <button type="button" onClick={reply.cancelReply}>Cancel</button>
+                </form>
+              )}
+              {c.reactions?.map((r) => (
+                <button key={r.id} type="button" onClick={() => reaction.toggle(r.id)}>
+                  {r.emoji ?? r.id} {r.count}
+                </button>
+              ))}
+              {c.replies?.length ? (
+                <button type="button" onClick={toggleReplies}>{showReplies ? 'Hide' : 'Show'} replies</button>
+              ) : null}
+              {showReplies && c.replies?.length
+                ? c.replies.map((replyComment) => (
+                    <HeadlessCommentItem key={replyComment.id} comment={replyComment}>
+                      {({ comment: rc, isAuthor: ra, edit: re, reply: rp, reaction: rxn, deleteComment: del }) => (
+                        <div style={{ marginLeft: 16 }}>
+                          <p>{rc.content}</p>
+                          <span>{rc.author.name}</span>
+                          {ra && <button type="button" onClick={() => re.startEditing()}>Edit</button>}
+                          {ra && <button type="button" onClick={del}>Delete</button>}
+                        </div>
+                      )}
+                    </HeadlessCommentItem>
+                  ))
+                : null}
+            </div>
+          )}
+        </HeadlessCommentItem>
+      ))}
+    </CommentSectionProvider>
+  );
+}
+```
+
 ## useCommentTree
 
 The flagship hook. Manages all comment state internally: add, reply, edit, delete, and reactions with correct count toggling. Works standalone (no Provider required) and supports adapters for persistence.
@@ -201,6 +292,28 @@ tree.error;                            // Error object or null
 | `totalCount` | `number` | Total comments (including nested replies) |
 | `isLoading` | `boolean` | True while loading from adapter |
 | `error` | `Error \| null` | Current error (null if none) |
+
+### Loading and error handling
+
+When using an adapter, `tree.isLoading` is `true` while the initial `getComments()` runs. Show a skeleton when there are no comments yet:
+
+```tsx
+import { useCommentTree, CommentSkeleton, CommentSectionErrorBoundary } from '@hasthiya_/headless-comments-react';
+
+const tree = useCommentTree({ currentUser, adapter });
+
+return (
+  <CommentSectionErrorBoundary fallback={(err, reset) => (
+    <div><p>Error: {err.message}</p><button type="button" onClick={reset}>Try again</button></div>
+  )}>
+    {tree.isLoading && tree.comments.length === 0 && <CommentSkeleton count={3} />}
+    {!tree.isLoading && tree.comments.length === 0 && <p>No comments yet.</p>}
+    {tree.comments.length > 0 && <YourCommentList tree={tree} />}
+  </CommentSectionErrorBoundary>
+);
+```
+
+`CommentSkeleton` is unstyled (use your own CSS; it uses classes like `headless-comment-skeleton`). `CommentSectionErrorBoundary` catches errors in the comment subtree and renders your `fallback` or a default "Try again" UI.
 
 ## Mutually Exclusive Reactions
 
@@ -292,15 +405,48 @@ const { toggle, isPending, reactions } = useCommentReaction(commentId);
 
 ### useComment
 
-All-in-one hook composing `useEditComment`, `useReplyTo`, and `useCommentReaction`:
+All-in-one hook composing `useEditComment`, `useReplyTo`, and `useCommentReaction`. When used via `useComment`, `edit.startEditing()` can be called with **no arguments** — it pre-fills with the comment's current content.
+
+**Options** (all optional; when omitted, falls back to `CommentSectionProvider` context):
+
+| Option | Signature | Description |
+|--------|-----------|-------------|
+| `onEdit` | `(commentId: string, content: string) => void \| Promise<void>` | Called when the comment is edited |
+| `onReply` | `(commentId: string, content: string) => void \| Promise<void>` | Called when a reply is submitted |
+| `onReaction` | `(commentId: string, reactionId: string) => void \| Promise<void>` | Called when a reaction is toggled |
+| `onDelete` | `(commentId: string) => void` | Called when the comment is deleted |
+| `currentUser` | `CommentUser` | Current user (for `isAuthor`). Falls back to Provider. |
 
 ```tsx
-import { useComment } from '@hasthiya_/headless-comments-react';
+import { useComment, type CommentUser } from '@hasthiya_/headless-comments-react';
 
 const {
   isAuthor, edit, reply, reaction,
   showReplies, toggleReplies, deleteComment,
-} = useComment(comment);
+} = useComment(comment, {
+  onEdit: async (id, content) => { /* persist edit */ },
+  onReply: async (parentId, content) => { /* add reply */ },
+  onReaction: (id, reactionId) => { /* toggle reaction */ },
+  onDelete: (id) => { /* remove comment */ },
+  currentUser: me,
+});
+
+// Enter edit mode with current content (no arg needed)
+edit.startEditing();
+```
+
+**Delete and confirmation:** `useComment` returns `deleteComment` and `isPendingDelete`. When the delete handler (e.g. from `useCommentTree`) returns a Promise, `isPendingDelete` is `true` until the promise settles — use it to show a loading state on the delete button. To add a confirmation step, wrap `deleteComment` in your own handler that shows a modal or `confirm()`, then calls `deleteComment()`:
+
+```tsx
+const { deleteComment, isPendingDelete } = useComment(comment);
+
+const handleDeleteClick = () => {
+  if (window.confirm('Delete this comment?')) deleteComment();
+};
+
+<button onClick={handleDeleteClick} disabled={isPendingDelete}>
+  {isPendingDelete ? 'Deleting…' : 'Delete'}
+</button>
 ```
 
 ### useSortedComments
@@ -356,18 +502,23 @@ const adapter = createRestAdapter({
 
 ### Custom Adapter
 
-Implement the `CommentAdapter<T>` interface for any backend:
+Implement the `CommentAdapter<T>` interface for any backend. For read-only use (e.g. display-only comments), implement only `getComments`:
 
 ```tsx
 import type { CommentAdapter } from '@hasthiya_/headless-comments-react';
 
-const myAdapter: CommentAdapter = {
+// Read-only adapter (e.g. display-only section)
+const readOnlyAdapter: CommentAdapter = {
   async getComments() { /* return Comment[] or { comments, total, hasMore } */ },
+};
+
+// Full CRUD adapter
+const myAdapter: CommentAdapter = {
+  async getComments() { /* ... */ },
   async createComment(content, parentId?) { /* return Comment with server ID */ },
   async updateComment(id, content) { /* return updated Comment */ },
   async deleteComment(id) { /* void */ },
   async toggleReaction(commentId, reactionId) { /* void */ },
-  // Optional:
   subscribe(listener) { /* return unsubscribe function */ },
   dispose() { /* cleanup */ },
 };
@@ -375,13 +526,15 @@ const myAdapter: CommentAdapter = {
 
 ### CommentAdapter Interface
 
+Only implement the methods you need. **Read-only adapters** (e.g. display-only sections) need only `getComments`; mutations will update local state only when the corresponding method is omitted.
+
 | Method | Signature | Required |
 |--------|-----------|----------|
 | `getComments` | `(options?) => Promise<Comment[] \| PaginatedResponse>` | Optional |
-| `createComment` | `(content, parentId?) => Promise<Comment>` | Yes |
-| `updateComment` | `(id, content) => Promise<Comment>` | Yes |
-| `deleteComment` | `(id) => Promise<void>` | Yes |
-| `toggleReaction` | `(commentId, reactionId) => Promise<void>` | Yes |
+| `createComment` | `(content, parentId?) => Promise<Comment>` | Optional |
+| `updateComment` | `(id, content) => Promise<Comment>` | Optional |
+| `deleteComment` | `(id) => Promise<void>` | Optional |
+| `toggleReaction` | `(commentId, reactionId) => Promise<void>` | Optional |
 | `subscribe` | `(listener) => () => void` | Optional |
 | `dispose` | `() => void` | Optional |
 
@@ -434,7 +587,7 @@ const count = countReplies(comment);
 import { sortComments, filterComments, searchComments } from '@hasthiya_/headless-comments-react';
 
 const sorted = sortComments(comments, 'newest');
-const popular = sortComments(comments, 'popular');
+const popular = sortComments(comments, 'popular'); // or 'top' (same behavior)
 const deepSorted = sortComments(comments, 'newest', { recursive: true });
 const filtered = filterComments(comments, (c) => !c.isDeleted);
 const results = searchComments(comments, 'react hooks');
@@ -453,7 +606,7 @@ const results = searchComments(comments, 'react hooks');
 | `flattenComments` | Flatten nested tree to array |
 | `buildCommentTree` | Build nested tree from flat list |
 | `countReplies` | Count replies recursively |
-| `sortComments` | Sort by newest/oldest/popular |
+| `sortComments` | Sort by newest, oldest, popular (or top) |
 | `filterComments` | Filter with predicate |
 | `searchComments` | Search by content |
 | `generateUniqueId` | Unique ID generator |
@@ -625,7 +778,7 @@ const tree = useCommentTree<{ score: number; flair: string }>({
 | `CommentAdapter<T>` | getComments, createComment, updateComment, deleteComment, toggleReaction, subscribe?, dispose? | Adapter interface for data persistence |
 | `CommentTheme` | primaryColor, backgroundColor, textColor, borderColor, borderRadius, fontSize | Theme configuration |
 | `CommentTexts` | reply, edit, delete, cancel, submit, noComments, loading | Labels and placeholders |
-| `SortOrder` | 'newest' \| 'oldest' \| 'popular' | Sort order enum |
+| `SortOrder` | 'newest' \| 'oldest' \| 'popular' \| 'top' | Sort order (popular and top are equivalent) |
 
 ## Accessibility
 

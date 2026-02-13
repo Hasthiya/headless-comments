@@ -7,11 +7,11 @@ import type { Comment } from './types';
 
 /**
  * Built-in sort orders.
- * - `'newest'` / `'desc'`: newest first (descending by createdAt)
- * - `'oldest'` / `'asc'`: oldest first (ascending by createdAt)
- * - `'popular'`: most net-positive reactions first (likes minus dislikes)
+ * - `'newest'`: newest first (descending by createdAt)
+ * - `'oldest'`: oldest first (ascending by createdAt)
+ * - `'popular'` / `'top'`: most net-positive reactions first (likes minus dislikes)
  */
-export type SortOrder = 'newest' | 'oldest' | 'popular';
+export type SortOrder = 'newest' | 'oldest' | 'popular' | 'top';
 
 /**
  * Custom comparator for full control over sort logic
@@ -84,6 +84,7 @@ function getBuiltinComparator<T extends Record<string, unknown>>(order: SortOrde
                 return dateB - dateA;
             };
         case 'popular':
+        case 'top':
             return (a, b) => {
                 const scoreA = getNetPositiveScore(a);
                 const scoreB = getNetPositiveScore(b);

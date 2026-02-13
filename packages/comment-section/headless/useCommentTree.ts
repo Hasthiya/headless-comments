@@ -219,14 +219,17 @@ export function useCommentTree<T extends Record<string, unknown> = Record<string
             setTree((prev) => addToTree(prev, comment, null, 'prepend'));
 
             // Persist to adapter — on success, reconcile server-generated ID/fields
-            adapterRef.current?.createComment(content)
-                .then((serverComment) => {
-                    setTree((prev) => {
-                        const withoutOptimistic = removeFromTree(prev, optimisticId);
-                        return addToTree(withoutOptimistic, serverComment, null, 'prepend');
-                    });
-                })
-                .catch(rollback);
+            const createPromise = adapterRef.current?.createComment?.(content);
+            if (createPromise) {
+                createPromise
+                    .then((serverComment) => {
+                        setTree((prev) => {
+                            const withoutOptimistic = removeFromTree(prev, optimisticId);
+                            return addToTree(withoutOptimistic, serverComment, null, 'prepend');
+                        });
+                    })
+                    .catch(rollback);
+            }
 
             return comment;
         },
@@ -251,14 +254,17 @@ export function useCommentTree<T extends Record<string, unknown> = Record<string
             setTree((prev) => addToTree(prev, reply, parentId, 'append'));
 
             // Persist to adapter — on success, reconcile server-generated ID/fields
-            adapterRef.current?.createComment(content, parentId)
-                .then((serverComment) => {
-                    setTree((prev) => {
-                        const withoutOptimistic = removeFromTree(prev, optimisticId);
-                        return addToTree(withoutOptimistic, serverComment, parentId, 'append');
-                    });
-                })
-                .catch(rollback);
+            const createPromise = adapterRef.current?.createComment?.(content, parentId);
+            if (createPromise) {
+                createPromise
+                    .then((serverComment) => {
+                        setTree((prev) => {
+                            const withoutOptimistic = removeFromTree(prev, optimisticId);
+                            return addToTree(withoutOptimistic, serverComment, parentId, 'append');
+                        });
+                    })
+                    .catch(rollback);
+            }
 
             return reply;
         },
@@ -277,7 +283,7 @@ export function useCommentTree<T extends Record<string, unknown> = Record<string
                 } as Partial<Comment<T>>)
             );
 
-            const adapterPromise = adapterRef.current?.updateComment(commentId, content);
+            const adapterPromise = adapterRef.current?.updateComment?.(commentId, content);
             if (adapterPromise) {
                 return adapterPromise.then(() => undefined).catch((err) => {
                     rollback(err);
@@ -293,7 +299,7 @@ export function useCommentTree<T extends Record<string, unknown> = Record<string
             snapshot();
             setTree((prev) => removeFromTree(prev, commentId));
 
-            const adapterPromise = adapterRef.current?.deleteComment(commentId);
+            const adapterPromise = adapterRef.current?.deleteComment?.(commentId);
             if (adapterPromise) {
                 return adapterPromise.catch((err) => {
                     rollback(err);
@@ -312,7 +318,7 @@ export function useCommentTree<T extends Record<string, unknown> = Record<string
                 : toggleReactionInTree;
             setTree((prev) => toggleFn(prev, commentId, reactionId));
 
-            const adapterPromise = adapterRef.current?.toggleReaction(commentId, reactionId);
+            const adapterPromise = adapterRef.current?.toggleReaction?.(commentId, reactionId);
             if (adapterPromise) {
                 return adapterPromise.catch((err) => {
                     rollback(err);

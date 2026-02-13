@@ -33,7 +33,7 @@ function SortBar() {
     const options = [
         { value: 'newest' as const, label: texts.sortNewest },
         { value: 'oldest' as const, label: texts.sortOldest },
-        { value: 'popular' as const, label: texts.sortTop },
+        { value: 'top' as const, label: texts.sortTop },
     ];
 
     return (

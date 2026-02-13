@@ -40,6 +40,10 @@ export interface PaginatedCommentsResponse<T extends Record<string, unknown> = R
  * (REST API, GraphQL, local state, Supabase, etc.)
  *
  * Generic parameter `T` matches the `Comment<T>` metadata shape.
+ *
+ * For read-only use (e.g. display-only comment sections), implement only
+ * `getComments`. Mutations (add/edit/delete/reaction) will update local state
+ * only when the corresponding method is omitted.
  */
 export interface CommentAdapter<T extends Record<string, unknown> = Record<string, unknown>> {
     /**
@@ -47,14 +51,14 @@ export interface CommentAdapter<T extends Record<string, unknown> = Record<strin
      * Can return a plain array or a PaginatedCommentsResponse for pagination support.
      */
     getComments?(options?: FetchCommentsOptions): Promise<Comment<T>[] | PaginatedCommentsResponse<T>>;
-    /** Create a new comment or reply */
-    createComment(content: string, parentId?: string): Promise<Comment<T>>;
-    /** Update an existing comment */
-    updateComment(id: string, content: string): Promise<Comment<T>>;
-    /** Delete a comment */
-    deleteComment(id: string): Promise<void>;
-    /** Toggle a reaction on a comment */
-    toggleReaction(commentId: string, reactionId: string): Promise<void>;
+    /** Create a new comment or reply. Omit for read-only adapters. */
+    createComment?(content: string, parentId?: string): Promise<Comment<T>>;
+    /** Update an existing comment. Omit for read-only adapters. */
+    updateComment?(id: string, content: string): Promise<Comment<T>>;
+    /** Delete a comment. Omit for read-only adapters. */
+    deleteComment?(id: string): Promise<void>;
+    /** Toggle a reaction on a comment. Omit for read-only adapters. */
+    toggleReaction?(commentId: string, reactionId: string): Promise<void>;
     /** Subscribe to external changes (realtime, SSE, websockets, etc.) */
     subscribe?(listener: (comments: Comment<T>[]) => void): () => void;
     /** Clean up resources (connections, subscriptions) */
