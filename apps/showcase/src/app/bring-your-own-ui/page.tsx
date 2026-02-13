@@ -335,7 +335,7 @@ export default function BringYourOwnUIPage() {
 
   return (
     <main className="min-h-screen">
-      <section className="container mx-auto max-w-4xl px-6 py-12">
+      <section className="container mx-auto max-w-4xl px-4 sm:px-6 py-12">
         <h1 className="font-display text-3xl font-bold text-foreground mb-2">
           Bring Your Own UI
         </h1>
@@ -358,7 +358,7 @@ export default function BringYourOwnUIPage() {
               aria-controls={`panel-${id}`}
               id={`tab-${id}`}
               className={cn(
-                'px-4 py-2.5 text-sm font-medium rounded-md transition-colors',
+                'min-h-[44px] px-4 py-3 sm:py-2.5 text-sm font-medium rounded-md transition-colors',
                 activeTab === id
                   ? 'bg-background text-foreground shadow-sm border border-border'
                   : 'text-muted-foreground hover:text-foreground hover:bg-background/50'

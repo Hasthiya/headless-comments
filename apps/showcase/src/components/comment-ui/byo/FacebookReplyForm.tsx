@@ -75,7 +75,7 @@ export function FacebookReplyForm({
             disabled={isSubmitDisabled}
             onClick={handleSubmit}
             size="sm"
-            className="h-auto rounded-full px-4 py-2 text-sm font-semibold bg-[#0866ff] hover:bg-[#1877f2] text-white border-0"
+            className="min-h-[44px] sm:min-h-0 h-auto rounded-full px-4 py-2 text-sm font-semibold bg-[#0866ff] hover:bg-[#1877f2] text-white border-0"
           >
             {isSubmitting ? (
               <span className="flex items-center gap-2">

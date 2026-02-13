@@ -126,7 +126,7 @@ export const ShadcnActionBar: React.FC<ActionBarProps & { className?: string }> 
             type="button"
             variant="ghost"
             size="icon"
-            className="h-7 w-7 text-muted-foreground"
+            className="min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 sm:h-7 sm:w-7 text-muted-foreground"
             onClick={() => setShowReactionPicker(!showReactionPicker)}
             disabled={disabled}
             aria-label="More reactions"
@@ -134,7 +134,10 @@ export const ShadcnActionBar: React.FC<ActionBarProps & { className?: string }> 
             <span className="text-base leading-none">😊</span>
           </Button>
           {showReactionPicker && (
-            <div className="absolute bottom-full left-0 mb-2 flex gap-1 p-1 bg-popover text-popover-foreground rounded-md border shadow-md z-50">
+            <div className={cn(
+              'absolute left-0 z-50 flex gap-1 p-1 bg-popover text-popover-foreground rounded-md border shadow-md max-h-[50vh] overflow-auto flex-wrap',
+              'top-full mt-2 sm:top-auto sm:mt-0 sm:bottom-full sm:mb-2'
+            )}>
               {commentReactions.map((reaction) => (
                 <ShadcnReactionButton
                   key={reaction.id}
@@ -155,7 +158,7 @@ export const ShadcnActionBar: React.FC<ActionBarProps & { className?: string }> 
           type="button"
           variant="ghost"
           size="sm"
-          className="h-7 px-2 text-muted-foreground hover:text-foreground"
+          className="min-h-[44px] py-2 sm:min-h-0 sm:h-7 sm:py-0 px-2 text-muted-foreground hover:text-foreground"
           onClick={onReply}
           disabled={disabled}
           aria-label={texts.reply}
@@ -168,7 +171,7 @@ export const ShadcnActionBar: React.FC<ActionBarProps & { className?: string }> 
         type="button"
         variant="ghost"
         size="sm"
-        className="h-7 px-2 text-muted-foreground hover:text-foreground"
+        className="min-h-[44px] py-2 sm:min-h-0 sm:h-7 sm:py-0 px-2 text-muted-foreground hover:text-foreground"
         onClick={handleCopyLink}
         disabled={disabled}
         aria-label={texts.copyLink}
@@ -183,7 +186,7 @@ export const ShadcnActionBar: React.FC<ActionBarProps & { className?: string }> 
               type="button"
               variant="ghost"
               size="icon"
-              className="h-7 w-7 text-muted-foreground"
+              className="min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 sm:h-7 sm:w-7 text-muted-foreground"
               disabled={disabled}
               aria-label="More options"
             >

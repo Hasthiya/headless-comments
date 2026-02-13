@@ -27,9 +27,9 @@ export const ShadcnReactionButton: React.FC<ReactionButtonProps> = ({
       size={buttonSize}
       className={cn(
         'rounded-full gap-1.5 h-auto py-1.5',
-        size === 'sm' && 'h-7 px-2 text-xs',
-        size === 'md' && 'h-7 px-2.5 text-xs',
-        size === 'lg' && 'h-8 px-3 text-sm',
+        size === 'sm' && 'min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 h-7 px-2 text-xs',
+        size === 'md' && 'min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 h-7 px-2.5 text-xs',
+        size === 'lg' && 'min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 h-8 px-3 text-sm',
         isActive
           ? 'bg-primary/10 text-primary hover:bg-primary/20'
           : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',

@@ -200,11 +200,11 @@ export const InstagramCommentItem: React.FC<CommentItemProps> = ({
           )}
 
           {!readOnlyValue && (
-            <div className="flex items-center gap-4 mt-1">
+            <div className="flex items-center gap-4 mt-1 flex-wrap">
               <button
                 type="button"
                 className={cn(
-                  'flex items-center gap-1 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 rounded',
+                  'min-h-[44px] flex items-center gap-1 py-2 px-3 text-xs font-medium rounded focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1',
                   isLiked
                     ? 'text-destructive'
                     : 'text-muted-foreground hover:text-foreground'
@@ -223,7 +223,7 @@ export const InstagramCommentItem: React.FC<CommentItemProps> = ({
               {depth < maxDepthValue && onReply && (
                 <button
                   type="button"
-                  className="text-xs font-medium text-muted-foreground hover:text-foreground focus:outline-none focus:underline"
+                  className="min-h-[44px] flex items-center py-2 text-xs font-medium text-muted-foreground hover:text-foreground focus:outline-none focus:underline"
                   onClick={handleReplyClick}
                 >
                   {texts.reply}
@@ -233,7 +233,7 @@ export const InstagramCommentItem: React.FC<CommentItemProps> = ({
                 <div className="relative ml-auto">
                   <button
                     type="button"
-                    className="p-1 rounded-full text-muted-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring"
+                    className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full text-muted-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring"
                     onClick={() => setShowMoreMenu((v) => !v)}
                     aria-label="More options"
                     aria-expanded={showMoreMenu}
@@ -251,7 +251,7 @@ export const InstagramCommentItem: React.FC<CommentItemProps> = ({
                         {onEdit && (
                           <button
                             type="button"
-                            className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-accent"
+                            className="w-full text-left min-h-[44px] flex items-center px-3 py-2 text-sm text-foreground hover:bg-accent"
                             onClick={() => {
                               handleEditClick();
                               setShowMoreMenu(false);
@@ -263,7 +263,7 @@ export const InstagramCommentItem: React.FC<CommentItemProps> = ({
                         {onDelete && (
                           <button
                             type="button"
-                            className="w-full text-left px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
+                            className="w-full text-left min-h-[44px] flex items-center px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
                             onClick={handleDelete}
                           >
                             {texts.delete}
@@ -294,7 +294,7 @@ export const InstagramCommentItem: React.FC<CommentItemProps> = ({
             <div className="mt-2">
               <button
                 type="button"
-                className="text-xs text-muted-foreground hover:text-foreground font-medium focus:outline-none focus:underline"
+                className="min-h-[44px] flex items-center py-2 text-xs text-muted-foreground hover:text-foreground font-medium focus:outline-none focus:underline"
                 onClick={() => setShowReplies(!showReplies)}
                 aria-expanded={showReplies}
               >

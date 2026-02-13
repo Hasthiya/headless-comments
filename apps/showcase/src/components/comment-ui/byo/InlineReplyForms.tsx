@@ -84,7 +84,7 @@ export function RedditInlineReplyForm({
         />
         <div className="flex items-center justify-end gap-2">
           {onCancel && (
-            <Button type="button" variant="outline" size="sm" onClick={onCancel} disabled={disabled || isSubmitting}>
+            <Button type="button" variant="outline" size="sm" className="min-h-[44px] sm:min-h-0" onClick={onCancel} disabled={disabled || isSubmitting}>
               {texts.cancel}
             </Button>
           )}
@@ -93,7 +93,7 @@ export function RedditInlineReplyForm({
             disabled={isSubmitDisabled}
             onClick={handleSubmit}
             size="sm"
-            className="h-auto rounded-full px-4 py-1.5 text-xs font-medium"
+            className="min-h-[44px] sm:min-h-0 h-auto rounded-full px-4 py-1.5 text-xs font-medium"
           >
             {isSubmitting ? (
               <span className="flex items-center gap-1.5">
@@ -159,7 +159,7 @@ export function InstagramInlineReplyForm({
             <span className="font-medium bg-gradient-to-r from-[#E1306C] to-[#F77737] bg-clip-text text-transparent">@{parentComment.author.name}</span>
           </div>
         )}
-        <div className="flex items-end gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-end gap-2">
           <Textarea
             ref={textareaRef}
             value={content}
@@ -169,14 +169,14 @@ export function InstagramInlineReplyForm({
             disabled={disabled || isSubmitting}
             rows={3}
             className={cn(
-              'flex-1 min-h-[80px] max-h-[200px] resize-none rounded-none border-0 border-b border-border bg-transparent px-0 py-2 shadow-none',
+              'flex-1 min-h-[80px] max-h-[200px] resize-none rounded-none border-0 border-b border-border bg-transparent px-0 py-2 shadow-none w-full',
               'focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-foreground/50'
             )}
             aria-label={inputPlaceholder}
           />
-          <div className="flex items-center gap-2 flex-shrink-0 pb-2">
+          <div className="flex items-center gap-2 flex-shrink-0 pb-2 sm:pb-2">
             {onCancel && (
-              <Button type="button" variant="link" size="sm" className="text-muted-foreground" onClick={onCancel}>
+              <Button type="button" variant="link" size="sm" className="min-h-[44px] sm:min-h-0 text-muted-foreground flex items-center" onClick={onCancel}>
                 {texts.cancel}
               </Button>
             )}
@@ -184,7 +184,7 @@ export function InstagramInlineReplyForm({
               type="button"
               disabled={isSubmitDisabled}
               onClick={handleSubmit}
-              className="h-auto px-3 py-1.5 text-sm font-semibold bg-gradient-to-r from-[#E1306C] to-[#F77737] text-white border-0 rounded-md hover:opacity-90"
+              className="min-h-[44px] sm:min-h-0 h-auto px-3 py-1.5 text-sm font-semibold bg-gradient-to-r from-[#E1306C] to-[#F77737] text-white border-0 rounded-md hover:opacity-90"
             >
               {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : 'Post'}
             </Button>
@@ -257,7 +257,7 @@ export function FacebookInlineReplyForm({
         />
         <div className="flex items-center justify-end gap-2">
           {onCancel && (
-            <Button type="button" variant="outline" size="sm" onClick={onCancel} disabled={disabled || isSubmitting}>
+            <Button type="button" variant="outline" size="sm" className="min-h-[44px] sm:min-h-0" onClick={onCancel} disabled={disabled || isSubmitting}>
               {texts.cancel}
             </Button>
           )}
@@ -266,7 +266,7 @@ export function FacebookInlineReplyForm({
             disabled={isSubmitDisabled}
             onClick={handleSubmit}
             size="sm"
-            className="h-auto rounded-full px-4 py-2 text-sm font-semibold bg-[#0866ff] hover:bg-[#1877f2] text-white border-0"
+            className="min-h-[44px] sm:min-h-0 h-auto rounded-full px-4 py-2 text-sm font-semibold bg-[#0866ff] hover:bg-[#1877f2] text-white border-0"
           >
             {isSubmitting ? (
               <span className="flex items-center gap-2">

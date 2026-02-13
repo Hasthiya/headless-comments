@@ -92,7 +92,7 @@ export default function Home() {
 
       {/* ══════════════════════  HERO  ══════════════════════════════════ */}
       <section
-        className="container mx-auto max-w-3xl px-6 pt-24 pb-24 sm:pt-32 sm:pb-32 text-center"
+        className="container mx-auto max-w-3xl px-4 sm:px-6 pt-24 pb-24 sm:pt-32 sm:pb-32 text-center"
         aria-label="Introduction"
       >
         {/* Badge — Heartbeat: muted, no decorative color */}
@@ -130,7 +130,7 @@ export default function Home() {
       {/* ══════════════════════  LIVE DEMO  ═════════════════════════════ */}
       <section
         id="demo"
-        className="container mx-auto max-w-3xl px-6 py-16 sm:py-24 scroll-mt-8"
+        className="container mx-auto max-w-3xl px-4 sm:px-6 py-16 sm:py-24 scroll-mt-8"
         aria-labelledby="demo-heading"
       >
         <div className="text-center mb-8">
@@ -146,7 +146,7 @@ export default function Home() {
       </section>
 
       {/* ══════════════════════  TECH STACK  ════════════════════════════ */}
-      <section className="container mx-auto max-w-3xl px-6 py-12 border-t border-border">
+      <section className="container mx-auto max-w-3xl px-4 sm:px-6 py-12 border-t border-border">
         <p className="text-center text-xs text-muted-foreground uppercase tracking-widest mb-6 font-medium">
           Built with
         </p>
@@ -158,7 +158,7 @@ export default function Home() {
       </section>
 
       {/* ══════════════════════  CTA FOOTER  ═══════════════════════════ */}
-      <section className="container mx-auto max-w-2xl px-6 py-24 sm:py-32 text-center">
+      <section className="container mx-auto max-w-2xl px-4 sm:px-6 py-24 sm:py-32 text-center">
         <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-6">
           Ready to ship?
         </h2>

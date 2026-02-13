@@ -58,7 +58,7 @@ export function InstagramReplyForm({
           initials
         )}
       </div>
-      <div className="flex-1 flex items-end gap-2">
+      <div className="flex-1 flex flex-col sm:flex-row sm:items-end gap-2">
         <Textarea
           ref={textareaRef}
           value={content}
@@ -68,7 +68,7 @@ export function InstagramReplyForm({
           disabled={disabled || isSubmitting}
           rows={3}
           className={cn(
-            'flex-1 min-h-[80px] max-h-[200px] resize-none rounded-none border-0 border-b border-border bg-transparent px-0 py-2 shadow-none',
+            'flex-1 min-h-[80px] max-h-[200px] resize-none rounded-none border-0 border-b border-border bg-transparent px-0 py-2 shadow-none w-full',
             'focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-foreground/50'
           )}
           aria-label={placeholder ?? texts.inputPlaceholder}
@@ -77,7 +77,7 @@ export function InstagramReplyForm({
           type="button"
           disabled={isSubmitDisabled}
           onClick={handleSubmit}
-          className="flex-shrink-0 h-auto px-3 py-1.5 text-sm font-semibold bg-gradient-to-r from-[#E1306C] to-[#F77737] text-white border-0 rounded-md hover:opacity-90"
+          className="flex-shrink-0 min-h-[44px] sm:min-h-0 h-auto px-3 py-1.5 text-sm font-semibold bg-gradient-to-r from-[#E1306C] to-[#F77737] text-white border-0 rounded-md hover:opacity-90"
         >
           {isSubmitting ? (
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden />

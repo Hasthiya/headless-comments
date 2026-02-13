@@ -169,7 +169,7 @@ export const ShadcnCommentItem: React.FC<
               variant="ghost"
               size="icon"
               className={cn(
-                'h-6 w-6 text-muted-foreground hover:text-foreground',
+                'min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 sm:h-6 sm:w-6 text-muted-foreground hover:text-foreground',
                 showUpHighlight && 'text-primary'
               )}
               onClick={() => handleReaction('like')}
@@ -187,7 +187,7 @@ export const ShadcnCommentItem: React.FC<
               variant="ghost"
               size="icon"
               className={cn(
-                'h-6 w-6 text-muted-foreground hover:text-foreground',
+                'min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 sm:h-6 sm:w-6 text-muted-foreground hover:text-foreground',
                 showDownHighlight && 'text-destructive'
               )}
               onClick={() => handleReaction('dislike')}
@@ -334,7 +334,7 @@ export const ShadcnCommentItem: React.FC<
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="h-7 px-2 text-muted-foreground hover:text-foreground"
+                  className="min-h-[44px] px-3 sm:min-h-0 sm:h-7 sm:px-2 text-muted-foreground hover:text-foreground"
                   onClick={() => setShowReplies(!showReplies)}
                   aria-expanded={showReplies}
                 >

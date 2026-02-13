@@ -1,4 +1,5 @@
 import { DocNav } from '@/components/docs/DocNav';
+import { DocNavMobile } from '@/components/docs/DocNavMobile';
 
 const docSections = [
   { id: 'overview', label: 'Overview' },
@@ -32,6 +33,7 @@ export default function DocsLayout({
           </nav>
         </aside>
         <main className="flex-1 min-w-0">
+          <DocNavMobile sections={docSections} />
           {children}
         </main>
       </div>

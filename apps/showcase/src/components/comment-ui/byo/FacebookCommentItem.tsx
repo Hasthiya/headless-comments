@@ -224,13 +224,13 @@ export const FacebookCommentItem: React.FC<CommentItemProps> = ({
           ) : null}
 
           {!readOnlyValue && (
-            <div className="flex items-center gap-4 mt-1 ml-1">
+            <div className="flex items-center gap-4 mt-1 ml-1 flex-wrap">
               {showReactions && commentReactions.length > 0 && (
                 <div className="relative" ref={reactionPickerRef}>
                   <button
                     type="button"
                     className={cn(
-                      'flex items-center gap-1.5 text-[13px] font-semibold focus:outline-none focus:ring-2 focus:ring-[#0866ff] focus:ring-offset-1 rounded',
+                      'min-h-[44px] flex items-center gap-1.5 text-[13px] font-semibold py-2 px-3 rounded focus:outline-none focus:ring-2 focus:ring-[#0866ff] focus:ring-offset-1',
                       activeReaction
                         ? 'text-[#0866ff] dark:text-[#8b9dc3]'
                         : 'text-muted-foreground hover:text-[#0866ff] dark:hover:text-[#8b9dc3]'
@@ -262,7 +262,10 @@ export const FacebookCommentItem: React.FC<CommentItemProps> = ({
                   </button>
                   {showReactionPopup && (
                     <div
-                      className="absolute bottom-full left-0 mb-1 flex gap-0.5 p-1.5 rounded-xl bg-popover text-popover-foreground border border-border shadow-lg z-20"
+                      className={cn(
+                        'absolute left-0 z-20 flex gap-0.5 p-1.5 rounded-xl bg-popover text-popover-foreground border border-border shadow-lg max-h-[50vh] overflow-auto flex-wrap',
+                        'top-full mt-2 sm:top-auto sm:mt-0 sm:bottom-full sm:mb-1'
+                      )}
                       role="menu"
                       aria-label="Reactions"
                     >
@@ -272,7 +275,7 @@ export const FacebookCommentItem: React.FC<CommentItemProps> = ({
                           type="button"
                           role="menuitem"
                           className={cn(
-                            'flex items-center justify-center w-8 h-8 rounded-full text-lg leading-none transition-colors',
+                            'flex items-center justify-center min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 sm:h-8 sm:w-8 rounded-full text-lg leading-none transition-colors',
                             reaction.isActive
                               ? 'bg-primary/10 scale-110'
                               : 'hover:bg-accent'
@@ -295,7 +298,7 @@ export const FacebookCommentItem: React.FC<CommentItemProps> = ({
               {depth < maxDepthValue && onReply && (
                 <button
                   type="button"
-                  className="text-[13px] font-semibold text-muted-foreground hover:text-[#0866ff] dark:hover:text-[#8b9dc3] focus:outline-none focus:underline"
+                  className="min-h-[44px] flex items-center py-2 text-[13px] font-semibold text-muted-foreground hover:text-[#0866ff] dark:hover:text-[#8b9dc3] focus:outline-none focus:underline"
                   onClick={handleReplyClick}
                 >
                   {texts.reply}
@@ -305,7 +308,7 @@ export const FacebookCommentItem: React.FC<CommentItemProps> = ({
                 <div className="relative">
                   <button
                     type="button"
-                    className="p-1 rounded-full text-muted-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring"
+                    className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full text-muted-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring"
                     onClick={() => setShowMoreMenu((v) => !v)}
                     aria-label="More options"
                     aria-expanded={showMoreMenu}
@@ -323,7 +326,7 @@ export const FacebookCommentItem: React.FC<CommentItemProps> = ({
                         {onEdit && (
                           <button
                             type="button"
-                            className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-accent"
+                            className="w-full text-left min-h-[44px] flex items-center px-3 py-2 text-sm text-foreground hover:bg-accent"
                             onClick={() => {
                               handleEditClick();
                               setShowMoreMenu(false);
@@ -335,7 +338,7 @@ export const FacebookCommentItem: React.FC<CommentItemProps> = ({
                         {onDelete && (
                           <button
                             type="button"
-                            className="w-full text-left px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
+                            className="w-full text-left min-h-[44px] flex items-center px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
                             onClick={handleDelete}
                           >
                             {texts.delete}

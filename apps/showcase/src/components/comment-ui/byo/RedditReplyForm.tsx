@@ -75,7 +75,7 @@ export function RedditReplyForm({
             disabled={isSubmitDisabled}
             onClick={handleSubmit}
             size="sm"
-            className="h-auto rounded-full px-4 py-1.5 text-xs font-medium"
+            className="min-h-[44px] sm:min-h-0 h-auto rounded-full px-4 py-1.5 text-xs font-medium"
           >
             {isSubmitting ? (
               <span className="flex items-center gap-1.5">

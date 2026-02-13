@@ -114,6 +114,7 @@ export const ShadcnReplyForm: React.FC<ReplyFormProps> = ({
                 type="button"
                 variant="outline"
                 size="sm"
+                className="min-h-[44px] sm:min-h-0"
                 onClick={handleCancel}
                 disabled={disabled || isSubmitting}
               >
@@ -123,6 +124,7 @@ export const ShadcnReplyForm: React.FC<ReplyFormProps> = ({
             <Button
               type="button"
               size="sm"
+              className="min-h-[44px] sm:min-h-0"
               onClick={handleSubmit}
               disabled={isSubmitDisabled}
             >
