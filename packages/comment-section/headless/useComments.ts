@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Hook to access the Comment Section context
+ * Hook to access the Headless Comments context
  * @module @comment-section/react/useComments
  */
 
@@ -10,7 +10,7 @@ import type { CommentSectionContextValue } from './types';
 import { CommentSectionContext } from './CommentProvider';
 
 /**
- * Hook to access the Comment Section context.
+ * Hook to access the Headless Comments context.
  * Must be used within a CommentSectionProvider.
  */
 export const useComments = (): CommentSectionContextValue => {

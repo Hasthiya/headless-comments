@@ -33,7 +33,7 @@ function isSortOrder(value: unknown): value is SortOrder {
 }
 
 /**
- * Context for the Comment Section
+ * Context for Headless Comments
  */
 export const CommentSectionContext = createContext<CommentSectionContextValue | null>(null);
 

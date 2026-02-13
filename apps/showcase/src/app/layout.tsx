@@ -18,7 +18,7 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Comment Section – Showcase',
+  title: 'Headless Comments – Showcase',
   description: 'Comment section component for React — TypeScript, replies, reactions, themeable. Live demo and docs.',
 };
 

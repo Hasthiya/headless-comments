@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * React Comment Section Component
+ * Headless Comments React Component
  * A highly customizable, TypeScript-ready comment section with reply and reaction support
  *
  * @package @comment-section/react

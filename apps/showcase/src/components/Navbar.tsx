@@ -13,7 +13,7 @@ export function Navbar() {
             href="/"
             className="font-display text-lg font-semibold text-foreground hover:text-foreground/80 transition-colors"
           >
-            Comment Section
+            Headless Comments
           </Link>
           <div className="flex items-center gap-4">
             <Link
