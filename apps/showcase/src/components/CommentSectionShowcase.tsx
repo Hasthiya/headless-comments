@@ -19,6 +19,7 @@ const currentUser: CommentUser = {
   id: 'current',
   name: 'You',
   isVerified: true,
+  avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=You',
 };
 
 /** 5 emoji reactions */
@@ -48,6 +49,7 @@ const sampleComments: Comment[] = [
       id: 'u1',
       name: 'Alice',
       isVerified: true,
+      avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Alice',
     },
     createdAt: new Date(Date.now() - 1000 * 60 * 30),
     reactions: makeEmojiReactions({ like: { count: 2, isActive: false }, heart: { count: 1, isActive: true } }),
@@ -55,7 +57,7 @@ const sampleComments: Comment[] = [
       {
         id: '1-1',
         content: 'I agree, really easy to use.',
-        author: { id: 'u2', name: 'Bob' },
+        author: { id: 'u2', name: 'Bob', avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Bob' },
         createdAt: new Date(Date.now() - 1000 * 60 * 15),
         parentId: '1',
         reactions: makeEmojiReactions(),
@@ -65,21 +67,21 @@ const sampleComments: Comment[] = [
   {
     id: '2',
     content: 'Looking forward to trying it in my Next.js app.',
-    author: { id: 'u3', name: 'Charlie', isVerified: false },
+    author: { id: 'u3', name: 'Charlie', isVerified: false, avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Charlie' },
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2),
     reactions: makeEmojiReactions(),
   },
   {
     id: '3',
     content: 'The nested replies and reactions make it feel really polished. Great for community features!',
-    author: { id: 'u4', name: 'Dana', isVerified: true },
+    author: { id: 'u4', name: 'Dana', isVerified: true, avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Dana' },
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
     reactions: makeEmojiReactions({ like: { count: 3, isActive: false } }),
     replies: [
       {
         id: '3-1',
         content: 'Same here — we shipped it in a week.',
-        author: { id: 'u5', name: 'Eve' },
+        author: { id: 'u5', name: 'Eve', avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Eve' },
         createdAt: new Date(Date.now() - 1000 * 60 * 60 * 20),
         parentId: '3',
         reactions: makeEmojiReactions({ haha: { count: 1, isActive: false } }),

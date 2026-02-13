@@ -11,13 +11,14 @@ const demoUser: CommentUser = {
     id: 'headless-user',
     name: 'You',
     isVerified: true,
+    avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=You',
 };
 
 const seedComments: Comment[] = [
     {
         id: 'h1',
         content: 'This is the headless preset — unstyled by default, fully customisable.',
-        author: { id: 'u10', name: 'Dev', isVerified: true },
+        author: { id: 'u10', name: 'Dev', isVerified: true, avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Dev' },
         createdAt: new Date(Date.now() - 1000 * 60 * 10),
         reactions: [
             { id: 'like', label: 'Like', emoji: '👍', count: 4, isActive: false },
@@ -27,7 +28,7 @@ const seedComments: Comment[] = [
             {
                 id: 'h1-1',
                 content: 'You can style every element with your own classes.',
-                author: { id: 'u11', name: 'Designer' },
+                author: { id: 'u11', name: 'Designer', avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Designer' },
                 createdAt: new Date(Date.now() - 1000 * 60 * 5),
                 parentId: 'h1',
                 reactions: [

@@ -14,6 +14,7 @@ const currentUser: CommentUser = {
   id: 'current',
   name: 'You',
   isVerified: true,
+  avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=You',
 };
 
 /** 5 emoji reactions */
@@ -39,14 +40,14 @@ const sampleComments: Comment[] = [
   {
     id: '1',
     content: 'The Styled preset uses CSS variables only — no Tailwind or Radix.',
-    author: { id: 'u1', name: 'Alice', isVerified: true },
+    author: { id: 'u1', name: 'Alice', isVerified: true, avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Alice' },
     createdAt: new Date(Date.now() - 1000 * 60 * 30),
     reactions: makeEmojiReactions({ like: { count: 1, isActive: false } }),
     replies: [
       {
         id: '1-1',
         content: 'Perfect for dropping into any stack.',
-        author: { id: 'u2', name: 'Bob' },
+        author: { id: 'u2', name: 'Bob', avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Bob' },
         createdAt: new Date(Date.now() - 1000 * 60 * 15),
         parentId: '1',
         reactions: makeEmojiReactions(),
@@ -56,7 +57,7 @@ const sampleComments: Comment[] = [
   {
     id: '2',
     content: 'Theme it with --cs-primary-color, --cs-bg-color, and more.',
-    author: { id: 'u3', name: 'Charlie' },
+    author: { id: 'u3', name: 'Charlie', avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Charlie' },
     createdAt: new Date(Date.now() - 1000 * 60 * 60),
     reactions: makeEmojiReactions(),
   },

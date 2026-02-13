@@ -9,13 +9,14 @@ const heroUser: CommentUser = {
   id: 'hero-user',
   name: 'You',
   isVerified: true,
+  avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=You',
 };
 
 const heroComment: Comment[] = [
   {
     id: 'hero-1',
     content: 'Welcome to the comment section. Try replying below.',
-    author: { id: 'u-hero-1', name: 'Showcase', isVerified: true },
+    author: { id: 'u-hero-1', name: 'Showcase', isVerified: true, avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Showcase' },
     createdAt: new Date(Date.now() - 1000 * 60 * 5),
     reactions: [],
   },

@@ -25,6 +25,7 @@ const currentUser: CommentUser = {
   id: 'current',
   name: 'You',
   isVerified: true,
+  avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=You',
 };
 
 /** 5 emoji reactions for Facebook, Slack, and Instagram tabs */
@@ -60,14 +61,14 @@ const redditComments: Comment[] = [
   {
     id: 'r1',
     content: 'This is a great example of the comment section component!',
-    author: { id: 'u1', name: 'Alice', isVerified: true },
+    author: { id: 'u1', name: 'Alice', isVerified: true, avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Alice' },
     createdAt: new Date(Date.now() - 1000 * 60 * 30),
     reactions: makeVoteReactions({ like: { count: 5, isActive: false } }),
     replies: [
       {
         id: 'r1-1',
         content: 'I agree, really easy to use.',
-        author: { id: 'u2', name: 'Bob' },
+        author: { id: 'u2', name: 'Bob', avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Bob' },
         createdAt: new Date(Date.now() - 1000 * 60 * 15),
         parentId: 'r1',
         reactions: makeVoteReactions({ like: { count: 2, isActive: false } }),
@@ -77,21 +78,21 @@ const redditComments: Comment[] = [
   {
     id: 'r2',
     content: 'Looking forward to trying it in my Next.js app.',
-    author: { id: 'u3', name: 'Charlie', isVerified: false },
+    author: { id: 'u3', name: 'Charlie', isVerified: false, avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Charlie' },
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2),
     reactions: makeVoteReactions(),
   },
   {
     id: 'r3',
     content: 'The nested replies and reactions make it feel really polished. Great for community features!',
-    author: { id: 'u4', name: 'Dana', isVerified: true },
+    author: { id: 'u4', name: 'Dana', isVerified: true, avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Dana' },
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
     reactions: makeVoteReactions({ like: { count: 8, isActive: false }, dislike: { count: 1, isActive: false } }),
     replies: [
       {
         id: 'r3-1',
         content: 'Same here — we shipped it in a week.',
-        author: { id: 'u5', name: 'Eve' },
+        author: { id: 'u5', name: 'Eve', avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Eve' },
         createdAt: new Date(Date.now() - 1000 * 60 * 60 * 20),
         parentId: 'r3',
         reactions: makeVoteReactions({ like: { count: 3, isActive: false } }),
@@ -105,14 +106,14 @@ const emojiComments: Comment[] = [
   {
     id: 'e1',
     content: 'This is a great example of the comment section component!',
-    author: { id: 'u1', name: 'Alice', isVerified: true },
+    author: { id: 'u1', name: 'Alice', isVerified: true, avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Alice' },
     createdAt: new Date(Date.now() - 1000 * 60 * 30),
     reactions: makeEmojiReactions({ like: { count: 2, isActive: false }, heart: { count: 1, isActive: true } }),
     replies: [
       {
         id: 'e1-1',
         content: 'I agree, really easy to use.',
-        author: { id: 'u2', name: 'Bob' },
+        author: { id: 'u2', name: 'Bob', avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Bob' },
         createdAt: new Date(Date.now() - 1000 * 60 * 15),
         parentId: 'e1',
         reactions: makeEmojiReactions(),
@@ -122,21 +123,21 @@ const emojiComments: Comment[] = [
   {
     id: 'e2',
     content: 'Looking forward to trying it in my Next.js app.',
-    author: { id: 'u3', name: 'Charlie', isVerified: false },
+    author: { id: 'u3', name: 'Charlie', isVerified: false, avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Charlie' },
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2),
     reactions: makeEmojiReactions(),
   },
   {
     id: 'e3',
     content: 'The nested replies and reactions make it feel really polished. Great for community features!',
-    author: { id: 'u4', name: 'Dana', isVerified: true },
+    author: { id: 'u4', name: 'Dana', isVerified: true, avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Dana' },
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
     reactions: makeEmojiReactions({ like: { count: 3, isActive: false } }),
     replies: [
       {
         id: 'e3-1',
         content: 'Same here — we shipped it in a week.',
-        author: { id: 'u5', name: 'Eve' },
+        author: { id: 'u5', name: 'Eve', avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Eve' },
         createdAt: new Date(Date.now() - 1000 * 60 * 60 * 20),
         parentId: 'e3',
         reactions: makeEmojiReactions({ haha: { count: 1, isActive: false } }),

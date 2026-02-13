@@ -27,7 +27,7 @@ import { StyledCommentSection, generateUniqueId, type Comment, type CommentUser 
 const currentUser: CommentUser = {
   id: 'user-1',
   name: 'John Doe',
-  avatarUrl: 'https://example.com/avatar.jpg',
+  avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=JohnDoe',
   isVerified: true,
 };
 
