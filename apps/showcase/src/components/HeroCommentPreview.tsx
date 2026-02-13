@@ -67,7 +67,6 @@ export function HeroCommentPreview() {
         showReactions={false}
         showMoreOptions={false}
         inputPlaceholder=""
-        enableOptimisticUpdates
       />
     </div>
   );

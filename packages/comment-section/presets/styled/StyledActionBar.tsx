@@ -81,6 +81,13 @@ export const StyledActionBar: React.FC<StyledActionBarProps> = ({
     /* Show up to 5 reactions in the picker (or all if fewer) */
     const pickerReactions = commentReactions.slice(0, 5);
 
+    /* Determine if any reactions have counts > 0 for trigger display */
+    const topReactions = commentReactions
+        .filter((r) => r.count > 0)
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 3);
+    const hasAnyReaction = topReactions.length > 0;
+
     const handleReport = useCallback(
         (reason: string) => {
             if (reportComment) reportComment(comment.id, reason);
@@ -109,18 +116,29 @@ export const StyledActionBar: React.FC<StyledActionBarProps> = ({
 
     return (
         <div className={`cs-action-bar ${className}`.trim()}>
-            {/* Single smiley icon: click opens reaction picker with up to 5 reactions (emoji + count) */}
+            {/* Reaction trigger: smiley icon when no reactions, emoji+count when reactions exist */}
             {pickerReactions.length > 0 && (
                 <div className="cs-reaction-picker" ref={reactionPickerRef}>
                     <button
                         type="button"
-                        className="cs-btn cs-btn--ghost cs-btn--icon cs-reaction-trigger"
+                        className={`cs-btn cs-btn--ghost cs-reaction-trigger${hasAnyReaction ? ' cs-reaction-trigger--has-reactions' : ' cs-btn--icon'}`}
                         onClick={() => setShowReactionPicker(!showReactionPicker)}
                         disabled={disabled}
-                        aria-label="Reactions"
+                        aria-label={hasAnyReaction ? `Reactions: ${topReactions.map((r) => `${r.label} ${r.count}`).join(', ')}` : 'Reactions'}
                         aria-expanded={showReactionPicker}
                     >
-                        <span className="cs-reaction-trigger__emoji" aria-hidden>😊</span>
+                        {hasAnyReaction ? (
+                            <span className="cs-reaction-trigger__active">
+                                {topReactions.map((r) => (
+                                    <span key={r.id} className="cs-reaction-trigger__badge">
+                                        <span className="cs-reaction__emoji">{r.emoji}</span>
+                                        <span className="cs-reaction__count">{r.count}</span>
+                                    </span>
+                                ))}
+                            </span>
+                        ) : (
+                            <span className="cs-reaction-trigger__emoji cs-reaction-trigger__emoji--muted" aria-hidden>😊</span>
+                        )}
                     </button>
                     {showReactionPicker && (
                         <div className="cs-reaction-picker__popover">

@@ -1,12 +1,13 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import {
   CommentSection,
   StyledCommentSection,
-  generateUniqueId,
+  useCommentTree,
   type Comment,
   type CommentUser,
+  type ReactionConfig,
 } from '@hasthiya_/headless-comments-react';
 import '@hasthiya_/headless-comments-react/presets/styled/styles.css';
 import { ShadcnCommentSection } from '@/components/comment-ui';
@@ -14,12 +15,30 @@ import { themeAwareDemoTheme } from '@/lib/demo-theme';
 
 type Preset = 'default' | 'shadcn' | 'styled';
 
-
 const currentUser: CommentUser = {
   id: 'current',
   name: 'You',
   isVerified: true,
 };
+
+/** 5 emoji reactions */
+const emojiReactions: ReactionConfig[] = [
+  { id: 'like', label: 'Like', emoji: '👍' },
+  { id: 'heart', label: 'Love', emoji: '❤️' },
+  { id: 'haha', label: 'Laugh', emoji: '😂' },
+  { id: 'wow', label: 'Wow', emoji: '😮' },
+  { id: 'angry', label: 'Angry', emoji: '😠' },
+];
+
+function makeEmojiReactions(overrides?: Partial<Record<string, { count: number; isActive: boolean }>>): Comment['reactions'] {
+  return emojiReactions.map((r) => ({
+    id: r.id,
+    label: r.label,
+    emoji: r.emoji,
+    count: overrides?.[r.id]?.count ?? 0,
+    isActive: overrides?.[r.id]?.isActive ?? false,
+  }));
+}
 
 const sampleComments: Comment[] = [
   {
@@ -31,10 +50,7 @@ const sampleComments: Comment[] = [
       isVerified: true,
     },
     createdAt: new Date(Date.now() - 1000 * 60 * 30),
-    reactions: [
-      { id: 'like', label: 'Like', emoji: '👍', count: 2, isActive: false },
-      { id: 'heart', label: 'Heart', emoji: '❤️', count: 1, isActive: true },
-    ],
+    reactions: makeEmojiReactions({ like: { count: 2, isActive: false }, heart: { count: 1, isActive: true } }),
     replies: [
       {
         id: '1-1',
@@ -42,9 +58,7 @@ const sampleComments: Comment[] = [
         author: { id: 'u2', name: 'Bob' },
         createdAt: new Date(Date.now() - 1000 * 60 * 15),
         parentId: '1',
-        reactions: [
-          { id: 'like', label: 'Like', emoji: '👍', count: 0, isActive: false },
-        ],
+        reactions: makeEmojiReactions(),
       },
     ],
   },
@@ -53,19 +67,14 @@ const sampleComments: Comment[] = [
     content: 'Looking forward to trying it in my Next.js app.',
     author: { id: 'u3', name: 'Charlie', isVerified: false },
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2),
-    reactions: [
-      { id: 'like', label: 'Like', emoji: '👍', count: 0, isActive: false },
-    ],
+    reactions: makeEmojiReactions(),
   },
   {
     id: '3',
     content: 'The nested replies and reactions make it feel really polished. Great for community features!',
     author: { id: 'u4', name: 'Dana', isVerified: true },
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
-    reactions: [
-      { id: 'like', label: 'Like', emoji: '👍', count: 3, isActive: false },
-      { id: 'heart', label: 'Heart', emoji: '❤️', count: 0, isActive: false },
-    ],
+    reactions: makeEmojiReactions({ like: { count: 3, isActive: false } }),
     replies: [
       {
         id: '3-1',
@@ -73,9 +82,7 @@ const sampleComments: Comment[] = [
         author: { id: 'u5', name: 'Eve' },
         createdAt: new Date(Date.now() - 1000 * 60 * 60 * 20),
         parentId: '3',
-        reactions: [
-          { id: 'like', label: 'Like', emoji: '👍', count: 1, isActive: false },
-        ],
+        reactions: makeEmojiReactions({ haha: { count: 1, isActive: false } }),
       },
     ],
   },
@@ -89,211 +96,12 @@ const PRESET_OPTIONS: { value: Preset; label: string }[] = [
 
 export function CommentSectionShowcase() {
   const [preset, setPreset] = useState<Preset>('styled');
-  const [comments, setComments] = useState<Comment[]>(() => sampleComments);
 
-  const handleSubmitComment = useCallback(
-    (content: string): Comment => {
-      const newComment: Comment = {
-        id: generateUniqueId(),
-        content,
-        author: currentUser,
-        createdAt: new Date(),
-        reactions: [
-          { id: 'like', label: 'Like', emoji: '👍', count: 0, isActive: false },
-          { id: 'dislike', label: 'Dislike', emoji: '👎', count: 0, isActive: false },
-        ],
-      };
-      setComments((prev) => [newComment, ...prev]);
-      return newComment;
-    },
-    []
-  );
-  const handleReply = useCallback(
-    (commentId: string, content: string): Comment => {
-      const newReply: Comment = {
-        id: generateUniqueId(),
-        content,
-        author: currentUser,
-        createdAt: new Date(),
-        parentId: commentId,
-        reactions: [
-          { id: 'like', label: 'Like', emoji: '👍', count: 0, isActive: false },
-          { id: 'dislike', label: 'Dislike', emoji: '👎', count: 0, isActive: false },
-        ],
-      };
-      setComments((prev) =>
-        prev.map((c) => {
-          if (c.id === commentId) {
-            return { ...c, replies: [...(c.replies ?? []), newReply] };
-          }
-          if (c.replies) {
-            return {
-              ...c,
-              replies: c.replies.map((r) =>
-                r.id === commentId
-                  ? { ...r, replies: [...(r.replies ?? []), newReply] }
-                  : r
-              ),
-            };
-          }
-          return c;
-        })
-      );
-      return newReply;
-    },
-    []
-  );
-
-  const handleReaction = useCallback((commentId: string, reactionId: string) => {
-    const updateReactions = (reactions: Comment['reactions']): Comment['reactions'] => {
-      const list = reactions ?? [];
-
-      if (reactionId === 'like' || reactionId === 'dislike') {
-        const like = list.find((r) => r.id === 'like');
-        const dislike = list.find((r) => r.id === 'dislike');
-        const ensureReaction = (
-          id: 'like' | 'dislike',
-          current: (typeof list)[0] | undefined
-        ) => ({
-          id,
-          label: id === 'dislike' ? 'Dislike' : 'Like',
-          emoji: id === 'dislike' ? '👎' : '👍',
-          count: current?.count ?? 0,
-          isActive: current?.isActive ?? false,
-        });
-        let nextLike = ensureReaction('like', like);
-        let nextDislike = ensureReaction('dislike', dislike);
-
-        if (reactionId === 'like') {
-          if (nextDislike.isActive) {
-            nextDislike = {
-              ...nextDislike,
-              count: Math.max(0, nextDislike.count - 1),
-              isActive: false,
-            };
-          }
-          if (nextLike.isActive) {
-            nextLike = {
-              ...nextLike,
-              count: Math.max(0, nextLike.count - 1),
-              isActive: false,
-            };
-          } else {
-            nextLike = {
-              ...nextLike,
-              count: nextLike.count + 1,
-              isActive: true,
-            };
-          }
-        } else {
-          if (nextLike.isActive) {
-            nextLike = {
-              ...nextLike,
-              count: Math.max(0, nextLike.count - 1),
-              isActive: false,
-            };
-          }
-          if (nextDislike.isActive) {
-            nextDislike = {
-              ...nextDislike,
-              count: Math.max(0, nextDislike.count - 1),
-              isActive: false,
-            };
-          } else {
-            nextDislike = {
-              ...nextDislike,
-              count: nextDislike.count + 1,
-              isActive: true,
-            };
-          }
-        }
-        const rest = list.filter((r) => r.id !== 'like' && r.id !== 'dislike');
-        return [...rest, nextLike, nextDislike];
-      }
-
-      const existing = list.find((r) => r.id === reactionId);
-      if (existing) {
-        return list.map((r) =>
-          r.id === reactionId
-            ? {
-                ...r,
-                count: r.count + (r.isActive ? -1 : 1),
-                isActive: !r.isActive,
-              }
-            : r
-        );
-      }
-      return [
-        ...list,
-        {
-          id: reactionId,
-          label: reactionId === 'dislike' ? 'Dislike' : reactionId,
-          emoji: reactionId === 'dislike' ? '👎' : '👍',
-          count: 1,
-          isActive: true,
-        },
-      ];
-    };
-    const updateComment = (c: Comment): Comment => {
-      if (c.id === commentId) {
-        return { ...c, reactions: updateReactions(c.reactions) };
-      }
-      if (c.replies?.length) {
-        return { ...c, replies: c.replies.map(updateComment) };
-      }
-      return c;
-    };
-    setComments((prev) => prev.map(updateComment));
-  }, []);
-
-  const handleEdit = useCallback(
-    (commentId: string, content: string): Comment => {
-      const updatedAt = new Date();
-      const applyEdit = (list: Comment[]): { next: Comment[]; updated: Comment | null } => {
-        let updated: Comment | null = null;
-        const next = list.map((c) => {
-          if (c.id === commentId) {
-            updated = { ...c, content, updatedAt, isEdited: true };
-            return updated;
-          }
-          if (c.replies) {
-            const { next: replyNext, updated: replyUpdated } = applyEdit(c.replies);
-            if (replyUpdated) updated = replyUpdated;
-            return { ...c, replies: replyNext };
-          }
-          return c;
-        });
-        return { next, updated };
-      };
-      const { next, updated } = applyEdit(comments);
-      setComments(next);
-      return updated ?? { id: commentId, content, author: currentUser, createdAt: new Date(), updatedAt, isEdited: true };
-    },
-    [comments]
-  );
-
-  const handleDelete = useCallback((commentId: string) => {
-    const remove = (list: Comment[]): Comment[] =>
-      list
-        .filter((c) => c.id !== commentId)
-        .map((c) => (c.replies ? { ...c, replies: remove(c.replies) } : c));
-    setComments((prev) => remove(prev));
-  }, []);
-
-  const commonProps = {
-    comments,
+  const tree = useCommentTree({
+    initialComments: sampleComments,
     currentUser,
-    onSubmitComment: handleSubmitComment,
-    onReply: handleReply,
-    onReaction: handleReaction,
-    onEdit: handleEdit,
-    onDelete: handleDelete,
-    theme: themeAwareDemoTheme,
-    showReactions: true,
-    showMoreOptions: true,
-    inputPlaceholder: 'Add a comment...',
-    enableOptimisticUpdates: true,
-  };
+    mutuallyExclusiveReactions: true,
+  });
 
   return (
     <div className="space-y-4">
@@ -321,20 +129,41 @@ export function CommentSectionShowcase() {
       </div>
 
       {preset === 'default' && (
-        <CommentSection {...commonProps} includeDislike />
+        <CommentSection
+          tree={tree}
+          currentUser={currentUser}
+          theme={themeAwareDemoTheme}
+          showReactions
+          showMoreOptions
+          availableReactions={emojiReactions}
+          inputPlaceholder="Add a comment..."
+        />
       )}
 
       {preset === 'shadcn' && (
         <ShadcnCommentSection
-          {...commonProps}
-          includeDislike
+          tree={tree}
+          currentUser={currentUser}
+          theme={themeAwareDemoTheme}
+          showReactions
+          showMoreOptions
+          availableReactions={emojiReactions}
+          inputPlaceholder="Add a comment..."
         />
       )}
 
       {preset === 'styled' && (
-        <StyledCommentSection {...commonProps} includeDislike showSortBar={false} />
+        <StyledCommentSection
+          tree={tree}
+          currentUser={currentUser}
+          theme={themeAwareDemoTheme}
+          showReactions
+          showMoreOptions
+          availableReactions={emojiReactions}
+          inputPlaceholder="Add a comment..."
+          showSortBar={false}
+        />
       )}
     </div>
   );
 }
-

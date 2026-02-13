@@ -5,9 +5,9 @@ import type { CommentItemProps } from '@hasthiya_/headless-comments-react';
 import type { Comment } from '@hasthiya_/headless-comments-react';
 import {
   useCommentSection,
-  useReplyForm,
-  useEditMode,
-  useReactions,
+  useReplyTo,
+  useEditComment,
+  useCommentReaction,
   useRelativeTime,
   useClickOutside,
   formatDate,
@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { SlackInlineReplyForm } from './InlineReplyForms';
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal, Smile } from 'lucide-react';
 
 /** Slack brand green for links and primary actions */
 const SLACK_ACCENT = '#2EB886';
@@ -90,12 +90,9 @@ export const SlackCommentItem: React.FC<CommentItemProps> = ({
   const localeValue = locale ?? context.locale;
   const availableReactions = availableReactionsProp ?? context.availableReactions;
 
-  const replyForm = useReplyForm();
-  const editMode = useEditMode();
-  const { toggleReaction, isPending: isReactionPending } = useReactions(
-    onReaction,
-    context.enableOptimisticUpdates
-  );
+  const replyHook = useReplyTo(comment.id);
+  const editHook = useEditComment(comment.id);
+  const reactionHook = useCommentReaction(comment.id);
   const [showReplies, setShowReplies] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showReactionPopup, setShowReactionPopup] = useState(false);
@@ -123,17 +120,19 @@ export const SlackCommentItem: React.FC<CommentItemProps> = ({
     .filter((r) => r.count > 0)
     .sort((a, b) => b.count - a.count)
     .slice(0, 3);
+  /* Limit picker to 5 reactions */
+  const pickerReactions = commentReactions.slice(0, 5);
 
-  const handleReplyClick = useCallback(() => replyForm.openReply(comment.id), [comment.id, replyForm]);
+  const handleReplyClick = useCallback(() => replyHook.openReply(), [replyHook]);
   const handleEditClick = useCallback(
-    () => editMode.startEdit(comment.id, comment.content),
-    [comment.id, comment.content, editMode]
+    () => editHook.startEditing(comment.content),
+    [comment.content, editHook]
   );
   const handleReaction = useCallback(
     (id: string) => {
-      if (!isReactionPending(comment.id, id)) toggleReaction(comment.id, id);
+      if (!reactionHook.isPending(id)) reactionHook.toggle(id);
     },
-    [comment.id, toggleReaction, isReactionPending]
+    [reactionHook]
   );
   const handleDelete = useCallback(() => {
     if (onDelete) onDelete(comment.id);
@@ -143,19 +142,19 @@ export const SlackCommentItem: React.FC<CommentItemProps> = ({
     (content: string) => {
       if (onReply) {
         onReply(comment.id, content);
-        replyForm.closeReply();
+        replyHook.cancelReply();
       }
     },
-    [comment.id, onReply, replyForm]
+    [comment.id, onReply, replyHook]
   );
   const handleEditSubmit = useCallback(
     (content: string) => {
       if (onEdit) {
         onEdit(comment.id, content);
-        editMode.cancelEdit();
+        editHook.cancelEdit();
       }
     },
-    [comment.id, onEdit, editMode]
+    [comment.id, onEdit, editHook]
   );
 
   const relativeTime = useRelativeTime(comment.createdAt, localeValue, texts);
@@ -243,11 +242,11 @@ export const SlackCommentItem: React.FC<CommentItemProps> = ({
             )}
           </div>
 
-          {editMode.isEditing && editMode.editingCommentId === comment.id ? (
+          {editHook.isEditing ? (
             <div className="mt-2 space-y-2">
               <Textarea
-                value={editMode.editValue}
-                onChange={(e) => editMode.setEditValue(e.target.value)}
+                value={editHook.editContent}
+                onChange={(e) => editHook.setEditContent(e.target.value)}
                 className="min-h-[72px] text-[15px] rounded border-border"
                 autoFocus
               />
@@ -257,7 +256,7 @@ export const SlackCommentItem: React.FC<CommentItemProps> = ({
                   size="sm"
                   style={{ backgroundColor: SLACK_ACCENT }}
                   className="text-white border-0 hover:opacity-90"
-                  onClick={() => handleEditSubmit(editMode.editValue)}
+                  onClick={() => handleEditSubmit(editHook.editContent)}
                 >
                   {texts.submit}
                 </Button>
@@ -266,7 +265,7 @@ export const SlackCommentItem: React.FC<CommentItemProps> = ({
                   variant="outline"
                   size="sm"
                   className="border-border"
-                  onClick={editMode.cancelEdit}
+                  onClick={editHook.cancelEdit}
                 >
                   {texts.cancel}
                 </Button>
@@ -306,19 +305,19 @@ export const SlackCommentItem: React.FC<CommentItemProps> = ({
                         </span>
                       ))
                     ) : (
-                      <span className="text-muted-foreground/80">Add reaction</span>
+                      <Smile className="h-4 w-4 text-muted-foreground/50" aria-hidden />
                     )}
                   </button>
                   {showReactionPopup && (
                     <div
                       className={cn(
-                        'absolute left-0 z-20 flex gap-0.5 p-1.5 rounded-lg bg-popover text-popover-foreground border border-border shadow-lg max-h-[50vh] overflow-auto flex-wrap',
+                        'absolute left-0 z-20 flex gap-0.5 p-1.5 rounded-lg bg-popover text-popover-foreground border border-border shadow-lg',
                         'top-full mt-1 sm:top-auto sm:mt-0 sm:bottom-full sm:mb-1'
                       )}
                       role="menu"
                       aria-label="Reactions"
                     >
-                      {commentReactions.map((reaction) => (
+                      {pickerReactions.map((reaction) => (
                         <button
                           key={reaction.id}
                           type="button"
@@ -331,7 +330,7 @@ export const SlackCommentItem: React.FC<CommentItemProps> = ({
                             handleReaction(reaction.id);
                             setShowReactionPopup(false);
                           }}
-                          disabled={isReactionPending(comment.id, reaction.id)}
+                          disabled={reactionHook.isPending(reaction.id)}
                           aria-label={reaction.label}
                           title={reaction.label}
                         >
@@ -400,13 +399,13 @@ export const SlackCommentItem: React.FC<CommentItemProps> = ({
             </div>
           )}
 
-          {replyForm.isOpen && replyForm.activeCommentId === comment.id && (
+          {replyHook.isReplying && (
             <div className="mt-3">
               <SlackInlineReplyForm
                 parentComment={comment}
                 currentUser={currentUser ?? undefined}
                 onSubmit={handleReplySubmit}
-                onCancel={replyForm.closeReply}
+                onCancel={replyHook.cancelReply}
                 placeholder={texts.replyPlaceholder}
                 autoFocus
               />

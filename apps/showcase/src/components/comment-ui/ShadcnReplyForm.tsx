@@ -29,7 +29,7 @@ export const ShadcnReplyForm: React.FC<ReplyFormProps> = ({
 }) => {
   const context = useCommentSection();
   const texts = context.texts;
-  const isSubmitting = parentComment ? context.isSubmittingReply : context.isSubmittingComment;
+  const isSubmitting = false;
 
   const [content, setContent] = useState('');
   const [error, setError] = useState<string | null>(null);

@@ -4,6 +4,7 @@
  */
 
 import type { Comment } from './types';
+import type { SortOrder } from './sorting';
 
 /**
  * Options for fetching comments
@@ -16,74 +17,46 @@ export interface FetchCommentsOptions {
     /** Number of comments to fetch */
     limit?: number;
     /** Sort order */
-    sortOrder?: 'asc' | 'desc' | 'oldest' | 'newest' | 'popular';
+    sortOrder?: SortOrder;
+}
+
+/**
+ * Paginated response from the adapter.
+ * Returned by getComments when pagination info is available.
+ */
+export interface PaginatedCommentsResponse<T extends Record<string, unknown> = Record<string, unknown>> {
+    /** The fetched comments */
+    comments: Comment<T>[];
+    /** Cursor for fetching the next page (undefined if no more pages) */
+    nextCursor?: string;
+    /** Whether more pages are available */
+    hasMore: boolean;
+    /** Total count of comments (if the backend provides it) */
+    totalCount?: number;
 }
 
 /**
  * Adapter interface for plugging in different data sources
- * (REST API, GraphQL, local state, etc.)
+ * (REST API, GraphQL, local state, Supabase, etc.)
+ *
+ * Generic parameter `T` matches the `Comment<T>` metadata shape.
  */
-export interface CommentAdapter {
-    /** Fetch comments from the data source */
-    getComments?(options?: FetchCommentsOptions): Promise<Comment[]>;
+export interface CommentAdapter<T extends Record<string, unknown> = Record<string, unknown>> {
+    /**
+     * Fetch comments from the data source.
+     * Can return a plain array or a PaginatedCommentsResponse for pagination support.
+     */
+    getComments?(options?: FetchCommentsOptions): Promise<Comment<T>[] | PaginatedCommentsResponse<T>>;
     /** Create a new comment or reply */
-    createComment(content: string, parentId?: string): Promise<Comment>;
+    createComment(content: string, parentId?: string): Promise<Comment<T>>;
     /** Update an existing comment */
-    updateComment(id: string, content: string): Promise<Comment>;
+    updateComment(id: string, content: string): Promise<Comment<T>>;
     /** Delete a comment */
     deleteComment(id: string): Promise<void>;
     /** Toggle a reaction on a comment */
     toggleReaction(commentId: string, reactionId: string): Promise<void>;
-}
-
-/**
- * Callback-style props (sync). createCallbackAdapter wraps these in Promise for the adapter interface.
- */
-export interface CallbackAdapterConfig {
-    onSubmitComment?: (content: string) => Comment;
-    onReply?: (commentId: string, content: string) => Comment;
-    onEdit?: (commentId: string, content: string) => Comment;
-    onDelete?: (commentId: string) => void;
-    onReaction?: (commentId: string, reactionId: string) => void;
-}
-
-/**
- * Creates a CommentAdapter from sync callback-style props.
- * Wraps sync callbacks in Promise so the adapter interface (Promise-based) is satisfied.
- */
-export function createCallbackAdapter(config: CallbackAdapterConfig): CommentAdapter {
-    return {
-        async createComment(content: string, parentId?: string): Promise<Comment> {
-            if (parentId && config.onReply) {
-                return Promise.resolve(config.onReply(parentId, content));
-            }
-            if (config.onSubmitComment) {
-                return Promise.resolve(config.onSubmitComment(content));
-            }
-            throw new Error('No createComment or onSubmitComment handler provided');
-        },
-
-        async updateComment(id: string, content: string): Promise<Comment> {
-            if (config.onEdit) {
-                return Promise.resolve(config.onEdit(id, content));
-            }
-            throw new Error('No updateComment or onEdit handler provided');
-        },
-
-        async deleteComment(id: string): Promise<void> {
-            if (config.onDelete) {
-                config.onDelete(id);
-                return;
-            }
-            throw new Error('No deleteComment or onDelete handler provided');
-        },
-
-        async toggleReaction(commentId: string, reactionId: string): Promise<void> {
-            if (config.onReaction) {
-                config.onReaction(commentId, reactionId);
-                return;
-            }
-            throw new Error('No toggleReaction or onReaction handler provided');
-        },
-    };
+    /** Subscribe to external changes (realtime, SSE, websockets, etc.) */
+    subscribe?(listener: (comments: Comment<T>[]) => void): () => void;
+    /** Clean up resources (connections, subscriptions) */
+    dispose?(): void;
 }

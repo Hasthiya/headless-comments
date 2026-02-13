@@ -1,11 +1,10 @@
-'use client';
-
 /**
- * Headless Comments React Component
- * A highly customizable, TypeScript-ready comment section with reply and reaction support
+ * Headless Comments React Component — v2.0
+ * A highly customizable, TypeScript-ready comment section with tree CRUD,
+ * standalone hooks, composable per-comment hooks, and pluggable adapters.
  *
- * @package @headless-comments/react
- * @version 1.0.0
+ * @package @hasthiya_/headless-comments-react
+ * @version 2.0.0
  * @license MIT
  */
 
@@ -19,6 +18,11 @@ export type {
   CommentTheme,
   OptimisticState,
 } from './core/types';
+
+export type { SortOrder, CommentComparator, SortCommentsOptions } from './core/sorting';
+export type { CommentAdapter, FetchCommentsOptions, PaginatedCommentsResponse } from './core/adapter';
+export type { InMemoryAdapterOptions, InMemoryAdapter } from './core/adapters/memory';
+export type { RestAdapterOptions } from './core/adapters/rest';
 
 export {
   getCommentPermalink,
@@ -44,8 +48,7 @@ export {
   copyToClipboard,
 } from './core/utils';
 
-export { sortComments } from './core/sorting';
-
+// Tree (read)
 export {
   flattenComments,
   buildCommentTree,
@@ -53,8 +56,21 @@ export {
   findCommentById,
 } from './core/tree';
 
-export type { CommentAdapter } from './core/adapter';
-export { createCallbackAdapter } from './core/adapter';
+// Tree (mutate)
+export {
+  addToTree,
+  removeFromTree,
+  updateInTree,
+  toggleReactionInTree,
+  exclusiveToggleReactionInTree,
+} from './core/tree';
+
+// Sorting & filtering
+export { sortComments, filterComments, searchComments } from './core/sorting';
+
+// Adapters
+export { createInMemoryAdapter } from './core/adapters/memory';
+export { createRestAdapter } from './core/adapters/rest';
 
 // ─── React Headless Layer ───────────────────────────────────────────────────
 export type {
@@ -68,12 +84,34 @@ export type {
   CommentSectionContextValue,
 } from './headless/types';
 
+// Provider & context
 export { CommentSectionProvider } from './headless/CommentProvider';
-export { useCommentSection } from './headless/useComments';
+export { useCommentSection, useOptionalCommentSection } from './headless/useComments';
+
+// Standalone hooks
+export { useCommentTree } from './headless/useCommentTree';
+export type { UseCommentTreeOptions, UseCommentTreeReturn } from './headless/useCommentTree';
+
+export { useSortedComments } from './headless/useSortedComments';
+export type { UseSortedCommentsOptions, UseSortedCommentsReturn } from './headless/useSortedComments';
+
+// Composable per-comment hooks
+export { useEditComment } from './headless/useEditComment';
+export type { UseEditCommentOptions, UseEditCommentReturn } from './headless/useEditComment';
+
+export { useReplyTo } from './headless/useReplyTo';
+export type { UseReplyToOptions, UseReplyToReturn } from './headless/useReplyTo';
+
+export { useCommentReaction } from './headless/useCommentReaction';
+export type { UseCommentReactionOptions, UseCommentReactionReturn } from './headless/useCommentReaction';
+
+export { useComment } from './headless/useComment';
+export type { UseCommentOptions, UseCommentReturn } from './headless/useComment';
+
+// Optimistic updates
 export { useOptimisticUpdates } from './headless/useOptimisticUpdates';
-export { useReplyForm } from './headless/useReplyForm';
-export { useEditMode } from './headless/useEditMode';
-export { useReactions } from './headless/useReactions';
+
+// Utility hooks
 export {
   useAutoResize,
   useCharacterCount,
@@ -88,6 +126,7 @@ export {
   useRelativeTime,
 } from './headless/hooks';
 
+// Headless components
 export { HeadlessCommentItem } from './headless/CommentItem';
 export type { HeadlessCommentItemProps, HeadlessCommentItemChildrenProps } from './headless/CommentItem';
 export { HeadlessReplyForm } from './headless/ReplyForm';
@@ -100,5 +139,5 @@ export { CommentSection, CommentSection as DefaultCommentSection } from './prese
 export { StyledCommentSection } from './presets/styled';
 export type { StyledCommentSectionProps } from './presets/styled';
 
-// Default export for backwards compatibility
+// Default export
 export { CommentSection as default } from './presets/default';

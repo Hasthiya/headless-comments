@@ -86,9 +86,6 @@ const StyledCommentSectionInternal: React.FC<InternalProps> = ({
         currentUser,
         submitComment,
         isLoading,
-        hasMore,
-        loadMore,
-        isLoadingMore,
         texts,
         maxDepth: contextMaxDepth,
     } = useCommentSection();
@@ -104,7 +101,7 @@ const StyledCommentSectionInternal: React.FC<InternalProps> = ({
             {!readOnly && currentUser && submitComment && (
                 <StyledReplyForm
                     currentUser={currentUser}
-                    onSubmit={submitComment}
+                    onSubmit={(content) => submitComment(content)}
                     placeholder={inputPlaceholder}
                     maxCharLimit={maxCharLimit}
                     showCharCount={showCharCount}
@@ -137,27 +134,6 @@ const StyledCommentSectionInternal: React.FC<InternalProps> = ({
                     maxCommentLines={maxCommentLines}
                 />
             ))}
-
-            {/* Load More */}
-            {hasMore && (
-                <div style={{ textAlign: 'center', padding: '16px 0' }}>
-                    <button
-                        type="button"
-                        className="cs-btn cs-btn--outline"
-                        onClick={loadMore}
-                        disabled={isLoadingMore}
-                    >
-                        {isLoadingMore ? (
-                            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                <span className="cs-spinner" />
-                                {texts.loading}
-                            </span>
-                        ) : (
-                            texts.loadMore
-                        )}
-                    </button>
-                </div>
-            )}
         </>
     );
 };
@@ -178,27 +154,18 @@ export const StyledCommentSection: React.FC<StyledCommentSectionProps> = (props)
 
     return (
         <CommentSectionProvider
-            comments={props.comments}
+            initialComments={props.comments ?? []}
             currentUser={props.currentUser}
+            tree={props.tree}
             availableReactions={props.availableReactions}
             texts={props.texts}
             theme={mergedTheme}
             locale={props.locale}
-            enableOptimisticUpdates={props.enableOptimisticUpdates}
             maxDepth={props.maxDepth}
             readOnly={props.readOnly}
             generateId={props.generateId}
             sortOrder={props.sortOrder}
-            onLoadMore={props.onLoadMore}
-            hasMore={props.hasMore}
-            isLoading={props.isLoading}
-            isSubmittingComment={props.isSubmittingComment}
-            isSubmittingReply={props.isSubmittingReply}
-            onSubmitComment={props.onSubmitComment}
-            onReply={props.onReply}
-            onReaction={props.onReaction}
-            onEdit={props.onEdit}
-            onDelete={props.onDelete}
+            onReport={props.onReport}
             includeDislike={props.includeDislike}
         >
             <div className="cs-root" style={cssVars}>

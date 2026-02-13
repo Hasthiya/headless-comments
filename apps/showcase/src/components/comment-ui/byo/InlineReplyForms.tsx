@@ -33,7 +33,8 @@ export function RedditInlineReplyForm({
   disabled = false,
   className = '',
 }: ReplyFormProps) {
-  const { texts, isSubmittingReply: isSubmitting } = useCommentSection();
+  const { texts } = useCommentSection();
+  const isSubmitting = false;
   const [content, setContent] = useState('');
   const textareaRef = useAutoResize(content, 200);
   const handleSubmit = useCallback(() => {
@@ -121,7 +122,8 @@ export function InstagramInlineReplyForm({
   disabled = false,
   className = '',
 }: ReplyFormProps) {
-  const { texts, isSubmittingReply: isSubmitting } = useCommentSection();
+  const { texts } = useCommentSection();
+  const isSubmitting = false;
   const [content, setContent] = useState('');
   const textareaRef = useAutoResize(content, 200);
   const handleSubmit = useCallback(() => {
@@ -206,7 +208,8 @@ export function FacebookInlineReplyForm({
   disabled = false,
   className = '',
 }: ReplyFormProps) {
-  const { texts, isSubmittingReply: isSubmitting } = useCommentSection();
+  const { texts } = useCommentSection();
+  const isSubmitting = false;
   const [content, setContent] = useState('');
   const textareaRef = useAutoResize(content, 200);
   const handleSubmit = useCallback(() => {
@@ -294,7 +297,8 @@ export function SlackInlineReplyForm({
   disabled = false,
   className = '',
 }: ReplyFormProps) {
-  const { texts, isSubmittingReply: isSubmitting } = useCommentSection();
+  const { texts } = useCommentSection();
+  const isSubmitting = false;
   const [content, setContent] = useState('');
   const textareaRef = useAutoResize(content, 200);
   const handleSubmit = useCallback(() => {

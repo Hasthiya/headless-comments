@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Hook to access the Headless Comments context
+ * Hooks to access the comment section context.
  * @module @headless-comments/react/useComments
  */
 
@@ -11,15 +11,23 @@ import { CommentSectionContext } from './CommentProvider';
 
 /**
  * Hook to access the Headless Comments context.
- * Must be used within a CommentSectionProvider.
+ * Must be used within a CommentSectionProvider. Throws if no Provider found.
  */
-export const useComments = (): CommentSectionContextValue => {
+export const useCommentSection = (): CommentSectionContextValue => {
     const context = useContext(CommentSectionContext);
     if (!context) {
-        throw new Error('useComments must be used within a CommentSectionProvider');
+        throw new Error('useCommentSection must be used within a CommentSectionProvider');
     }
     return context;
 };
 
-// Re-export for standard naming
-export const useCommentSection = useComments;
+/**
+ * Non-throwing version — returns the context value or null if no Provider is found.
+ * Used internally by composable hooks for the "context optional" pattern.
+ */
+export const useOptionalCommentSection = (): CommentSectionContextValue | null => {
+    return useContext(CommentSectionContext);
+};
+
+// Legacy alias
+export const useComments = useCommentSection;

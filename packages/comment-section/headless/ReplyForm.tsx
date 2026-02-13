@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import type { CommentUser } from '../core/types';
-import { useCommentSection } from './useComments';
+import { useOptionalCommentSection } from './useComments';
 import { useAutoResize, useCharacterCount, useEnterSubmit } from './hooks';
 
 /**
@@ -24,24 +24,29 @@ export interface HeadlessReplyFormChildrenProps {
 }
 
 /**
- * Props for the headless reply form. Use for new comments (submitComment) or replies (replyToComment(commentId, content)).
+ * Props for the headless reply form.
+ * Works with or without CommentSectionProvider.
  */
 export interface HeadlessReplyFormProps {
     /** Render function receiving form state and handlers */
     children: (props: HeadlessReplyFormChildrenProps) => React.ReactNode;
-    /** Called with trimmed content on submit */
-    onSubmit: (content: string) => void;
+    /** Called with trimmed content on submit. Can return a Promise for async operations. */
+    onSubmit: (content: string) => void | Promise<void>;
     onCancel?: () => void;
     maxCharLimit?: number;
     autoFocus?: boolean;
     disabled?: boolean;
     initialContent?: string;
     submitOnEnter?: boolean;
+    /** Current user (for standalone use) */
+    currentUser?: CommentUser | null;
+    /** Whether the form is submitting (for standalone use) */
+    isSubmitting?: boolean;
 }
 
 /**
  * Headless reply form: provides form state and handlers via render props.
- * Must be used inside CommentSectionProvider. Use with submitComment for top-level or replyToComment(commentId, content) for replies.
+ * Works with or without CommentSectionProvider.
  */
 export const HeadlessReplyForm: React.FC<HeadlessReplyFormProps> = ({
     children,
@@ -52,10 +57,12 @@ export const HeadlessReplyForm: React.FC<HeadlessReplyFormProps> = ({
     disabled = false,
     initialContent = '',
     submitOnEnter = true,
+    currentUser: currentUserProp,
+    isSubmitting: isSubmittingProp = false,
 }) => {
-    const context = useCommentSection();
-    const currentUser = context.currentUser;
-    const isSubmittingFromContext = context.isSubmittingComment ?? context.isSubmittingReply ?? false;
+    const context = useOptionalCommentSection();
+    const currentUser = currentUserProp ?? context?.currentUser;
+    const isSubmittingFromContext = isSubmittingProp;
 
     const [content, setContent] = useState(initialContent);
     const [error, setError] = useState<string | null>(null);
@@ -69,17 +76,34 @@ export const HeadlessReplyForm: React.FC<HeadlessReplyFormProps> = ({
         }
     }, [autoFocus, textareaRef]);
 
+    const [isSubmittingInternal, setIsSubmittingInternal] = useState(false);
+
     const handleSubmit = useCallback(() => {
-        if (!content.trim() || isSubmittingFromContext || isOverLimit) return;
+        if (!content.trim() || isSubmittingFromContext || isSubmittingInternal || isOverLimit) return;
         setError(null);
-        try {
-            onSubmit(content.trim());
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const maybePromise: any = onSubmit(content.trim());
+
+        // Support both sync and async onSubmit
+        if (maybePromise && typeof maybePromise.then === 'function') {
+            setIsSubmittingInternal(true);
+            (maybePromise as Promise<void>)
+                .then(() => {
+                    setContent('');
+                    onCancel?.();
+                })
+                .catch((err: unknown) => {
+                    setError(err instanceof Error ? err.message : 'Failed to submit');
+                })
+                .finally(() => {
+                    setIsSubmittingInternal(false);
+                });
+        } else {
             setContent('');
             onCancel?.();
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to submit');
         }
-    }, [content, isSubmittingFromContext, isOverLimit, onSubmit, onCancel]);
+    }, [content, isSubmittingFromContext, isSubmittingInternal, isOverLimit, onSubmit, onCancel]);
 
     const handleCancel = useCallback(() => {
         setContent('');
@@ -87,7 +111,8 @@ export const HeadlessReplyForm: React.FC<HeadlessReplyFormProps> = ({
         onCancel?.();
     }, [onCancel]);
 
-    const isSubmitDisabled = !content.trim() || isSubmittingFromContext || isOverLimit || disabled;
+    const isSubmitting = isSubmittingFromContext || isSubmittingInternal;
+    const isSubmitDisabled = !content.trim() || isSubmitting || isOverLimit || disabled;
     const onKeyDown = useEnterSubmit(handleSubmit, isSubmitDisabled, { submitOnEnter });
 
     return (
@@ -95,7 +120,7 @@ export const HeadlessReplyForm: React.FC<HeadlessReplyFormProps> = ({
             {children({
                 content,
                 setContent,
-                isSubmitting: isSubmittingFromContext,
+                isSubmitting,
                 error,
                 textareaRef,
                 characterCount: count,

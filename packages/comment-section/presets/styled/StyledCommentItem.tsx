@@ -3,9 +3,9 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import type { Comment, CommentUser, CommentTexts } from '../../core/types';
 import { useCommentSection } from '../../headless/useComments';
-import { useReplyForm } from '../../headless/useReplyForm';
-import { useEditMode } from '../../headless/useEditMode';
-import { useReactions } from '../../headless/useReactions';
+import { useEditComment } from '../../headless/useEditComment';
+import { useReplyTo } from '../../headless/useReplyTo';
+import { useCommentReaction } from '../../headless/useCommentReaction';
 import { formatRelativeTime, truncateToLines } from '../../core/utils';
 import { StyledAvatar } from './StyledAvatar';
 import { StyledActionBar } from './StyledActionBar';
@@ -73,33 +73,22 @@ export const StyledCommentItem: React.FC<StyledCommentItemProps> = ({
         texts,
         locale,
         maxDepth: contextMaxDepth,
-        replyToComment,
-        toggleReaction: contextToggleReaction,
-        editComment,
-        deleteComment,
-        enableOptimisticUpdates,
     } = context;
 
     const maxDepth = propMaxDepth ?? contextMaxDepth;
 
-    // Hooks
-    const replyForm = useReplyForm();
-    const editMode = useEditMode();
-    const { toggleReaction } = useReactions(
-        (commentId: string, reactionId: string) =>
-            contextToggleReaction(commentId, reactionId),
-        enableOptimisticUpdates
-    );
+    // Composable hooks (scoped to this comment)
+    const editHook = useEditComment(comment.id);
+    const replyHook = useReplyTo(comment.id);
+    const reactionHook = useCommentReaction(comment.id, {
+        reactions: comment.reactions,
+    });
 
     // Local state
     const [showReplies, setShowReplies] = useState(true);
     const [isExpanded, setIsExpanded] = useState(false);
-    const [editContent, setEditContent] = useState('');
 
     const isAuthor = currentUser?.id === comment.author.id;
-    const isEditing =
-        editMode.isEditing && editMode.editingCommentId === comment.id;
-    const isReplying = replyForm.activeCommentId === comment.id;
     const replies = comment.replies || [];
 
     // Truncation
@@ -115,38 +104,36 @@ export const StyledCommentItem: React.FC<StyledCommentItemProps> = ({
 
     // Handlers
     const handleReplyOpen = useCallback(() => {
-        replyForm.openReply(comment.id);
-    }, [comment.id, replyForm]);
+        replyHook.openReply();
+    }, [replyHook]);
 
     const handleEditStart = useCallback(() => {
-        editMode.startEdit(comment.id, comment.content);
-        setEditContent(comment.content);
-    }, [comment.id, comment.content, editMode]);
+        editHook.startEditing(comment.content);
+    }, [comment.content, editHook]);
 
     const handleEditSubmit = useCallback(() => {
-        if (editContent.trim()) {
-            editComment(comment.id, editContent.trim());
-            editMode.cancelEdit();
+        if (editHook.editContent.trim()) {
+            editHook.submitEdit();
         }
-    }, [comment.id, editContent, editComment, editMode]);
+    }, [editHook]);
 
     const handleDelete = useCallback(() => {
-        deleteComment(comment.id);
-    }, [comment.id, deleteComment]);
+        context.deleteComment(comment.id);
+    }, [comment.id, context]);
 
     const handleReaction = useCallback(
         (reactionId: string) => {
-            toggleReaction(comment.id, reactionId);
+            reactionHook.toggle(reactionId);
         },
-        [comment.id, toggleReaction]
+        [reactionHook]
     );
 
     const handleReplySubmit = useCallback(
         (content: string) => {
-            replyToComment(comment.id, content);
-            replyForm.closeReply();
+            context.replyToComment(comment.id, content);
+            replyHook.cancelReply();
         },
-        [comment.id, replyToComment, replyForm]
+        [comment.id, context, replyHook]
     );
 
     const timeStr = formatRelativeTime(comment.createdAt, locale, texts);
@@ -173,12 +160,12 @@ export const StyledCommentItem: React.FC<StyledCommentItemProps> = ({
                 </div>
 
                 {/* Content or Edit form */}
-                {isEditing ? (
+                {editHook.isEditing ? (
                     <div className="cs-edit-form">
                         <textarea
                             className="cs-edit-form__textarea"
-                            value={editContent}
-                            onChange={(e) => setEditContent(e.target.value)}
+                            value={editHook.editContent}
+                            onChange={(e) => editHook.setEditContent(e.target.value)}
                             rows={3}
                             autoFocus
                         />
@@ -187,14 +174,14 @@ export const StyledCommentItem: React.FC<StyledCommentItemProps> = ({
                                 type="button"
                                 className="cs-btn cs-btn--primary cs-btn--sm"
                                 onClick={handleEditSubmit}
-                                disabled={!editContent.trim()}
+                                disabled={!editHook.editContent.trim()}
                             >
                                 {texts.submit}
                             </button>
                             <button
                                 type="button"
                                 className="cs-btn cs-btn--outline cs-btn--sm"
-                                onClick={editMode.cancelEdit}
+                                onClick={editHook.cancelEdit}
                             >
                                 {texts.cancel}
                             </button>
@@ -216,7 +203,7 @@ export const StyledCommentItem: React.FC<StyledCommentItemProps> = ({
                 )}
 
                 {/* Action Bar */}
-                {!readOnly && !isEditing && (
+                {!readOnly && !editHook.isEditing && (
                     <StyledActionBar
                         comment={comment}
                         onReply={depth < maxDepth ? handleReplyOpen : undefined}
@@ -229,12 +216,12 @@ export const StyledCommentItem: React.FC<StyledCommentItemProps> = ({
                 )}
 
                 {/* Inline Reply Form */}
-                {isReplying && (
+                {replyHook.isReplying && (
                     <StyledReplyForm
                         parentComment={comment}
                         currentUser={currentUser}
                         onSubmit={handleReplySubmit}
-                        onCancel={replyForm.closeReply}
+                        onCancel={replyHook.cancelReply}
                         autoFocus
                     />
                 )}

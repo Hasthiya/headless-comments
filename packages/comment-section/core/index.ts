@@ -3,7 +3,7 @@
  * @module @headless-comments/react/core
  */
 
-// Types
+// ─── Types ──────────────────────────────────────────────────────────────────
 export type {
     Comment,
     CommentUser,
@@ -14,21 +14,32 @@ export type {
     OptimisticState,
 } from './types';
 
-// Adapter
-export type { CommentAdapter, FetchCommentsOptions, CallbackAdapterConfig } from './adapter';
-export { createCallbackAdapter } from './adapter';
+// ─── Adapter ────────────────────────────────────────────────────────────────
+export type { CommentAdapter, FetchCommentsOptions, PaginatedCommentsResponse } from './adapter';
 
-// Tree operations
+// ─── Adapter Implementations ────────────────────────────────────────────────
+export { createInMemoryAdapter } from './adapters/memory';
+export type { InMemoryAdapterOptions, InMemoryAdapter } from './adapters/memory';
+export { createRestAdapter } from './adapters/rest';
+export type { RestAdapterOptions } from './adapters/rest';
+// Note: Supabase adapter is a separate entry point — import from './adapters/supabase'
+
+// ─── Tree Operations (read) ─────────────────────────────────────────────────
 export { buildCommentTree, flattenComments, findCommentById, countReplies } from './tree';
 
-// Sorting
-export { sortComments } from './sorting';
+// ─── Tree Operations (mutate — pure, immutable) ─────────────────────────────
+export { addToTree, removeFromTree, updateInTree, toggleReactionInTree, exclusiveToggleReactionInTree } from './tree';
 
-// Utilities & defaults
+// ─── Sorting & Filtering ────────────────────────────────────────────────────
+export { sortComments, filterComments, searchComments } from './sorting';
+export type { SortOrder, CommentComparator, SortCommentsOptions } from './sorting';
+
+// ─── Utilities & Defaults ───────────────────────────────────────────────────
 export {
     defaultTexts,
     defaultTheme,
     defaultReactions,
+    defaultReactionsWithoutDislike,
     generateUniqueId,
     formatRelativeTime,
     formatDate,

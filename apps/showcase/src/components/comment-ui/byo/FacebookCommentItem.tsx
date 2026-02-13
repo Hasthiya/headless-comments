@@ -4,9 +4,9 @@ import React, { useState, useCallback } from 'react';
 import type { CommentItemProps } from '@hasthiya_/headless-comments-react';
 import {
   useCommentSection,
-  useReplyForm,
-  useEditMode,
-  useReactions,
+  useReplyTo,
+  useEditComment,
+  useCommentReaction,
   useRelativeTime,
   useClickOutside,
   formatDate,
@@ -47,12 +47,9 @@ export const FacebookCommentItem: React.FC<CommentItemProps> = ({
   const localeValue = locale ?? context.locale;
   const availableReactions = availableReactionsProp ?? context.availableReactions;
 
-  const replyForm = useReplyForm();
-  const editMode = useEditMode();
-  const { toggleReaction, isPending: isReactionPending } = useReactions(
-    onReaction,
-    context.enableOptimisticUpdates
-  );
+  const replyHook = useReplyTo(comment.id);
+  const editHook = useEditComment(comment.id);
+  const reactionHook = useCommentReaction(comment.id);
   const [showReplies, setShowReplies] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showReactionPopup, setShowReactionPopup] = useState(false);
@@ -81,17 +78,19 @@ export const FacebookCommentItem: React.FC<CommentItemProps> = ({
     .filter((r) => r.count > 0)
     .sort((a, b) => b.count - a.count)
     .slice(0, 3);
+  /* Limit picker to 5 reactions */
+  const pickerReactions = commentReactions.slice(0, 5);
 
-  const handleReplyClick = useCallback(() => replyForm.openReply(comment.id), [comment.id, replyForm]);
+  const handleReplyClick = useCallback(() => replyHook.openReply(), [replyHook]);
   const handleEditClick = useCallback(
-    () => editMode.startEdit(comment.id, comment.content),
-    [comment.id, comment.content, editMode]
+    () => editHook.startEditing(comment.content),
+    [comment.content, editHook]
   );
   const handleReaction = useCallback(
     (id: string) => {
-      if (!isReactionPending(comment.id, id)) toggleReaction(comment.id, id);
+      if (!reactionHook.isPending(id)) reactionHook.toggle(id);
     },
-    [comment.id, toggleReaction, isReactionPending]
+    [reactionHook]
   );
   const handleDelete = useCallback(() => {
     if (onDelete) onDelete(comment.id);
@@ -101,19 +100,19 @@ export const FacebookCommentItem: React.FC<CommentItemProps> = ({
     (content: string) => {
       if (onReply) {
         onReply(comment.id, content);
-        replyForm.closeReply();
+        replyHook.cancelReply();
       }
     },
-    [comment.id, onReply, replyForm]
+    [comment.id, onReply, replyHook]
   );
   const handleEditSubmit = useCallback(
     (content: string) => {
       if (onEdit) {
         onEdit(comment.id, content);
-        editMode.cancelEdit();
+        editHook.cancelEdit();
       }
     },
-    [comment.id, onEdit, editMode]
+    [comment.id, onEdit, editHook]
   );
 
   const relativeTime = useRelativeTime(comment.createdAt, localeValue, texts);
@@ -193,11 +192,11 @@ export const FacebookCommentItem: React.FC<CommentItemProps> = ({
             )}
           </div>
 
-          {editMode.isEditing && editMode.editingCommentId === comment.id ? (
+          {editHook.isEditing ? (
             <div className="mt-2 space-y-2">
               <Textarea
-                value={editMode.editValue}
-                onChange={(e) => editMode.setEditValue(e.target.value)}
+                value={editHook.editContent}
+                onChange={(e) => editHook.setEditContent(e.target.value)}
                 className="min-h-[72px] text-[15px] rounded-2xl border-border"
                 autoFocus
               />
@@ -206,7 +205,7 @@ export const FacebookCommentItem: React.FC<CommentItemProps> = ({
                   type="button"
                   size="sm"
                   className="rounded-full"
-                  onClick={() => handleEditSubmit(editMode.editValue)}
+                  onClick={() => handleEditSubmit(editHook.editContent)}
                 >
                   {texts.submit}
                 </Button>
@@ -215,7 +214,7 @@ export const FacebookCommentItem: React.FC<CommentItemProps> = ({
                   variant="outline"
                   size="sm"
                   className="rounded-full border-border"
-                  onClick={editMode.cancelEdit}
+                  onClick={editHook.cancelEdit}
                 >
                   {texts.cancel}
                 </Button>
@@ -263,13 +262,13 @@ export const FacebookCommentItem: React.FC<CommentItemProps> = ({
                   {showReactionPopup && (
                     <div
                       className={cn(
-                        'absolute left-0 z-20 flex gap-0.5 p-1.5 rounded-xl bg-popover text-popover-foreground border border-border shadow-lg max-h-[50vh] overflow-auto flex-wrap',
+                        'absolute left-0 z-20 flex gap-0.5 p-1.5 rounded-xl bg-popover text-popover-foreground border border-border shadow-lg',
                         'top-full mt-2 sm:top-auto sm:mt-0 sm:bottom-full sm:mb-1'
                       )}
                       role="menu"
                       aria-label="Reactions"
                     >
-                      {commentReactions.map((reaction) => (
+                      {pickerReactions.map((reaction) => (
                         <button
                           key={reaction.id}
                           type="button"
@@ -284,7 +283,7 @@ export const FacebookCommentItem: React.FC<CommentItemProps> = ({
                             handleReaction(reaction.id);
                             setShowReactionPopup(false);
                           }}
-                          disabled={isReactionPending(comment.id, reaction.id)}
+                          disabled={reactionHook.isPending(reaction.id)}
                           aria-label={reaction.label}
                           title={reaction.label}
                         >
@@ -352,13 +351,13 @@ export const FacebookCommentItem: React.FC<CommentItemProps> = ({
             </div>
           )}
 
-          {replyForm.isOpen && replyForm.activeCommentId === comment.id && (
+          {replyHook.isReplying && (
             <div className="mt-3">
               <FacebookInlineReplyForm
                 parentComment={comment}
                 currentUser={currentUser ?? undefined}
                 onSubmit={handleReplySubmit}
-                onCancel={replyForm.closeReply}
+                onCancel={replyHook.cancelReply}
                 placeholder={texts.replyPlaceholder}
                 autoFocus
               />

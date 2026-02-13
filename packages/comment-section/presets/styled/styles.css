@@ -490,9 +490,41 @@
     padding: 4px;
 }
 
+.cs-reaction-trigger--has-reactions {
+    padding: 4px 8px;
+    gap: 6px;
+}
+
 .cs-reaction-trigger__emoji {
     font-size: 1.1em;
     line-height: 1;
+}
+
+.cs-reaction-trigger__emoji--muted {
+    opacity: 0.5;
+    filter: grayscale(100%);
+}
+
+.cs-reaction-trigger__active {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cs-reaction-trigger__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 0.85em;
+}
+
+.cs-reaction-trigger__badge .cs-reaction__emoji {
+    font-size: 1.15em;
+}
+
+.cs-reaction-trigger__badge .cs-reaction__count {
+    font-size: 0.85em;
+    font-variant-numeric: tabular-nums;
 }
 
 .cs-reaction-picker__popover {
@@ -501,9 +533,8 @@
     bottom: calc(100% + 6px);
     z-index: 50;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 2px;
-    min-width: 120px;
     padding: 6px;
     background: var(--cs-bg-color);
     border: 1px solid var(--cs-border-color);

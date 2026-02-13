@@ -1,139 +1,80 @@
-import React, { useState, useCallback } from 'react';
+import React, { memo } from 'react';
 import type { Comment, CommentUser } from '../core/types';
-import { useCommentSection } from './useComments';
-import { useReplyForm } from './useReplyForm';
-import { useEditMode } from './useEditMode';
-import { useReactions } from './useReactions';
+import { useComment } from './useComment';
+import type { UseCommentReturn } from './useComment';
 
 /**
- * Props passed to the render function (children) of HeadlessCommentItem.
+ * Props for the headless comment item.
+ * Render function receives the same shape as useComment() return.
+ * Works with or without CommentSectionProvider.
  */
-export interface HeadlessCommentItemChildrenProps {
-    comment: Comment;
-    /** True if the current user is the comment author */
-    isAuthor: boolean;
-    isEditing: boolean;
-    showReplies: boolean;
-    toggleReplies: () => void;
-    onReplyOpen: () => void;
-    onEditStart: () => void;
-    onEditSubmit: (content: string) => void;
-    onEditCancel: () => void;
-    onDelete: () => void;
-    onReaction: (reactionId: string) => void;
-    isReactionPending: (commentId: string, reactionId: string) => boolean;
-    /** Current logged-in user, or null/undefined if not authenticated */
-    currentUser: CommentUser | null | undefined;
-    replies: Comment[];
-    depth: number;
-    maxDepth: number;
-}
-
-/**
- * Props for the headless comment item. Use with a render-prop to build fully custom comment UI.
- */
-export interface HeadlessCommentItemProps {
-    comment: Comment;
+export interface HeadlessCommentItemProps<T extends Record<string, unknown> = Record<string, unknown>> {
+    /** The comment data */
+    comment: Comment<T>;
     /** Render function receiving comment state and handlers */
-    children: (props: HeadlessCommentItemChildrenProps) => React.ReactNode;
-    onReply?: (commentId: string, content: string) => void;
-    onReaction?: (commentId: string, reactionId: string) => void;
+    children: (props: UseCommentReturn<T> & { depth: number; maxDepth: number }) => React.ReactNode;
+    /** When outside Provider, pass handlers directly */
     onEdit?: (commentId: string, content: string) => void;
+    /** When outside Provider, pass handlers directly */
+    onReply?: (commentId: string, content: string) => void;
+    /** When outside Provider, pass handlers directly */
+    onReaction?: (commentId: string, reactionId: string) => void;
+    /** When outside Provider, pass handlers directly */
     onDelete?: (commentId: string) => void;
+    /** Current user (for standalone use) */
+    currentUser?: CommentUser;
+    /** Current nesting depth */
     depth?: number;
+    /** Maximum nesting depth */
     maxDepth?: number;
 }
 
 /**
- * Headless comment item: provides comment state and handlers via render props.
- * Must be used inside CommentSectionProvider. Use for fully custom comment UI.
+ * Props passed to the render function of HeadlessCommentItem.
+ * Extends UseCommentReturn with depth info.
  */
-export const HeadlessCommentItem: React.FC<HeadlessCommentItemProps> = ({
+export type HeadlessCommentItemChildrenProps<T extends Record<string, unknown> = Record<string, unknown>> = UseCommentReturn<T> & {
+    depth: number;
+    maxDepth: number;
+};
+
+/**
+ * Headless comment item: provides comment state and handlers via render props.
+ * Uses useComment internally. Works with or without CommentSectionProvider.
+ * Wrapped in React.memo to prevent unnecessary re-renders in comment lists.
+ */
+function HeadlessCommentItemInner<T extends Record<string, unknown> = Record<string, unknown>>({
     comment,
     children,
-    onReaction,
     onEdit,
+    onReply,
+    onReaction,
     onDelete,
+    currentUser,
     depth = 0,
-    maxDepth: propMaxDepth,
-}) => {
-    const context = useCommentSection();
-    const currentUser = context.currentUser;
-    const maxDepth = propMaxDepth ?? context.maxDepth;
-
-    // Local state
-    const [showReplies, setShowReplies] = useState(true);
-    const toggleReplies = useCallback(() => setShowReplies((prev) => !prev), []);
-
-    // Hooks
-    const replyForm = useReplyForm();
-    const editMode = useEditMode();
-
-    const { toggleReaction, isPending: isReactionPending } = useReactions(
+    maxDepth = 3,
+}: HeadlessCommentItemProps<T>): React.ReactElement {
+    const commentState = useComment<T>(comment, {
+        onEdit,
+        onReply,
         onReaction,
-        context.enableOptimisticUpdates
-    );
-
-    // Computed
-    const isAuthor = currentUser?.id === comment.author.id;
-    const isEditing = editMode.isEditing && editMode.editingCommentId === comment.id;
-
-    // Handlers
-    const handleReplyOpen = useCallback(() => {
-        replyForm.openReply(comment.id);
-    }, [comment.id, replyForm]);
-
-    const handleEditStart = useCallback(() => {
-        editMode.startEdit(comment.id, comment.content);
-    }, [comment.id, comment.content, editMode]);
-
-    const handleEditSubmit = useCallback(
-        (content: string) => {
-            if (onEdit) {
-                onEdit(comment.id, content);
-                editMode.cancelEdit();
-            }
-        },
-        [comment.id, onEdit, editMode]
-    );
-
-    const handleDelete = useCallback(() => {
-        if (onDelete) onDelete(comment.id);
-    }, [comment.id, onDelete]);
-
-    const handleReaction = useCallback(
-        (reactionId: string) => {
-            toggleReaction(comment.id, reactionId);
-        },
-        [comment.id, toggleReaction]
-    );
-
-    // Helper for checking reaction pending state
-    const checkReactionPending = useCallback(
-        (cId: string, rId: string) => isReactionPending(cId, rId),
-        [isReactionPending]
-    );
+        onDelete,
+        currentUser,
+    });
 
     return (
         <>
             {children({
-                comment,
-                isAuthor,
-                isEditing,
-                showReplies,
-                toggleReplies,
-                onReplyOpen: handleReplyOpen,
-                onEditStart: handleEditStart,
-                onEditSubmit: handleEditSubmit,
-                onEditCancel: editMode.cancelEdit,
-                onDelete: handleDelete,
-                onReaction: handleReaction,
-                isReactionPending: checkReactionPending,
-                currentUser,
-                replies: showReplies ? (comment.replies || []) : [],
+                ...commentState,
                 depth,
                 maxDepth,
             })}
         </>
     );
-};
+}
+
+/**
+ * Memoized headless comment item component.
+ * Re-renders only when props change (shallow comparison).
+ */
+export const HeadlessCommentItem = memo(HeadlessCommentItemInner) as typeof HeadlessCommentItemInner;

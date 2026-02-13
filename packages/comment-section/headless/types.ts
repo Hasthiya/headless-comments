@@ -1,5 +1,5 @@
 /**
- * React-dependent types for the comment system
+ * React-dependent types for the comment system (v2)
  * @module @headless-comments/react/types
  */
 
@@ -12,23 +12,80 @@ import type {
     CommentTexts,
     CommentTheme,
 } from '../core/types';
+import type { SortOrder } from '../core/sorting';
+import type { UseCommentTreeReturn } from './useCommentTree';
 
 type ReactNode = React.ReactNode;
 type CSSProperties = React.CSSProperties;
 
+// ─── CommentSection Context ─────────────────────────────────────────────────
+
+/**
+ * Context value for the CommentSection.
+ * Generic parameter `T` matches the `Comment<T>` metadata shape.
+ */
+export interface CommentSectionContextValue<T extends Record<string, unknown> = Record<string, unknown>> {
+    /** Current user */
+    currentUser?: CommentUser | null;
+    /** Available reactions */
+    availableReactions: ReactionConfig[];
+    /** Custom texts */
+    texts: Required<CommentTexts>;
+    /** Theme */
+    theme: Required<CommentTheme>;
+    /** Locale */
+    locale: string;
+    /** Max depth for replies */
+    maxDepth: number;
+    /** Whether the section is read-only */
+    readOnly: boolean;
+    /** Generate unique ID */
+    generateId: () => string;
+    /** List of comments (from the tree) */
+    comments: Comment<T>[];
+    /** Error state */
+    error: Error | null;
+    /** Submit a new comment */
+    submitComment: (content: string) => Comment<T>;
+    /** Reply to a comment */
+    replyToComment: (parentId: string, content: string) => Comment<T>;
+    /** Toggle a reaction. Returns a Promise when backed by an adapter. */
+    toggleReaction: (commentId: string, reactionId: string) => void | Promise<void>;
+    /** Edit a comment. Returns a Promise when backed by an adapter. */
+    editComment: (commentId: string, content: string) => void | Promise<void>;
+    /** Delete a comment. Returns a Promise when backed by an adapter. */
+    deleteComment: (commentId: string) => void | Promise<void>;
+    /** Report a comment */
+    reportComment?: (commentId: string, reason: string) => void;
+    /** Set the comments tree */
+    setComments: (comments: Comment<T>[]) => void;
+    /** Find a comment by ID */
+    findComment: (commentId: string) => Comment<T> | undefined;
+    /** Total comment count */
+    totalCount: number;
+    /** Whether the adapter is loading */
+    isLoading: boolean;
+    /** Current sort order */
+    sortOrder: SortOrder;
+    /** Change sort order */
+    setSortOrder: (order: SortOrder) => void;
+}
+
+// ─── Component Props ────────────────────────────────────────────────────────
+
 /**
  * Props for the CommentItem component
  */
-export interface CommentItemProps {
+export interface CommentItemProps<T extends Record<string, unknown> = Record<string, unknown>> {
     /** The comment data */
-    comment: Comment;
+    comment: Comment<T>;
     /** Current logged-in user */
     currentUser?: CommentUser | null;
-    /** Callback when a reply is submitted (sync) */
+    /** Callback when a reply is submitted */
     onReply?: (commentId: string, content: string) => void;
     /** Callback when a reaction is toggled */
     onReaction?: (commentId: string, reactionId: string) => void;
-    /** Callback when a comment is edited (sync) */
+    /** Callback when a comment is edited */
     onEdit?: (commentId: string, content: string) => void;
     /** Callback when a comment is deleted */
     onDelete?: (commentId: string) => void;
@@ -37,13 +94,13 @@ export interface CommentItemProps {
     /** Current depth level */
     depth?: number;
     /** Custom render function for the comment content */
-    renderContent?: (comment: Comment) => ReactNode;
+    renderContent?: (comment: Comment<T>) => ReactNode;
     /** Custom render function for the avatar */
     renderAvatar?: (user: CommentUser) => ReactNode;
     /** Custom render function for reactions */
-    renderReactions?: (comment: Comment) => ReactNode;
+    renderReactions?: (comment: Comment<T>) => ReactNode;
     /** Custom render function for the action bar */
-    renderActions?: (comment: Comment) => ReactNode;
+    renderActions?: (comment: Comment<T>) => ReactNode;
     /** Custom render function for the timestamp */
     renderTimestamp?: (date: Date | string) => ReactNode;
     /** Show/hide the reply form */
@@ -87,47 +144,39 @@ export interface CommentItemProps {
 /**
  * Props for the CommentSection component
  */
-export interface CommentSectionProps {
+export interface CommentSectionProps<T extends Record<string, unknown> = Record<string, unknown>> {
     /** Array of comments to display */
-    comments: Comment[];
+    comments?: Comment<T>[];
+    /** Pre-configured tree instance from useCommentTree */
+    tree?: UseCommentTreeReturn<T>;
     /** Current logged-in user */
     currentUser?: CommentUser | null;
     /** Callback when a new comment is submitted */
-    onSubmitComment?: (content: string) => Comment;
+    onSubmitComment?: (content: string) => Comment<T>;
     /** Callback when a reply is submitted */
-    onReply?: (commentId: string, content: string) => Comment;
+    onReply?: (commentId: string, content: string) => Comment<T>;
     /** Callback when a reaction is toggled */
     onReaction?: (commentId: string, reactionId: string) => void;
     /** Callback when a comment is edited */
-    onEdit?: (commentId: string, content: string) => Comment;
+    onEdit?: (commentId: string, content: string) => void;
     /** Callback when a comment is deleted */
     onDelete?: (commentId: string) => void;
     /** Callback when a comment is reported */
     onReport?: (commentId: string, reason: string) => void;
-    /** Callback when more comments are loaded */
-    onLoadMore?: () => Comment[] | void;
-    /** Whether more comments are available */
-    hasMore?: boolean;
-    /** Whether comments are currently loading */
-    isLoading?: boolean;
-    /** User-controlled: new comment form is submitting (e.g. API in progress) */
-    isSubmittingComment?: boolean;
-    /** User-controlled: reply form is submitting */
-    isSubmittingReply?: boolean;
-    /** Custom render for the new comment / reply form (user supplies UI) */
-    renderReplyForm?: (props: RenderReplyFormProps) => ReactNode;
+    /** Custom render for the reply form */
+    renderReplyForm?: (props: RenderReplyFormProps<T>) => ReactNode;
     /** Maximum depth for nested replies */
     maxDepth?: number;
     /** Custom render function for a comment */
-    renderComment?: (comment: Comment, props: CommentItemProps) => ReactNode;
+    renderComment?: (comment: Comment<T>, props: CommentItemProps<T>) => ReactNode;
     /** Custom render function for the comment content */
-    renderContent?: (comment: Comment) => ReactNode;
+    renderContent?: (comment: Comment<T>) => ReactNode;
     /** Custom render function for the avatar */
     renderAvatar?: (user: CommentUser) => ReactNode;
     /** Custom render function for reactions */
-    renderReactions?: (comment: Comment) => ReactNode;
+    renderReactions?: (comment: Comment<T>) => ReactNode;
     /** Custom render function for the action bar */
-    renderActions?: (comment: Comment) => ReactNode;
+    renderActions?: (comment: Comment<T>) => ReactNode;
     /** Custom render function for the timestamp */
     renderTimestamp?: (date: Date | string) => ReactNode;
     /** Custom render function for the empty state */
@@ -174,16 +223,12 @@ export interface CommentSectionProps {
     autoFocus?: boolean;
     /** Enable mentions (@username) */
     enableMentions?: boolean;
-    /** Custom sort function for comments */
-    sortComments?: (comments: Comment[]) => Comment[];
     /** Sort order for comments */
-    sortOrder?: 'asc' | 'desc' | 'oldest' | 'newest' | 'popular';
+    sortOrder?: SortOrder;
     /** localStorage key for persisting sort preference */
     sortOrderKey?: string;
-    /** Include dislike reaction in defaults (guideline: avoid unless required) */
+    /** Include dislike reaction in defaults */
     includeDislike?: boolean;
-    /** Enable optimistic updates */
-    enableOptimisticUpdates?: boolean;
     /** Custom unique ID generator */
     generateId?: () => string;
 }
@@ -191,15 +236,14 @@ export interface CommentSectionProps {
 /**
  * Props passed to renderReplyForm when user supplies custom form UI
  */
-export interface RenderReplyFormProps {
-    /** Submit handler (sync) */
+export interface RenderReplyFormProps<T extends Record<string, unknown> = Record<string, unknown>> {
+    /** Submit handler */
     onSubmit: (content: string) => void;
     onCancel?: () => void;
     placeholder?: string;
     disabled?: boolean;
-    /** Whether the form is in a submitting state (from isSubmittingComment / isSubmittingReply) */
     isSubmitting?: boolean;
-    parentComment?: Comment;
+    parentComment?: Comment<T>;
 }
 
 /**
@@ -210,7 +254,7 @@ export interface ReplyFormProps {
     parentComment?: Comment;
     /** Current user */
     currentUser?: CommentUser | null;
-    /** Callback when reply is submitted (sync) */
+    /** Callback when reply is submitted */
     onSubmit: (content: string) => void;
     /** Callback when cancelled */
     onCancel?: () => void;
@@ -302,63 +346,4 @@ export interface ActionBarProps {
     disabled?: boolean;
     /** Whether the current user is the author */
     isAuthor?: boolean;
-}
-
-/**
- * Context value for the CommentSection
- */
-export interface CommentSectionContextValue {
-    /** Current user */
-    currentUser?: CommentUser | null;
-    /** Available reactions */
-    availableReactions: ReactionConfig[];
-    /** Custom texts */
-    texts: Required<CommentTexts>;
-    /** Theme */
-    theme: Required<CommentTheme>;
-    /** Locale */
-    locale: string;
-    /** Whether optimistic updates are enabled */
-    enableOptimisticUpdates: boolean;
-    /** Max depth for replies */
-    maxDepth: number;
-    /** Whether the section is read-only */
-    readOnly: boolean;
-    /** Generate unique ID */
-    generateId: () => string;
-    /** List of comments (sorted) */
-    comments: Comment[];
-    /** Error state */
-    error: Error | null;
-    /** Set error state */
-    setError: (error: Error | null) => void;
-    /** Submit a new comment (sync) */
-    submitComment: (content: string) => void;
-    /** Reply to a comment (sync) */
-    replyToComment: (commentId: string, content: string) => void;
-    /** Toggle a reaction (sync) */
-    toggleReaction: (commentId: string, reactionId: string) => void;
-    /** Edit a comment (sync) */
-    editComment: (commentId: string, content: string) => void;
-    /** Delete a comment (sync) */
-    deleteComment: (commentId: string) => void;
-    /** Report a comment */
-    reportComment?: (commentId: string, reason: string) => void;
-
-    // Pagination
-    onLoadMore?: () => Comment[] | void;
-    hasMore: boolean;
-    isLoading: boolean;
-    isLoadingMore: boolean;
-    loadMore: () => void;
-
-    /** User-controlled: new comment form is submitting */
-    isSubmittingComment: boolean;
-    /** User-controlled: reply form is submitting */
-    isSubmittingReply: boolean;
-
-    /** Current sort order */
-    sortOrder: 'asc' | 'desc' | 'oldest' | 'newest' | 'popular';
-    /** Change sort order (persists to localStorage when sortOrderKey is set) */
-    setSortOrder: (order: 'asc' | 'desc' | 'oldest' | 'newest' | 'popular') => void;
 }

@@ -1,37 +1,42 @@
 {
   "name": "@hasthiya_/headless-comments-react",
-  "version": "1.1.0",
-  "description": "A highly customizable React comment section component with reply, reaction support, and optimistic updates. TypeScript-ready and fully themeable.",
+  "version": "2.0.0",
+  "description": "A truly headless React comment system with generic types, tree CRUD, standalone hooks, composable per-comment hooks, and pluggable adapters. TypeScript-ready and fully themeable.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.js"
     },
     "./core": {
+      "types": "./dist/core.d.ts",
       "import": "./dist/core.mjs",
-      "require": "./dist/core.js",
-      "types": "./dist/core.d.ts"
+      "require": "./dist/core.js"
     },
     "./headless": {
+      "types": "./dist/headless.d.ts",
       "import": "./dist/headless.mjs",
-      "require": "./dist/headless.js",
-      "types": "./dist/headless.d.ts"
+      "require": "./dist/headless.js"
     },
     "./presets/default": {
+      "types": "./dist/presets/default.d.ts",
       "import": "./dist/presets/default.mjs",
-      "require": "./dist/presets/default.js",
-      "types": "./dist/presets/default.d.ts"
+      "require": "./dist/presets/default.js"
     },
     "./presets/styled": {
+      "types": "./dist/presets/styled.d.ts",
       "import": "./dist/presets/styled.mjs",
-      "require": "./dist/presets/styled.js",
-      "types": "./dist/presets/styled.d.ts"
+      "require": "./dist/presets/styled.js"
     },
-    "./presets/styled/styles.css": "./presets/styled/styles.css"
+    "./presets/styled/styles.css": "./presets/styled/styles.css",
+    "./adapters/supabase": {
+      "types": "./dist/adapters/supabase.d.ts",
+      "import": "./dist/adapters/supabase.mjs",
+      "require": "./dist/adapters/supabase.js"
+    }
   },
   "files": [
     "dist",
@@ -53,6 +58,10 @@
     "comments",
     "reply",
     "reaction",
+    "headless",
+    "tree-crud",
+    "composable-hooks",
+    "adapter",
     "optimistic-updates",
     "typescript",
     "component",
@@ -74,8 +83,13 @@
   },
   "homepage": "https://github.com/Hasthiya/headless-comments#readme",
   "peerDependencies": {
-    "react": ">=19.0.0",
-    "react-dom": ">=19.0.0"
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@supabase/supabase-js": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@types/react": "^19.0.0",

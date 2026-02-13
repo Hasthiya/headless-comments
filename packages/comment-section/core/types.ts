@@ -38,9 +38,17 @@ export interface Reaction {
 }
 
 /**
- * Represents a single comment
+ * Represents a single comment.
+ * Generic parameter `T` defines the shape of the `metadata` field for type-safe extensions.
+ *
+ * @example
+ * ```ts
+ * type MyComment = Comment<{ score: number; flair: string }>;
+ * const c: MyComment = { ... };
+ * c.metadata?.score // number — fully type-safe
+ * ```
  */
-export interface Comment {
+export interface Comment<T extends Record<string, unknown> = Record<string, unknown>> {
     /** Unique identifier for the comment */
     readonly id: string;
     /** The comment content/text */
@@ -54,7 +62,7 @@ export interface Comment {
     /** Parent comment ID for nested replies */
     readonly parentId?: string;
     /** Array of reply comments */
-    readonly replies?: Comment[];
+    readonly replies?: Comment<T>[];
     /** Array of reactions on the comment */
     readonly reactions?: Reaction[];
     /** Whether the comment has been edited */
@@ -65,8 +73,8 @@ export interface Comment {
     readonly hasError?: boolean;
     /** Error message if submission failed */
     readonly errorMessage?: string;
-    /** Additional metadata for the comment */
-    readonly metadata?: Record<string, unknown>;
+    /** Type-safe metadata for extending the comment with custom fields */
+    readonly metadata?: T;
 }
 
 /**

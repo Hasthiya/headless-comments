@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import type { Comment, CommentUser } from '../../core/types';
-import { useCommentSection } from '../../headless/useComments';
+import { useOptionalCommentSection } from '../../headless/useComments';
 import { useAutoResize, useCharacterCount, useEnterSubmit } from '../../headless/hooks';
 import { StyledAvatar } from './StyledAvatar';
 
@@ -31,11 +31,14 @@ export const StyledReplyForm: React.FC<StyledReplyFormProps> = ({
     disabled = false,
     className = '',
 }) => {
-    const context = useCommentSection();
-    const texts = context.texts;
-    const isSubmitting = parentComment
-        ? context.isSubmittingReply
-        : context.isSubmittingComment;
+    const context = useOptionalCommentSection();
+    const texts = context?.texts ?? {
+        submit: 'Submit',
+        cancel: 'Cancel',
+        replyPlaceholder: 'Write a reply...',
+        inputPlaceholder: 'Add a comment...',
+    } as Required<import('../../core/types').CommentTexts>;
+    const isSubmitting = false;
 
     const [content, setContent] = useState('');
     const [error, setError] = useState<string | null>(null);

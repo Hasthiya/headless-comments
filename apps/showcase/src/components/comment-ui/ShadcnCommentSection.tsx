@@ -5,16 +5,13 @@ import type { CommentSectionProps, Comment, ReplyFormProps } from '@hasthiya_/he
 import {
   CommentSectionProvider,
   useCommentSection,
-  useInfiniteScroll,
   themeToCSSVariables,
   mergeTheme,
 } from '@hasthiya_/headless-comments-react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 import { ShadcnCommentItem } from './ShadcnCommentItem';
 import { ShadcnReplyForm } from './ShadcnReplyForm';
 import { ShadcnCommentSkeleton } from './ShadcnCommentSkeleton';
-import { Loader2 } from 'lucide-react';
 
 type CommentThemeRequired = Required<NonNullable<CommentSectionProps['theme']>>;
 
@@ -61,24 +58,14 @@ const CommentSectionInternal: React.FC<
     currentUser,
     texts: contextTexts,
     error,
-    setError,
     submitComment,
     replyToComment,
     toggleReaction,
     editComment,
     deleteComment,
     isLoading,
-    isLoadingMore,
-    hasMore,
-    loadMore,
     maxDepth,
-    isSubmittingComment,
   } = useCommentSection();
-
-  const scrollSentinelRef = useInfiniteScroll(
-    () => { if (hasMore && !isLoadingMore) loadMore(); },
-    { enabled: hasMore && !isLoadingMore }
-  );
 
   const containerStyle: React.CSSProperties = {
     ...themeToCSSVariables(internalTheme),
@@ -106,15 +93,6 @@ const CommentSectionInternal: React.FC<
         ) : (
           <div className="flex flex-col items-center justify-center rounded-lg bg-destructive/10 p-6 text-destructive">
             <p className="font-medium">{error.message}</p>
-            <Button
-              type="button"
-              variant="destructive"
-              size="sm"
-              className="mt-3"
-              onClick={() => setError(null)}
-            >
-              Retry
-            </Button>
           </div>
         )}
       </div>
@@ -130,7 +108,7 @@ const CommentSectionInternal: React.FC<
             onSubmit: submitComment,
             placeholder: inputPlaceholder,
             disabled: false,
-            isSubmitting: isSubmittingComment,
+            isSubmitting: false,
           })
         ) : (
           <ShadcnReplyForm
@@ -204,19 +182,6 @@ const CommentSectionInternal: React.FC<
           )
         )}
       </div>
-      {hasMore && (
-        <div ref={scrollSentinelRef} className="flex justify-center p-4">
-          {isLoadingMore ? (
-            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden />
-          ) : (
-            loadMore && (
-              <Button type="button" variant="outline" size="sm" onClick={loadMore}>
-                {texts?.loadMore ?? contextTexts.loadMore}
-              </Button>
-            )
-          )}
-        </div>
-      )}
       {renderFooter && renderFooter()}
     </div>
   );
@@ -230,18 +195,7 @@ export const ShadcnCommentSection: React.FC<ShadcnCommentSectionProps> = (props)
   const {
     comments,
     currentUser,
-    onSubmitComment,
-    onReply,
-    onReaction,
-    onEdit,
-    onDelete,
     onReport,
-    onLoadMore,
-    hasMore,
-    isLoading,
-    isSubmittingComment,
-    isSubmittingReply,
-    enableOptimisticUpdates,
     maxDepth,
     readOnly,
     generateId,
@@ -250,9 +204,9 @@ export const ShadcnCommentSection: React.FC<ShadcnCommentSectionProps> = (props)
     texts,
     theme,
     locale,
-    sortComments: _sortComments,
     sortOrder,
     sortOrderKey,
+    tree,
     ...rest
   } = props;
 
@@ -260,29 +214,19 @@ export const ShadcnCommentSection: React.FC<ShadcnCommentSectionProps> = (props)
 
   return (
     <CommentSectionProvider
-      comments={comments}
+      initialComments={comments ?? []}
       currentUser={currentUser}
+      tree={tree}
       availableReactions={availableReactions}
       includeDislike={includeDislike}
       texts={texts}
       theme={mergedTheme}
       locale={locale}
-      enableOptimisticUpdates={enableOptimisticUpdates}
       maxDepth={maxDepth}
       readOnly={readOnly}
       generateId={generateId}
       sortOrder={sortOrder}
       sortOrderKey={sortOrderKey}
-      onLoadMore={onLoadMore}
-      hasMore={hasMore}
-      isLoading={isLoading}
-      isSubmittingComment={isSubmittingComment}
-      isSubmittingReply={isSubmittingReply}
-      onSubmitComment={onSubmitComment}
-      onReply={onReply}
-      onReaction={onReaction}
-      onEdit={onEdit}
-      onDelete={onDelete}
       onReport={onReport}
     >
       <CommentSectionInternal {...rest} internalTheme={mergedTheme} texts={texts} sortOrderKey={sortOrderKey} />

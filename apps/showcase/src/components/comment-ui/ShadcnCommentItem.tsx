@@ -5,9 +5,9 @@ import type { CommentItemProps, ReplyFormProps } from '@hasthiya_/headless-comme
 import type { CommentUser, CommentTexts } from '@hasthiya_/headless-comments-react';
 import {
   useCommentSection,
-  useReplyForm,
-  useEditMode,
-  useReactions,
+  useReplyTo,
+  useEditComment,
+  useCommentReaction,
   useRelativeTime,
   formatDate,
   truncateToLines,
@@ -82,12 +82,9 @@ export const ShadcnCommentItem: React.FC<
   const readOnlyValue = readOnly ?? context.readOnly;
   const localeValue = locale ?? context.locale;
 
-  const replyForm = useReplyForm();
-  const editMode = useEditMode();
-  const { toggleReaction, isPending: isReactionPending } = useReactions(
-    onReaction,
-    context.enableOptimisticUpdates
-  );
+  const replyHook = useReplyTo(comment.id);
+  const editHook = useEditComment(comment.id);
+  const reactionHook = useCommentReaction(comment.id);
   const [showReplies, setShowReplies] = useState(false);
   const isAuthor = currentUser?.id === comment.author.id;
 
@@ -105,18 +102,18 @@ export const ShadcnCommentItem: React.FC<
   const showDownHighlight = isDownvoted && !isUpvoted;
 
   const handleReplyClick = useCallback(
-    () => replyForm.openReply(comment.id),
-    [comment.id, replyForm]
+    () => replyHook.openReply(),
+    [replyHook]
   );
   const handleEditClick = useCallback(
-    () => editMode.startEdit(comment.id, comment.content),
-    [comment.id, comment.content, editMode]
+    () => editHook.startEditing(comment.content),
+    [comment.content, editHook]
   );
   const handleReaction = useCallback(
     (reactionId: string) => {
-      if (!isReactionPending(comment.id, reactionId)) toggleReaction(comment.id, reactionId);
+      if (!reactionHook.isPending(reactionId)) reactionHook.toggle(reactionId);
     },
-    [comment.id, toggleReaction, isReactionPending]
+    [reactionHook]
   );
   const handleDelete = useCallback(() => {
     if (onDelete) onDelete(comment.id);
@@ -125,18 +122,18 @@ export const ShadcnCommentItem: React.FC<
     (content: string) => {
       if (!onReply) throw new Error('onReply is required');
       onReply(comment.id, content);
-      replyForm.closeReply();
+      replyHook.cancelReply();
     },
-    [comment.id, onReply, replyForm]
+    [comment.id, onReply, replyHook]
   );
   const handleEditSubmit = useCallback(
     (content: string) => {
       if (onEdit) {
         onEdit(comment.id, content);
-        editMode.cancelEdit();
+        editHook.cancelEdit();
       }
     },
-    [comment.id, onEdit, editMode]
+    [comment.id, onEdit, editHook]
   );
 
   const relativeTime = useRelativeTime(comment.createdAt, localeValue, texts);
@@ -173,7 +170,7 @@ export const ShadcnCommentItem: React.FC<
                 showUpHighlight && 'text-primary'
               )}
               onClick={() => handleReaction('like')}
-              disabled={isReactionPending(comment.id, 'like')}
+              disabled={reactionHook.isPending('like')}
               aria-label="Upvote"
               aria-pressed={showUpHighlight}
             >
@@ -191,7 +188,7 @@ export const ShadcnCommentItem: React.FC<
                 showDownHighlight && 'text-destructive'
               )}
               onClick={() => handleReaction('dislike')}
-              disabled={isReactionPending(comment.id, 'dislike')}
+              disabled={reactionHook.isPending('dislike')}
               aria-label="Downvote"
               aria-pressed={showDownHighlight}
             >
@@ -227,19 +224,19 @@ export const ShadcnCommentItem: React.FC<
               )}
             </div>
 
-            {editMode.isEditing && editMode.editingCommentId === comment.id ? (
+            {editHook.isEditing ? (
               <div className="space-y-2">
                 <Textarea
-                  value={editMode.editValue}
-                  onChange={(e) => editMode.setEditValue(e.target.value)}
+                  value={editHook.editContent}
+                  onChange={(e) => editHook.setEditContent(e.target.value)}
                   className="min-h-[80px]"
                   autoFocus
                 />
                 <div className="flex gap-2">
-                  <Button type="button" size="sm" onClick={() => handleEditSubmit(editMode.editValue)}>
+                  <Button type="button" size="sm" onClick={() => handleEditSubmit(editHook.editContent)}>
                     {texts.submit}
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={editMode.cancelEdit}>
+                  <Button type="button" variant="outline" size="sm" onClick={editHook.cancelEdit}>
                     {texts.cancel}
                   </Button>
                 </div>
@@ -302,14 +299,14 @@ export const ShadcnCommentItem: React.FC<
             )}
             {renderActions && renderActions(comment)}
 
-            {replyForm.isOpen && replyForm.activeCommentId === comment.id && (
+            {replyHook.isReplying && (
               <div className="mt-3">
                 {renderInlineReplyForm ? (
                   renderInlineReplyForm({
                     parentComment: comment,
                     currentUser: currentUser ?? undefined,
                     onSubmit: handleReplySubmit,
-                    onCancel: replyForm.closeReply,
+                    onCancel: replyHook.cancelReply,
                     placeholder: texts.replyPlaceholder,
                     autoFocus: true,
                   })
@@ -318,7 +315,7 @@ export const ShadcnCommentItem: React.FC<
                     parentComment={comment}
                     currentUser={currentUser}
                     onSubmit={handleReplySubmit}
-                    onCancel={replyForm.closeReply}
+                    onCancel={replyHook.cancelReply}
                     maxCharLimit={500}
                     showCharCount
                     autoFocus
