@@ -1,6 +1,6 @@
 {
   "name": "@hasthiya_/headless-comments-react",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A highly customizable React comment section component with reply, reaction support, and optimistic updates. TypeScript-ready and fully themeable.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
