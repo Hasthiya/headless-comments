@@ -5,6 +5,7 @@ import {
   generateUniqueId,
   type Comment,
   type CommentUser,
+  type ReactionConfig,
 } from '@comment-section/react';
 import { ShadcnCommentSection } from '@/components/comment-ui';
 import {
@@ -23,6 +24,24 @@ const currentUser: CommentUser = {
   name: 'You',
   isVerified: true,
 };
+
+/** Facebook-style reactions: Like, Love, Haha, Wow, Sad, Angry */
+const facebookReactions: ReactionConfig[] = [
+  { id: 'like', label: 'Like', emoji: '👍' },
+  { id: 'heart', label: 'Love', emoji: '❤️' },
+  { id: 'haha', label: 'Haha', emoji: '😂' },
+  { id: 'wow', label: 'Wow', emoji: '😮' },
+  { id: 'sad', label: 'Sad', emoji: '😢' },
+  { id: 'angry', label: 'Angry', emoji: '😠' },
+];
+
+const FACEBOOK_REACTION_IDS = new Set(facebookReactions.map((r) => r.id));
+
+/** Initial reactions for new comments/replies (Facebook six + dislike for Reddit tab) */
+const initialReactionsForNewComment: Comment['reactions'] = [
+  ...facebookReactions.map((r) => ({ ...r, count: 0, isActive: false })),
+  { id: 'dislike', label: 'Dislike', emoji: '👎', count: 0, isActive: false },
+];
 
 const sampleComments: Comment[] = [
   {
@@ -98,11 +117,7 @@ function useByoCommentState() {
       content,
       author: currentUser,
       createdAt: new Date(),
-      reactions: [
-        { id: 'like', label: 'Like', emoji: '👍', count: 0, isActive: false },
-        { id: 'dislike', label: 'Dislike', emoji: '👎', count: 0, isActive: false },
-        { id: 'heart', label: 'Heart', emoji: '❤️', count: 0, isActive: false },
-      ],
+      reactions: initialReactionsForNewComment,
     };
     setComments((prev) => [newComment, ...prev]);
     return newComment;
@@ -115,11 +130,7 @@ function useByoCommentState() {
       author: currentUser,
       createdAt: new Date(),
       parentId: commentId,
-      reactions: [
-        { id: 'like', label: 'Like', emoji: '👍', count: 0, isActive: false },
-        { id: 'dislike', label: 'Dislike', emoji: '👎', count: 0, isActive: false },
-        { id: 'heart', label: 'Heart', emoji: '❤️', count: 0, isActive: false },
-      ],
+      reactions: initialReactionsForNewComment,
     };
     setComments((prev) =>
       prev.map((c) => {
@@ -145,6 +156,37 @@ function useByoCommentState() {
   const handleReaction = useCallback((commentId: string, reactionId: string) => {
     const updateReactions = (reactions: Comment['reactions']): Comment['reactions'] => {
       const list = reactions ?? [];
+
+      if (FACEBOOK_REACTION_IDS.has(reactionId)) {
+        const ensureFromConfig = (config: ReactionConfig, current: (typeof list)[0] | undefined) => ({
+          id: config.id,
+          label: config.label,
+          emoji: config.emoji,
+          count: current?.count ?? 0,
+          isActive: current?.isActive ?? false,
+        });
+        const merged = facebookReactions.map((config) =>
+          ensureFromConfig(config, list.find((r) => r.id === config.id))
+        );
+        const currentActive = merged.find((r) => r.isActive);
+        if (currentActive?.id === reactionId) {
+          return [
+            ...merged.map((r) =>
+              r.id === reactionId
+                ? { ...r, count: Math.max(0, r.count - 1), isActive: false }
+                : r
+            ),
+            ...list.filter((r) => !FACEBOOK_REACTION_IDS.has(r.id)),
+          ];
+        }
+        let next = merged.map((r) => {
+          if (r.id === reactionId) return { ...r, count: r.count + 1, isActive: true };
+          if (r.isActive) return { ...r, count: Math.max(0, r.count - 1), isActive: false };
+          return r;
+        });
+        return [...next, ...list.filter((r) => !FACEBOOK_REACTION_IDS.has(r.id))];
+      }
+
       if (reactionId === 'like' || reactionId === 'dislike') {
         const like = list.find((r) => r.id === 'like');
         const dislike = list.find((r) => r.id === 'dislike');
@@ -186,12 +228,13 @@ function useByoCommentState() {
             : r
         );
       }
+      const config = facebookReactions.find((r) => r.id === reactionId);
       return [
         ...list,
         {
           id: reactionId,
-          label: reactionId === 'dislike' ? 'Dislike' : reactionId,
-          emoji: reactionId === 'dislike' ? '👎' : '👍',
+          label: config?.label ?? reactionId,
+          emoji: config?.emoji ?? '👍',
           count: 1,
           isActive: true,
         },
@@ -395,6 +438,8 @@ export default function BringYourOwnUIPage() {
               </p>
               <ShadcnCommentSection
                 {...commonProps}
+                availableReactions={facebookReactions}
+                includeDislike={false}
                 renderReplyForm={({ onSubmit, placeholder, disabled, isSubmitting }) => (
                   <FacebookReplyForm
                     onSubmit={onSubmit}

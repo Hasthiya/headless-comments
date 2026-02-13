@@ -8,6 +8,7 @@ import {
   useEditMode,
   useReactions,
   useRelativeTime,
+  useClickOutside,
   formatDate,
   getDefaultAvatar,
   truncateToLines,
@@ -16,7 +17,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { FacebookInlineReplyForm } from './InlineReplyForms';
-import { ThumbsUp, MoreHorizontal } from 'lucide-react';
+import { Smile, MoreHorizontal } from 'lucide-react';
 
 /**
  * Facebook-style comment item: rounded avatars, blue "Like" / "Reply" link-style actions.
@@ -37,12 +38,14 @@ export const FacebookCommentItem: React.FC<CommentItemProps> = ({
   readOnly = false,
   locale,
   maxCommentLines = 5,
+  availableReactions: availableReactionsProp,
 }) => {
   const context = useCommentSection();
   const texts = context.texts;
   const maxDepthValue = maxDepth ?? context.maxDepth;
   const readOnlyValue = readOnly ?? context.readOnly;
   const localeValue = locale ?? context.locale;
+  const availableReactions = availableReactionsProp ?? context.availableReactions;
 
   const replyForm = useReplyForm();
   const editMode = useEditMode();
@@ -52,11 +55,32 @@ export const FacebookCommentItem: React.FC<CommentItemProps> = ({
   );
   const [showReplies, setShowReplies] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [showReactionPopup, setShowReactionPopup] = useState(false);
   const isAuthor = currentUser?.id === comment.author.id;
 
-  const likeReaction = comment.reactions?.find((r) => r.id === 'like');
-  const likeCount = likeReaction?.count ?? 0;
-  const isLiked = likeReaction?.isActive ?? false;
+  const reactionPickerRef = useClickOutside<HTMLDivElement>(
+    () => setShowReactionPopup(false),
+    showReactionPopup
+  );
+
+  const commentReactions = availableReactions.map((config) => {
+    const existing = comment.reactions?.find((r) => r.id === config.id);
+    return {
+      id: config.id,
+      label: config.label,
+      emoji: config.emoji,
+      count: existing?.count ?? 0,
+      isActive: existing?.isActive ?? false,
+    };
+  });
+
+  const activeReaction = commentReactions.find((r) => r.isActive);
+  const totalReactionCount = commentReactions.reduce((sum, r) => sum + r.count, 0);
+  const hasAnyReaction = totalReactionCount > 0;
+  const topReactions = commentReactions
+    .filter((r) => r.count > 0)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 3);
 
   const handleReplyClick = useCallback(() => replyForm.openReply(comment.id), [comment.id, replyForm]);
   const handleEditClick = useCallback(
@@ -201,27 +225,73 @@ export const FacebookCommentItem: React.FC<CommentItemProps> = ({
 
           {!readOnlyValue && (
             <div className="flex items-center gap-4 mt-1 ml-1">
-              <button
-                type="button"
-                className={cn(
-                  'flex items-center gap-1.5 text-[13px] font-semibold focus:outline-none focus:ring-2 focus:ring-[#0866ff] focus:ring-offset-1 rounded',
-                  isLiked
-                    ? 'text-[#0866ff] dark:text-[#8b9dc3]'
-                    : 'text-muted-foreground hover:text-[#0866ff] dark:hover:text-[#8b9dc3]'
-                )}
-                onClick={() => handleReaction('like')}
-                disabled={isReactionPending(comment.id, 'like')}
-                aria-label={isLiked ? 'Unlike' : 'Like'}
-                aria-pressed={isLiked}
-              >
-                <ThumbsUp
-                  className={cn('h-3.5 w-3.5', isLiked && 'fill-current')}
-                  aria-hidden
-                />
-                {likeCount > 0 && <span>Like</span>}
-                {likeCount > 0 && <span className="text-muted-foreground">·</span>}
-                {likeCount > 0 && <span>{likeCount}</span>}
-              </button>
+              {showReactions && commentReactions.length > 0 && (
+                <div className="relative" ref={reactionPickerRef}>
+                  <button
+                    type="button"
+                    className={cn(
+                      'flex items-center gap-1.5 text-[13px] font-semibold focus:outline-none focus:ring-2 focus:ring-[#0866ff] focus:ring-offset-1 rounded',
+                      activeReaction
+                        ? 'text-[#0866ff] dark:text-[#8b9dc3]'
+                        : 'text-muted-foreground hover:text-[#0866ff] dark:hover:text-[#8b9dc3]'
+                    )}
+                    onClick={() => setShowReactionPopup((v) => !v)}
+                    aria-haspopup="true"
+                    aria-expanded={showReactionPopup}
+                    aria-label={
+                      hasAnyReaction
+                        ? `Reactions: ${topReactions.map((r) => `${r.label} ${r.count}`).join(', ')}`
+                        : 'React'
+                    }
+                    aria-pressed={!!activeReaction}
+                  >
+                    {!hasAnyReaction ? (
+                      <Smile className="h-3.5 w-3.5" aria-hidden />
+                    ) : (
+                      topReactions.map((r) => (
+                        <span
+                          key={r.id}
+                          className="inline-flex items-center gap-0.5 text-base leading-none"
+                          aria-hidden
+                        >
+                          <span>{r.emoji}</span>
+                          <span className="text-xs tabular-nums">{r.count}</span>
+                        </span>
+                      ))
+                    )}
+                  </button>
+                  {showReactionPopup && (
+                    <div
+                      className="absolute bottom-full left-0 mb-1 flex gap-0.5 p-1.5 rounded-xl bg-popover text-popover-foreground border border-border shadow-lg z-20"
+                      role="menu"
+                      aria-label="Reactions"
+                    >
+                      {commentReactions.map((reaction) => (
+                        <button
+                          key={reaction.id}
+                          type="button"
+                          role="menuitem"
+                          className={cn(
+                            'flex items-center justify-center w-8 h-8 rounded-full text-lg leading-none transition-colors',
+                            reaction.isActive
+                              ? 'bg-primary/10 scale-110'
+                              : 'hover:bg-accent'
+                          )}
+                          onClick={() => {
+                            handleReaction(reaction.id);
+                            setShowReactionPopup(false);
+                          }}
+                          disabled={isReactionPending(comment.id, reaction.id)}
+                          aria-label={reaction.label}
+                          title={reaction.label}
+                        >
+                          {reaction.emoji}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
               {depth < maxDepthValue && onReply && (
                 <button
                   type="button"
@@ -324,6 +394,7 @@ export const FacebookCommentItem: React.FC<CommentItemProps> = ({
                   readOnly={readOnlyValue}
                   locale={localeValue}
                   maxCommentLines={maxCommentLines}
+                  availableReactions={availableReactions}
                 />
               ))}
             </div>
