@@ -1,6 +1,6 @@
 {
   "name": "@hasthiya_/headless-comments-react",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "A truly headless React comment system with generic types, tree CRUD, standalone hooks, composable per-comment hooks, and pluggable adapters. TypeScript-ready and fully themeable.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
