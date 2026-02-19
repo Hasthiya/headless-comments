@@ -4,6 +4,7 @@ import './globals.css';
 import { ThemeProvider } from '@/providers/ThemeProvider';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { Analytics } from '@vercel/analytics/next';
 
 const outfit = Outfit({
   subsets: ['latin'],
@@ -35,6 +36,7 @@ export default function RootLayout({
           <div className="flex-1">{children}</div>
           <Footer />
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
