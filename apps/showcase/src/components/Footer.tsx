@@ -11,14 +11,7 @@ export function Footer() {
           >
             Documentation
           </Link>
-          <a
-            href="https://github.com/yourusername/comment-section"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-foreground transition-colors duration-300 ease-heartbeat underline-offset-4 hover:underline"
-          >
-            GitHub
-          </a>
+
           <span className="font-mono text-xs">@hasthiya_/headless-comments-react</span>
         </div>
       </div>

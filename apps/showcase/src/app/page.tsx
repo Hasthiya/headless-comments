@@ -181,11 +181,7 @@ export default function Home() {
           <Button asChild size="lg" className="rounded-full font-semibold px-8 h-12 text-base">
             <Link href="/docs">Read the docs</Link>
           </Button>
-          <Button asChild variant="outline" size="lg" className="rounded-full font-semibold px-8 h-12 text-base border-foreground/20 text-foreground hover:bg-muted">
-            <a href="https://github.com/yourusername/comment-section" target="_blank" rel="noopener noreferrer">
-              GitHub
-            </a>
-          </Button>
+
         </div>
         <code className="inline-flex items-center gap-2 bg-muted text-muted-foreground px-4 py-3 rounded-full text-sm font-mono border border-border select-all">
           <span className="text-foreground/40">$</span> npm install @hasthiya_/headless-comments-react
