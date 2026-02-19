@@ -5,21 +5,45 @@ import {
   useCommentTree,
   type Comment,
   type CommentUser,
-  type ReactionConfig,
 } from '@hasthiya_/headless-comments-react';
-import { ShadcnCommentSection } from '@/components/comment-ui';
-import {
-  InstagramCommentItem,
-  FacebookCommentItem,
-  SlackCommentItem,
-  RedditReplyForm,
-  InstagramReplyForm,
-  FacebookReplyForm,
-  SlackReplyForm,
-  RedditInlineReplyForm,
-} from '@/components/comment-ui/byo';
-import { themeAwareDemoTheme } from '@/lib/demo-theme';
 import { cn } from '@/lib/utils';
+import { CodeBlock } from '@/components/docs/CodeBlock';
+
+// Import all 15 UI styles
+import DiscordStyle from '@/components/temp-ui-comps/DiscordStyle';
+import FacebookStyle from '@/components/temp-ui-comps/FacebookStyle';
+import GitHubStyle from '@/components/temp-ui-comps/GitHubStyle';
+import HackerNewsStyle from '@/components/temp-ui-comps/HackerNewsStyle';
+import InstagramStyle from '@/components/temp-ui-comps/InstagramStyle';
+import LinkedInStyle from '@/components/temp-ui-comps/LinkedInStyle';
+import MediumStyle from '@/components/temp-ui-comps/MediumStyle';
+import RedditStyle from '@/components/temp-ui-comps/RedditStyle';
+import SlackStyle from '@/components/temp-ui-comps/SlackStyle';
+import StackOverflowStyle from '@/components/temp-ui-comps/StackOverflowStyle';
+import TelegramStyle from '@/components/temp-ui-comps/TelegramStyle';
+import TikTokStyle from '@/components/temp-ui-comps/TikTokStyle';
+import TwitterStyle from '@/components/temp-ui-comps/TwitterStyle';
+import WhatsAppStyle from '@/components/temp-ui-comps/WhatsAppStyle';
+import YouTubeStyle from '@/components/temp-ui-comps/YouTubeStyle';
+
+// Import source codes
+import {
+  DiscordStyle_CODE,
+  FacebookStyle_CODE,
+  GitHubStyle_CODE,
+  HackerNewsStyle_CODE,
+  InstagramStyle_CODE,
+  LinkedInStyle_CODE,
+  MediumStyle_CODE,
+  RedditStyle_CODE,
+  SlackStyle_CODE,
+  StackOverflowStyle_CODE,
+  TelegramStyle_CODE,
+  TikTokStyle_CODE,
+  TwitterStyle_CODE,
+  WhatsAppStyle_CODE,
+  YouTubeStyle_CODE,
+} from './codes';
 
 const currentUser: CommentUser = {
   id: 'current',
@@ -28,327 +52,160 @@ const currentUser: CommentUser = {
   avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=You',
 };
 
-/** 5 emoji reactions for Facebook, Slack, and Instagram tabs */
-const emojiReactions: ReactionConfig[] = [
-  { id: 'like', label: 'Like', emoji: '👍' },
-  { id: 'heart', label: 'Love', emoji: '❤️' },
-  { id: 'haha', label: 'Laugh', emoji: '😂' },
-  { id: 'wow', label: 'Wow', emoji: '😮' },
-  { id: 'angry', label: 'Angry', emoji: '😠' },
+const TAB_IDS = [
+  'reddit', 'instagram', 'facebook', 'slack',
+  'discord', 'github', 'hackernews', 'linkedin',
+  'medium', 'stackoverflow', 'telegram', 'tiktok',
+  'twitter', 'whatsapp', 'youtube'
+] as const;
+
+type TabId = typeof TAB_IDS[number];
+
+const TABS: { id: TabId; label: string; Component: any; Code: string }[] = [
+  { id: 'discord', label: 'Discord', Component: DiscordStyle, Code: DiscordStyle_CODE },
+  { id: 'facebook', label: 'Facebook', Component: FacebookStyle, Code: FacebookStyle_CODE },
+  { id: 'github', label: 'GitHub', Component: GitHubStyle, Code: GitHubStyle_CODE },
+  { id: 'hackernews', label: 'Hacker News', Component: HackerNewsStyle, Code: HackerNewsStyle_CODE },
+  { id: 'instagram', label: 'Instagram', Component: InstagramStyle, Code: InstagramStyle_CODE },
+  { id: 'linkedin', label: 'LinkedIn', Component: LinkedInStyle, Code: LinkedInStyle_CODE },
+  { id: 'medium', label: 'Medium', Component: MediumStyle, Code: MediumStyle_CODE },
+  { id: 'reddit', label: 'Reddit', Component: RedditStyle, Code: RedditStyle_CODE },
+  { id: 'slack', label: 'Slack', Component: SlackStyle, Code: SlackStyle_CODE },
+  { id: 'stackoverflow', label: 'Stack Overflow', Component: StackOverflowStyle, Code: StackOverflowStyle_CODE },
+  { id: 'telegram', label: 'Telegram', Component: TelegramStyle, Code: TelegramStyle_CODE },
+  { id: 'tiktok', label: 'TikTok', Component: TikTokStyle, Code: TikTokStyle_CODE },
+  { id: 'twitter', label: 'Twitter', Component: TwitterStyle, Code: TwitterStyle_CODE },
+  { id: 'whatsapp', label: 'WhatsApp', Component: WhatsAppStyle, Code: WhatsAppStyle_CODE },
+  { id: 'youtube', label: 'YouTube', Component: YouTubeStyle, Code: YouTubeStyle_CODE },
 ];
 
-/** Helper to create the 5-emoji reaction instances for sample comments */
-function makeEmojiReactions(overrides?: Partial<Record<string, { count: number; isActive: boolean }>>): Comment['reactions'] {
-  return emojiReactions.map((r) => ({
-    id: r.id,
-    label: r.label,
-    emoji: r.emoji,
-    count: overrides?.[r.id]?.count ?? 0,
-    isActive: overrides?.[r.id]?.isActive ?? false,
-  }));
-}
+/** All 7 reaction types used across all component styles */
+const ALL_REACTIONS = [
+  { id: 'like', label: 'Like', emoji: '👍', count: 0, isActive: false },
+  { id: 'dislike', label: 'Dislike', emoji: '👎', count: 0, isActive: false },
+  { id: 'love', label: 'Love', emoji: '❤️', count: 0, isActive: false },
+  { id: 'haha', label: 'Haha', emoji: '😂', count: 0, isActive: false },
+  { id: 'wow', label: 'Wow', emoji: '😮', count: 0, isActive: false },
+  { id: 'sad', label: 'Sad', emoji: '😢', count: 0, isActive: false },
+  { id: 'angry', label: 'Angry', emoji: '😡', count: 0, isActive: false },
+] as const;
 
-/** Helper to create like/dislike reaction instances for Reddit */
-function makeVoteReactions(overrides?: Partial<Record<string, { count: number; isActive: boolean }>>): Comment['reactions'] {
-  return [
-    { id: 'like', label: 'Like', emoji: '👍', count: overrides?.like?.count ?? 0, isActive: overrides?.like?.isActive ?? false },
-    { id: 'dislike', label: 'Dislike', emoji: '👎', count: overrides?.dislike?.count ?? 0, isActive: overrides?.dislike?.isActive ?? false },
-  ];
-}
+const makeReactions = (overrides: Record<string, number> = {}) =>
+  ALL_REACTIONS.map(r => ({ ...r, count: overrides[r.id] ?? r.count }));
 
-/** Sample comments for Reddit (like/dislike) */
-const redditComments: Comment[] = [
+/** Default reaction config for newly created comments */
+const REACTION_CONFIG = ALL_REACTIONS.map(({ id, label, emoji }) => ({
+  id, label, emoji, activeColor: '#f97316',
+}));
+
+/** Sample comments shared across tabs */
+const initialComments: Comment[] = [
   {
-    id: 'r1',
-    content: 'This is a great example of the comment section component!',
+    id: '1',
+    content: 'This is a great example of the comment section component! It really shows how flexible the headless logic is.',
     author: { id: 'u1', name: 'Alice', isVerified: true, avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Alice' },
     createdAt: new Date(Date.now() - 1000 * 60 * 30),
-    reactions: makeVoteReactions({ like: { count: 5, isActive: false } }),
+    reactions: makeReactions({ like: 5, love: 2, haha: 1 }),
     replies: [
       {
-        id: 'r1-1',
-        content: 'I agree, really easy to use.',
+        id: '1-1',
+        content: 'I agree, the API is very intuitive.',
         author: { id: 'u2', name: 'Bob', avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Bob' },
         createdAt: new Date(Date.now() - 1000 * 60 * 15),
-        parentId: 'r1',
-        reactions: makeVoteReactions({ like: { count: 2, isActive: false } }),
+        parentId: '1',
+        reactions: makeReactions({ like: 2 }),
       },
     ],
   },
   {
-    id: 'r2',
-    content: 'Looking forward to trying it in my Next.js app.',
+    id: '2',
+    content: 'Can I use my own validation library with this?',
     author: { id: 'u3', name: 'Charlie', isVerified: false, avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Charlie' },
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2),
-    reactions: makeVoteReactions(),
+    reactions: makeReactions(),
   },
-  {
-    id: 'r3',
-    content: 'The nested replies and reactions make it feel really polished. Great for community features!',
-    author: { id: 'u4', name: 'Dana', isVerified: true, avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Dana' },
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
-    reactions: makeVoteReactions({ like: { count: 8, isActive: false }, dislike: { count: 1, isActive: false } }),
-    replies: [
-      {
-        id: 'r3-1',
-        content: 'Same here — we shipped it in a week.',
-        author: { id: 'u5', name: 'Eve', avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Eve' },
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 20),
-        parentId: 'r3',
-        reactions: makeVoteReactions({ like: { count: 3, isActive: false } }),
-      },
-    ],
-  },
-];
-
-/** Sample comments for emoji-based tabs (Facebook, Slack, Instagram) */
-const emojiComments: Comment[] = [
-  {
-    id: 'e1',
-    content: 'This is a great example of the comment section component!',
-    author: { id: 'u1', name: 'Alice', isVerified: true, avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Alice' },
-    createdAt: new Date(Date.now() - 1000 * 60 * 30),
-    reactions: makeEmojiReactions({ like: { count: 2, isActive: false }, heart: { count: 1, isActive: true } }),
-    replies: [
-      {
-        id: 'e1-1',
-        content: 'I agree, really easy to use.',
-        author: { id: 'u2', name: 'Bob', avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Bob' },
-        createdAt: new Date(Date.now() - 1000 * 60 * 15),
-        parentId: 'e1',
-        reactions: makeEmojiReactions(),
-      },
-    ],
-  },
-  {
-    id: 'e2',
-    content: 'Looking forward to trying it in my Next.js app.',
-    author: { id: 'u3', name: 'Charlie', isVerified: false, avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Charlie' },
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2),
-    reactions: makeEmojiReactions(),
-  },
-  {
-    id: 'e3',
-    content: 'The nested replies and reactions make it feel really polished. Great for community features!',
-    author: { id: 'u4', name: 'Dana', isVerified: true, avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Dana' },
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
-    reactions: makeEmojiReactions({ like: { count: 3, isActive: false } }),
-    replies: [
-      {
-        id: 'e3-1',
-        content: 'Same here — we shipped it in a week.',
-        author: { id: 'u5', name: 'Eve', avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Eve' },
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 20),
-        parentId: 'e3',
-        reactions: makeEmojiReactions({ haha: { count: 1, isActive: false } }),
-      },
-    ],
-  },
-];
-
-type TabId = 'reddit' | 'instagram' | 'facebook' | 'slack';
-
-const TABS: { id: TabId; label: string; description: string }[] = [
-  { id: 'reddit', label: 'Reddit', description: 'Upvote / downvote strip, compact type.' },
-  { id: 'instagram', label: 'Instagram', description: 'Compact rows, heart for like, minimal Reply link.' },
-  { id: 'facebook', label: 'Facebook', description: 'Rounded avatars, bubble comments, Like and Reply links.' },
-  { id: 'slack', label: 'Slack', description: 'Clean layout, name + time, thread summary with avatars and reply count.' },
 ];
 
 export default function BringYourOwnUIPage() {
   const [activeTab, setActiveTab] = useState<TabId>('reddit');
 
-  // Separate trees per tab with mutual exclusivity
-  const redditTree = useCommentTree({
-    initialComments: redditComments,
+  const tree = useCommentTree({
+    initialComments,
     currentUser,
     mutuallyExclusiveReactions: true,
+    defaultReactions: REACTION_CONFIG,
   });
 
-  const instaTree = useCommentTree({
-    initialComments: emojiComments,
-    currentUser,
-    mutuallyExclusiveReactions: true,
-  });
-
-  const facebookTree = useCommentTree({
-    initialComments: emojiComments,
-    currentUser,
-    mutuallyExclusiveReactions: true,
-  });
-
-  const slackTree = useCommentTree({
-    initialComments: emojiComments,
-    currentUser,
-    mutuallyExclusiveReactions: true,
-  });
+  const ActiveTab = TABS.find((t) => t.id === activeTab) || TABS[0];
+  const Component = ActiveTab.Component;
 
   return (
-    <main className="min-h-screen">
-      <section className="container mx-auto max-w-4xl px-4 sm:px-6 py-12">
-        <h1 className="font-display text-3xl font-bold text-foreground mb-2">
+    <main className="min-h-screen bg-background">
+      <section className="container mx-auto max-w-6xl px-4 sm:px-6 py-12">
+        <h1 className="font-display text-4xl font-bold text-foreground mb-3 text-center">
           Bring Your Own UI
         </h1>
-        <p className="text-muted-foreground mb-8">
-          The same headless comment engine drives four different UIs. Each tab has its own
-          state — switch tabs to see Reddit-style votes, Instagram-style hearts, Facebook-style bubbles, and Slack-style threads.
+        <p className="text-muted-foreground mb-10 text-center max-w-2xl mx-auto text-lg">
+          One headless engine, limitless possibilities. All these examples use the exact same logic hooks,
+          rendering completely different UIs from popular platforms.
         </p>
 
-        <div
-          role="tablist"
-          aria-label="Comment UI style"
-          className="flex flex-wrap gap-1 p-1 rounded-lg bg-muted/60 border border-border mb-6"
-        >
-          {TABS.map(({ id, label }) => (
-            <button
-              key={id}
-              type="button"
-              role="tab"
-              aria-selected={activeTab === id}
-              aria-controls={`panel-${id}`}
-              id={`tab-${id}`}
-              className={cn(
-                'min-h-[44px] px-4 py-3 sm:py-2.5 text-sm font-medium rounded-md transition-colors',
-                activeTab === id
-                  ? 'bg-background text-foreground shadow-sm border border-border'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
-              )}
-              onClick={() => setActiveTab(id)}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+        <div className="flex flex-col gap-6">
+          {/* Scrollable Tabs */}
+          <div className="flex overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap gap-2 sm:justify-center custom-scrollbar">
+            {TABS.map(({ id, label }) => (
+              <button
+                key={id}
+                onClick={() => setActiveTab(id)}
+                className={cn(
+                  'whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all border',
+                  activeTab === id
+                    ? 'bg-foreground text-background border-foreground shadow-md'
+                    : 'bg-background hover:bg-muted text-muted-foreground hover:text-foreground border-transparent hover:border-border'
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
 
-        <div className="pt-2">
-          {activeTab === 'reddit' && (
-            <div
-              role="tabpanel"
-              id="panel-reddit"
-              aria-labelledby="tab-reddit"
-              className="space-y-2"
-            >
-              <p className="text-sm text-muted-foreground mb-4">
-                {TABS.find((t) => t.id === 'reddit')?.description}
-              </p>
-              <ShadcnCommentSection
-                tree={redditTree}
-                currentUser={currentUser}
-                theme={themeAwareDemoTheme}
-                inputPlaceholder="Add a comment..."
-                renderReplyForm={({ onSubmit, placeholder, disabled, isSubmitting }) => (
-                  <RedditReplyForm
-                    onSubmit={onSubmit}
-                    placeholder={placeholder}
-                    disabled={disabled}
-                    isSubmitting={isSubmitting}
-                  />
+          <div className="grid lg:grid-cols-2 gap-8 items-start">
+            {/* Preview Column */}
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-semibold">Preview</h3>
+                <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                  Live Demo
+                </div>
+              </div>
+              <div
+                className={cn(
+                  "border rounded-xl p-6 transition-all min-h-[500px] shadow-sm",
+                  // Dark background container for dark-themed UIs
+                  ["discord", "tiktok", "twitter", "youtube", "whatsapp", "telegram", "slack", "stackoverflow", "github", "linkedin", "facebook", "reddit"].includes(activeTab)
+                    ? "bg-[#09090b]"
+                    : "bg-white"
                 )}
-                renderInlineReplyForm={(props) => <RedditInlineReplyForm {...props} />}
-                showReactions
-                showMoreOptions
-                includeDislike
-              />
+              >
+                <Component key={activeTab} tree={tree} currentUser={currentUser} />
+              </div>
             </div>
-          )}
-          {activeTab === 'instagram' && (
-            <div
-              role="tabpanel"
-              id="panel-instagram"
-              aria-labelledby="tab-instagram"
-              className="space-y-2"
-            >
-              <p className="text-sm text-muted-foreground mb-4">
-                {TABS.find((t) => t.id === 'instagram')?.description}
-              </p>
-              <ShadcnCommentSection
-                tree={instaTree}
-                currentUser={currentUser}
-                theme={themeAwareDemoTheme}
-                inputPlaceholder="Add a comment..."
-                availableReactions={emojiReactions}
-                renderReplyForm={({ onSubmit, placeholder, disabled, isSubmitting }) => (
-                  <InstagramReplyForm
-                    onSubmit={onSubmit}
-                    placeholder={placeholder}
-                    disabled={disabled}
-                    isSubmitting={isSubmitting}
-                  />
-                )}
-                renderComment={(comment, props) => (
-                  <InstagramCommentItem key={comment.id} {...props} comment={comment} />
-                )}
-                showReactions
-                showMoreOptions={false}
-              />
+
+            {/* Code Column */}
+            <div className="flex flex-col gap-4 min-w-0">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-semibold">Source Code</h3>
+                <span className="text-xs text-muted-foreground">
+                  {ActiveTab.label}Style.tsx
+                </span>
+              </div>
+              <div className="border rounded-xl overflow-hidden bg-muted/30 shadow-sm">
+                <div className="max-h-[600px] overflow-y-auto custom-scrollbar">
+                  <CodeBlock key={activeTab} code={ActiveTab.Code} lang="tsx" />
+                </div>
+              </div>
             </div>
-          )}
-          {activeTab === 'facebook' && (
-            <div
-              role="tabpanel"
-              id="panel-facebook"
-              aria-labelledby="tab-facebook"
-              className="space-y-2"
-            >
-              <p className="text-sm text-muted-foreground mb-4">
-                {TABS.find((t) => t.id === 'facebook')?.description}
-              </p>
-              <ShadcnCommentSection
-                tree={facebookTree}
-                currentUser={currentUser}
-                theme={themeAwareDemoTheme}
-                inputPlaceholder="Add a comment..."
-                availableReactions={emojiReactions}
-                includeDislike={false}
-                renderReplyForm={({ onSubmit, placeholder, disabled, isSubmitting }) => (
-                  <FacebookReplyForm
-                    onSubmit={onSubmit}
-                    placeholder={placeholder}
-                    disabled={disabled}
-                    isSubmitting={isSubmitting}
-                  />
-                )}
-                renderComment={(comment, props) => (
-                  <FacebookCommentItem key={comment.id} {...props} comment={comment} />
-                )}
-                showReactions
-                showMoreOptions={false}
-              />
-            </div>
-          )}
-          {activeTab === 'slack' && (
-            <div
-              role="tabpanel"
-              id="panel-slack"
-              aria-labelledby="tab-slack"
-              className="space-y-2"
-            >
-              <p className="text-sm text-muted-foreground mb-4">
-                {TABS.find((t) => t.id === 'slack')?.description}
-              </p>
-              <ShadcnCommentSection
-                tree={slackTree}
-                currentUser={currentUser}
-                theme={themeAwareDemoTheme}
-                inputPlaceholder="Add a comment..."
-                availableReactions={emojiReactions}
-                includeDislike={false}
-                renderReplyForm={({ onSubmit, placeholder, disabled, isSubmitting }) => (
-                  <SlackReplyForm
-                    onSubmit={onSubmit}
-                    placeholder={placeholder}
-                    disabled={disabled}
-                    isSubmitting={isSubmitting}
-                  />
-                )}
-                renderComment={(comment, props) => (
-                  <SlackCommentItem key={comment.id} {...props} comment={comment} />
-                )}
-                showReactions
-                showMoreOptions={false}
-              />
-            </div>
-          )}
+          </div>
         </div>
       </section>
     </main>
