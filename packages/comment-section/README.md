@@ -6,6 +6,8 @@ A headless-first React comment engine: standalone hooks, composable per-comment 
 ![License](https://img.shields.io/npm/l/@hasthiya_/headless-comments-react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-ready-blue)
 
+**[Live Demo](https://headless.hasthiya.dev/)**
+
 ## Table of contents
 
 - [Features](#features)
