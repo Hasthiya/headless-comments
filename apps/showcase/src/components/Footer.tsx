@@ -11,6 +11,22 @@ export function Footer() {
           >
             Documentation
           </Link>
+          <a
+            href="https://github.com/Hasthiya/headless-comments"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-foreground transition-colors duration-300 ease-heartbeat underline-offset-4 hover:underline"
+          >
+            GitHub
+          </a>
+          <a
+            href="https://github.com/Hasthiya/headless-comments/issues"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-foreground transition-colors duration-300 ease-heartbeat underline-offset-4 hover:underline"
+          >
+            Issues
+          </a>
 
           <span className="font-mono text-xs">@hasthiya_/headless-comments-react</span>
         </div>
