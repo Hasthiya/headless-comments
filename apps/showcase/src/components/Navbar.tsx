@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import Link from 'next/link';
-import { Package, Menu, X } from 'lucide-react';
+import { Package, Menu, X, Github } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import {
   Sheet,
@@ -56,6 +56,15 @@ export function Navbar() {
           <div className="hidden md:block">
             <ThemeToggle />
           </div>
+          <a
+            href="https://github.com/Hasthiya/headless-comments"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden md:inline-flex rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors min-h-[44px] min-w-[44px] items-center justify-center"
+            aria-label="GitHub"
+          >
+            <Github className="h-4 w-4" />
+          </a>
           <a
             href="https://www.npmjs.com/package/@hasthiya_/headless-comments-react"
             target="_blank"
@@ -111,6 +120,16 @@ export function Navbar() {
                 <div className="min-h-[48px] px-5 flex items-center border-t border-border mt-2 pt-2">
                   <ThemeToggle />
                 </div>
+                <a
+                  href="https://github.com/Hasthiya/headless-comments"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="min-h-[48px] px-5 flex items-center gap-2 text-base text-muted-foreground hover:text-foreground hover:bg-muted/80 active:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+                  onClick={closeMobileMenu}
+                >
+                  <Github className="h-4 w-4 shrink-0" />
+                  GitHub
+                </a>
                 <a
                   href="https://www.npmjs.com/package/@hasthiya_/headless-comments-react"
                   target="_blank"
